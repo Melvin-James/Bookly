@@ -1,0 +1,35 @@
+<div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6 mt-6">
+    <h2 class="text-2xl font-semibold theme mb-4">Edit Profile</h2>
+    
+    <form action="/user/profile/edit" method="POST" enctype="multipart/form-data" class="space-y-4">
+      
+      <!-- Name -->
+      <div>
+        <label class="block font-medium mb-1">Name</label>
+        <input type="text" name="name" value="<%= userData.name %>" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-theme" />
+      </div>
+  
+      <!-- Email -->
+      <div>
+        <label class="block font-medium mb-1">Email</label>
+        <input type="email" name="email" value="<%= userData.email %>" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-theme" />
+      </div>
+  
+      <!-- Phone -->
+      <div>
+        <label class="block font-medium mb-1">Phone</label>
+        <input type="text" name="phone" value="<%= userData.phone %>" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-theme" />
+      </div>
+  
+      <!-- Profile Image Upload -->
+      <div>
+        <label class="block font-medium mb-1">Profile Image</label>
+        <input type="file" name="userImage" accept="image/*" class="w-full" />
+      </div>
+  
+      <div class="pt-4">
+        <button type="submit" class="bg-theme text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition">Update Profile</button>
+      </div>
+    </form>
+  </div>
+  

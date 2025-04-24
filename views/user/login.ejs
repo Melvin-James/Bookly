@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login-Bookly</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 380px;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #007D8B;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
+        }
+        .error {
+            color: red;
+            font-size: 15px;
+            text-align: left;
+            margin-left: 10px;
+        }
+        .btn {
+            width: 100%;
+            background: #007D8B;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #005F66;
+        }
+        .links {
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        .links a {
+            color: #007D8B;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Bookly Login</h2>
+        <form id="userLoginForm" method="POST" action="/user/login">
+            <div class="form-group">
+                <input type="email" id="email" name="email" placeholder="Email" value="<%= formData?.email || '' %>">
+                <% if (errors?.email) { %>
+                    <p class="error" id="error-email"><%= errors.email.msg %></p>
+                <% } else { %>
+                    <p class="error" id="error-email"></p>
+                <% } %>
+            </div>
+        
+            <div class="form-group">
+                <input type="password" id="password" name="password" placeholder="Password">
+                <% if (errors?.password) { %>
+                    <p class="error" id="error-password"><%= errors.password.msg %></p>
+                <% } else { %>
+                    <p class="error" id="error-password"></p>
+                <% } %>
+            </div>
+        
+            <% if (errors?.login) { %>
+                <p class="error" id="error-login"><%= errors.login.msg %></p>
+            <% } %>
+        
+            <button type="submit" class="btn">Login</button>
+        </form>
+        
+        <div class="links">
+            <p><a href="/user/forgot-password">Forgot Password?</a></p>
+            <p>Don't have an account? <a href="/user/signup">Sign Up</a></p>
+        </div>
+    </div>    
+</body>
+</html>

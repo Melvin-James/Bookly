@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookly - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar -->
+    <%- include("../partials/sidebar") %>
+
+    <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <%- include("../partials/header") %>
+
+        <!-- Dynamic Content -->
+        <div class="p-6">
+            <%- include(body) %>
+        </div>
+    </div>
+
+</body>
+</html>

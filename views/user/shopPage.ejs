@@ -1,0 +1,359 @@
+<%- include("../partials/userHead") %>
+  <!-- Categories Section -->
+  <section class="py-8">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-end mb-6">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <form action="/user/shop" method="GET" class="relative">
+            <input 
+              type="text" 
+              name="search" 
+              placeholder="Search for books..." 
+              value="<%= filters.search %>"
+              class="w-full border border-gray-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+            <!-- Preserve other filters when searching -->
+            <% if (filters.sort) { %><input type="hidden" name="sort" value="<%= filters.sort %>"><% } %>
+            <% if (filters.category) { %><input type="hidden" name="category" value="<%= filters.category %>"><% } %>
+            <% if (filters.priceRange) { %><input type="hidden" name="priceRange" value="<%= filters.priceRange %>"><% } %>
+            <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </form>
+          <div class="relative inline-block text-left" id="sort-dropdown-container">
+            <button type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" id="sort-dropdown-button">
+              Sort By
+              <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="hidden origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10" id="sort-dropdown-menu">
+              <div class="py-1">
+                <a href="<%= buildQueryUrl({sort: 'price-low'}) %>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <%= filters.sort === 'price-low' ? 'bg-gray-100' : '' %>">Price: Low to High</a>
+                <a href="<%= buildQueryUrl({sort: 'price-high'}) %>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <%= filters.sort === 'price-high' ? 'bg-gray-100' : '' %>">Price: High to Low</a>
+                <a href="<%= buildQueryUrl({sort: 'name-asc'}) %>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <%= filters.sort === 'name-asc' ? 'bg-gray-100' : '' %>">A - Z</a>
+                <a href="<%= buildQueryUrl({sort: 'name-desc'}) %>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <%= filters.sort === 'name-desc' ? 'bg-gray-100' : '' %>">Z - A</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="relative inline-block text-left" id="filter-dropdown-container">
+            <button type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" id="filter-dropdown-button">
+              Filter
+              <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="hidden origin-top-right absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10" id="filter-dropdown-menu">
+              <form action="/user/shop" method="GET" id="filter-form">
+                <!-- Preserve search and sort when filtering -->
+                <% if (filters.search) { %><input type="hidden" name="search" value="<%= filters.search %>"><% } %>
+                <% if (filters.sort) { %><input type="hidden" name="sort" value="<%= filters.sort %>"><% } %>
+                
+                <div class="p-4">
+                  <h3 class="font-medium text-gray-900 mb-2">Category</h3>
+                  <div class="space-y-2">
+                    <% categories.forEach(category => { %>
+                      <label class="flex items-center">
+                        <input 
+                          type="checkbox" 
+                          name="category" 
+                          value="<%= category.name.toLowerCase() %>" 
+                          class="rounded text-primary focus:ring-primary h-4 w-4"
+                          <%= filters.category && filters.category.includes(category.name.toLowerCase()) ? 'checked' : '' %>
+                        >
+                        <span class="ml-2 text-sm text-gray-700"><%= category.name %></span>
+                      </label>
+                    <% }) %>
+                  </div>
+                  
+                  <h3 class="font-medium text-gray-900 mt-4 mb-2">Price Range</h3>
+                  <div class="space-y-2">
+                    <label class="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        name="priceRange" 
+                        value="under300" 
+                        class="rounded text-primary focus:ring-primary h-4 w-4"
+                        <%= filters.priceRange && filters.priceRange.includes('under300') ? 'checked' : '' %>
+                      >
+                      <span class="ml-2 text-sm text-gray-700">Under ₹300</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        name="priceRange" 
+                        value="300-400" 
+                        class="rounded text-primary focus:ring-primary h-4 w-4"
+                        <%= filters.priceRange && filters.priceRange.includes('300-400') ? 'checked' : '' %>
+                      >
+                      <span class="ml-2 text-sm text-gray-700">₹300 - ₹400</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        name="priceRange" 
+                        value="400-500" 
+                        class="rounded text-primary focus:ring-primary h-4 w-4"
+                        <%= filters.priceRange && filters.priceRange.includes('400-500') ? 'checked' : '' %>
+                      >
+                      <span class="ml-2 text-sm text-gray-700">₹400 - ₹500</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        name="priceRange" 
+                        value="over500" 
+                        class="rounded text-primary focus:ring-primary h-4 w-4"
+                        <%= filters.priceRange && filters.priceRange.includes('over500') ? 'checked' : '' %>
+                      >
+                      <span class="ml-2 text-sm text-gray-700">Over ₹500</span>
+                    </label>
+                  </div>
+                  
+                  <div class="mt-6 flex justify-end">
+                    <button type="submit" class="inline-flex justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center mb-8">
+        <% if (totalProducts > 0) { %>
+          <p class="text-gray-600">Showing <%= (currentPage - 1) * 12 + 1 %>-<%= Math.min(currentPage * 12, totalProducts) %> of <%= totalProducts %> products</p>
+        <% } else { %>
+          <p class="text-gray-600">No products found</p>
+        <% } %>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <% products.forEach((product) => { %>
+          <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 group">
+            <div class="relative">
+              <img src="/uploads/product-images/<%=product.productImage[0]%>" alt="<%= product.name %>" class="w-full h-64 object-cover">
+              <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <a href="/user/product-details/<%= product._id %>">
+                  <button class="bg-white text-gray-800 px-4 py-2 rounded-md text-sm font-medium mr-2 hover:bg-gray-100 transition-colors">
+                    View
+                  </button>
+                </a>
+                
+                <button class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition-colors" data-id="<%= product._id %>">Add to Cart</button>
+              </div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-medium text-gray-900 mb-1"><%= product.name %></h3>
+              <p class="text-sm text-gray-500 mb-2"><%= product.publisher %></p>
+      
+              <% if (product.productOffer > 0) { %>
+                <div class="flex items-center space-x-2">
+                  <span class="text-sm text-gray-400 line-through">₹<%= product.price.toFixed(2) %></span>
+                  <span class="font-bold text-primary">
+                    ₹<%= (product.price * (1 - product.productOffer / 100)).toFixed(2) %>
+                  </span>
+                </div>
+              <% } else { %>
+                <p class="font-bold text-primary">₹<%= product.price.toFixed(2) %></p>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div class="flex justify-center mt-8">
+          <nav class="inline-flex rounded-md shadow">
+            <% if (currentPage > 1) { %>
+              <a href="<%= buildQueryUrl({page: currentPage - 1}) %>" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50">
+                Previous
+              </a>
+            <% } else { %>
+              <span class="px-4 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-300 rounded-l-md cursor-not-allowed">
+                Previous
+              </span>
+            <% } %>
+            
+            <% for(let i = 1; i <= totalPages; i++) { %>
+              <% if (i === currentPage) { %>
+                <span class="px-4 py-2 text-sm font-medium text-white bg-primary border border-primary">
+                  <%= i %>
+                </span>
+              <% } else { %>
+                <a href="<%= buildQueryUrl({page: i}) %>" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">
+                  <%= i %>
+                </a>
+              <% } %>
+            <% } %>
+            
+            <% if (currentPage < totalPages) { %>
+              <a href="<%= buildQueryUrl({page: currentPage + 1}) %>" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50">
+                Next
+              </a>
+            <% } else { %>
+              <span class="px-4 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-300 rounded-r-md cursor-not-allowed">
+                Next
+              </span>
+            <% } %>
+          </nav>
+        </div>
+      <% } %>
+  </section> 
+<%- include("../partials/userFooter") %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  // Handle filter form submission
+  const filterForm = document.getElementById('filter-form');
+  
+  if (filterForm) {
+    filterForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get current URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Preserve search parameter if it exists
+      const searchParam = urlParams.get('search');
+      if (searchParam) {
+        const searchInput = document.createElement('input');
+        searchInput.type = 'hidden';
+        searchInput.name = 'search';
+        searchInput.value = searchParam;
+        filterForm.appendChild(searchInput);
+      }
+      
+      // Preserve sort parameter if it exists
+      const sortParam = urlParams.get('sort');
+      if (sortParam) {
+        const sortInput = document.createElement('input');
+        sortInput.type = 'hidden';
+        sortInput.name = 'sort';
+        sortInput.value = sortParam;
+        filterForm.appendChild(sortInput);
+      }
+      
+      // Get all checked checkboxes
+      const categoryCheckboxes = document.querySelectorAll('input[name="category"]:checked');
+      const priceRangeCheckboxes = document.querySelectorAll('input[name="priceRange"]:checked');
+      
+      // Remove existing hidden inputs to avoid duplicates
+      document.querySelectorAll('input[type="hidden"][name="category"]').forEach(el => {
+        if (el.parentElement === filterForm) el.remove();
+      });
+      
+      document.querySelectorAll('input[type="hidden"][name="priceRange"]').forEach(el => {
+        if (el.parentElement === filterForm) el.remove();
+      });
+      
+      // Create arrays of values
+      const categoryValues = Array.from(categoryCheckboxes).map(cb => cb.value);
+      const priceRangeValues = Array.from(priceRangeCheckboxes).map(cb => cb.value);
+      
+      // Create hidden inputs for the combined values
+      if (categoryValues.length > 0) {
+        const categoryInput = document.createElement('input');
+        categoryInput.type = 'hidden';
+        categoryInput.name = 'category';
+        categoryInput.value = categoryValues.join(',');
+        filterForm.appendChild(categoryInput);
+      }
+      
+      if (priceRangeValues.length > 0) {
+        const priceRangeInput = document.createElement('input');
+        priceRangeInput.type = 'hidden';
+        priceRangeInput.name = 'priceRange';
+        priceRangeInput.value = priceRangeValues.join(',');
+        filterForm.appendChild(priceRangeInput);
+      }
+      
+      // Submit the form
+      filterForm.submit();
+    });
+  }
+  
+  // Search form should preserve other filters
+  const searchForm = document.querySelector('form[action="/user/shop"]');
+  if (searchForm && searchForm !== filterForm) {
+    searchForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get current URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Preserve sort parameter if it exists
+      const sortParam = urlParams.get('sort');
+      if (sortParam) {
+        const sortInput = document.createElement('input');
+        sortInput.type = 'hidden';
+        sortInput.name = 'sort';
+        sortInput.value = sortParam;
+        searchForm.appendChild(sortInput);
+      }
+      
+      // Preserve category parameter if it exists
+      const categoryParam = urlParams.get('category');
+      if (categoryParam) {
+        const categoryInput = document.createElement('input');
+        categoryInput.type = 'hidden';
+        categoryInput.name = 'category';
+        categoryInput.value = categoryParam;
+        searchForm.appendChild(categoryInput);
+      }
+      
+      // Preserve priceRange parameter if it exists
+      const priceRangeParam = urlParams.get('priceRange');
+      if (priceRangeParam) {
+        const priceRangeInput = document.createElement('input');
+        priceRangeInput.type = 'hidden';
+        priceRangeInput.name = 'priceRange';
+        priceRangeInput.value = priceRangeParam;
+        searchForm.appendChild(priceRangeInput);
+      }
+      
+      // Submit the form
+      searchForm.submit();
+    });
+  }
+  
+  // Sort Dropdown Toggle and Link Handling
+  const sortDropdownButton = document.getElementById('sort-dropdown-button');
+  const sortDropdownMenu = document.getElementById('sort-dropdown-menu');
+  
+  if (sortDropdownButton && sortDropdownMenu) {
+    sortDropdownButton.addEventListener('click', () => {
+      sortDropdownMenu.classList.toggle('hidden');
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!sortDropdownButton.contains(e.target) && !sortDropdownMenu.contains(e.target)) {
+        sortDropdownMenu.classList.add('hidden');
+      }
+    });
+  }
+  
+  // Filter Dropdown Toggle
+  const filterDropdownButton = document.getElementById('filter-dropdown-button');
+  const filterDropdownMenu = document.getElementById('filter-dropdown-menu');
+  
+  if (filterDropdownButton && filterDropdownMenu) {
+    filterDropdownButton.addEventListener('click', () => {
+      filterDropdownMenu.classList.toggle('hidden');
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!filterDropdownButton.contains(e.target) && !filterDropdownMenu.contains(e.target)) {
+        filterDropdownMenu.classList.add('hidden');
+      }
+    });
+  }
+});
+</script>

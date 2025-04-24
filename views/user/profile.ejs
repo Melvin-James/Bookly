@@ -1,0 +1,38 @@
+<div class="max-w-5xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden p-6 mt-4">
+  <div class="flex flex-col sm:flex-row items-center sm:items-start sm:justify-between gap-6">
+    
+    <!-- Profile Image -->
+    <div class="flex-shrink-0">
+      <img src="/uploads/profileImages/<%= userData.userImage[0] %>" alt="Profile Image" class="w-32 h-32 object-cover rounded-full border-4 border-theme shadow-md" />
+    </div>
+
+    <!-- Profile Details -->
+    <div class="flex-1">
+      <h2 class="text-2xl font-bold theme mb-2">Hello, <%= userData.name %></h2>
+      <div class="text-gray-700 space-y-1">
+        <p><span class="font-semibold">Email:</span> <%= userData.email %></p>
+        <p><span class="font-semibold">Phone:</span> <%= userData.phone %></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Addresses -->
+  <div class="mt-6 border-t pt-4">
+    <h3 class="text-lg font-semibold mb-3 theme">Saved Addresses</h3>
+    <% if (addressData.length) { %>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <% addressData.forEach(addr => { %>
+          <div class="bg-gray-50 border rounded-lg p-4 shadow-sm">
+            <p class="font-medium mb-1"><%= addr.addressType %> Address</p>
+            <p><%= addr.name %></p>
+            <p><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></p>
+            <p><strong>Landmark:</strong> <%= addr.landmark %></p>
+            <p><strong>Phone:</strong> <%= addr.phone %>, <strong>Alt:</strong> <%= addr.altPhone %></p>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-gray-500">No address available.</p>
+    <% } %>
+  </div>
+</div>

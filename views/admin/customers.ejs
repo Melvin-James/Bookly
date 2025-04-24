@@ -1,0 +1,224 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-[#007D8B]">User Management</h1>
+
+    <form id="searchForm" class="flex space-x-2" onsubmit="return false;">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Search by name or email"
+        class="px-4 py-2 border rounded-md"
+      />
+      <button class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]" onclick="performSearch()">Search</button>
+      <button type="button" onclick="clearSearch()" class="px-4 py-2 border rounded-md text-gray-600 hover:text-black">Clear</button>
+    </form>
+  </div>
+
+  <!-- Users Table -->
+  <div class="overflow-x-auto bg-white rounded-lg shadow">
+    <table class="min-w-full table-auto">
+      <thead class="bg-[#007D8B] text-white">
+        <tr>
+          <th class="py-3 px-4 text-left">index</th>
+          <th class="py-3 px-4 text-left">Name</th>
+          <th class="py-3 px-4 text-left">Email</th>
+          <th class="py-3 px-4 text-left">Status</th>
+          <th class="py-3 px-4 text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach((user, index) => { %>
+          <tr class="border-b">
+            <td class="py-3 px-4"><%= index + 1 %></td>
+            <td class="py-3 px-4"><%= user.name %></td>
+            <td class="py-3 px-4"><%= user.email %></td>
+            <td class="py-3 px-4">
+              <% if (user.isBlocked) { %>
+                <span class="px-2 py-1 text-sm rounded-md bg-red-100 text-red-700">Blocked</span>
+              <% } else { %>
+                <span class="px-2 py-1 text-sm rounded-md bg-green-100 text-green-700">Active</span>
+              <% } %>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button
+                class="toggle-block-btn text-sm px-4 py-2 rounded-md 
+                <%= user.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600' %> text-white"
+                data-user-id="<%= user._id %>"
+                data-is-blocked="<%= user.isBlocked %>"
+                onclick="showConfirmation(this)">
+                <%= user.isBlocked ? 'Unblock' : 'Block' %>
+              </button>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+<div id="pagination" class="mt-6 flex justify-center space-x-2"></div>
+
+<div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-80">
+    <p id="modalMessage" class="mb-4 text-gray-700 text-center">Are you sure?</p>
+    <div class="flex justify-between">
+      <button onclick="confirmAction()" class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]">Confirm</button>
+      <button onclick="closeModal()" class="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- JavaScript -->
+<script>
+  let selectedButton = null;
+  function showConfirmation(button) {
+    selectedButton = button;
+    const isBlocked = button.getAttribute('data-is-blocked') === 'true';
+    document.getElementById('modalMessage').textContent = `Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this user?`;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('confirmationModal').classList.add('hidden');
+    selectedButton = null;
+  }
+
+  async function confirmAction() {
+    if (!selectedButton) return;
+
+    const userId = selectedButton.getAttribute('data-user-id');
+    const isBlocked = selectedButton.getAttribute('data-is-blocked') === 'true';
+
+    try {
+      const res = await fetch(`/admin/customer/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isBlocked: !isBlocked }),
+      });
+
+      if (res.ok) {
+        const statusCell = selectedButton.closest('tr').querySelectorAll('td')[3];
+        const newStatus = isBlocked ? 'Active' : 'Blocked';
+        const newColorClass = isBlocked
+          ? 'bg-green-100 text-green-700'
+          : 'bg-red-100 text-red-700';
+
+        statusCell.innerHTML = `<span class="px-2 py-1 text-sm rounded-md ${newColorClass}">${newStatus}</span>`;
+
+        selectedButton.innerText = isBlocked ? 'Block' : 'Unblock';
+        selectedButton.setAttribute('data-is-blocked', !isBlocked);
+        selectedButton.className = `toggle-block-btn text-sm px-4 py-2 rounded-md text-white ${
+          isBlocked ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+        }`;
+      } else {
+        alert("Failed to update user status.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred.");
+    } finally {
+      closeModal();
+    }
+  }
+
+  function performSearch(){
+    const query = document.getElementById('searchInput').value;
+
+    fetch(`/admin/search-customer?query=${encodeURIComponent(query)}`)
+    .then(res=>res.json())
+    .then(data=>{
+      const tbody = document.querySelector('tbody');
+      tbody.innerHTML = '';
+
+      data.users.forEach((user,index)=>{
+        const row = document.createElement('tr');
+        row.className = 'border-b';
+
+        row.innerHTML=`
+          <td class="py-3 px-4">${index + 1}</td>
+           <td class="py-3 px-4">${user.name}</td>
+            <td class="py-3 px-4">${user.email}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-1 text-sm rounded-md ${user.isBlocked ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+                ${user.isBlocked ? 'Blocked' : 'Active'}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button class="toggle-block-btn text-sm px-4 py-2 rounded-md 
+                ${user.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'} text-white"
+                data-user-id="${user._id}"
+                data-is-blocked="${user.isBlocked}"
+                onclick="showConfirmation(this)">
+                ${user.isBlocked ? 'Unblock' : 'Block'}
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(err => console.error("Search error:", err));
+  }
+
+  function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    performSearch(); // Reload full list
+  }
+
+  let currentPage = 1;
+  function performPagination(page = 1) {
+    fetch(`/admin/customer-pagination?page=${page}`)
+      .then(res => res.json())
+      .then(data => {
+        currentPage = data.currentPage;
+        renderUsers(data.users);
+        renderPagination(data.totalPages);
+      })
+      .catch(err => console.error("Pagination error:", err));
+  }
+
+  function renderUsers(users) {
+    const tbody = document.querySelector('tbody');
+    tbody.innerHTML = '';
+    users.forEach((user, index) => {
+      const row = document.createElement('tr');
+      row.className = "border-b";
+      row.innerHTML = `
+        <td class="py-3 px-4">${index + 1}</td>
+        <td class="py-3 px-4">${user.name}</td>
+        <td class="py-3 px-4">${user.email}</td>
+        <td class="py-3 px-4">
+          <span class="px-2 py-1 text-sm rounded-md ${user.isBlocked ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+            ${user.isBlocked ? 'Blocked' : 'Active'}
+          </span>
+        </td>
+        <td class="py-3 px-4 text-center">
+          <button class="toggle-block-btn text-sm px-4 py-2 rounded-md 
+            ${user.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'} text-white"
+            data-user-id="${user._id}"
+            data-is-blocked="${user.isBlocked}"
+            onclick="showConfirmation(this)">
+            ${user.isBlocked ? 'Unblock' : 'Block'}
+          </button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function renderPagination(totalPages) {
+    const container = document.querySelector('#pagination');
+    container.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.innerText = i;
+      btn.className = `px-4 py-2 rounded-md ${
+        i === currentPage ? 'bg-[#007D8B] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+      }`;
+      btn.onclick = () => performPagination(i);
+      container.appendChild(btn);
+    }
+  }
+
+  // Initial load
+  window.onload = () => performPagination(1);
+</script>

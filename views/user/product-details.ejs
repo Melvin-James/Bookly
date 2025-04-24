@@ -1,0 +1,168 @@
+<%- include("../partials/userHead") %>
+<style>
+  #zoomResult {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 20px;
+    width: 400px;
+    height: 500px;
+    border: 1px solid #ccc;
+    background-repeat: no-repeat;
+    background-size: 200%;
+    background-position: center;
+    z-index: 50;
+    pointer-events: none;
+  }
+</style>  
+<section class="py-4">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Breadcrumb -->
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="/user/home" class="hover:text-primary">Home</a> / 
+      <a href="/user/home" class="hover:text-primary">Books</a> / 
+      <span class="text-gray-800"><%= product.name %></span>
+    </nav>
+  
+    <!-- Product Display -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <!-- Images -->
+      <div>
+        <div class="relative group border rounded-xl overflow-hidden">
+          <img id="mainImage" src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.name %>" 
+              class="w-full h-[500px] object-cover rounded-xl shadow-md transition-transform duration-200 transform"
+              style="cursor: zoom-in;" />
+          <div id="zoomResult" class="hidden absolute top-0 left-full ml-4 w-[400px] h-[500px] bg-no-repeat border rounded-xl shadow-lg z-50"></div>
+        </div>
+
+        <!-- Thumbnails -->
+        <div class="flex space-x-3 overflow-x-auto mt-4">
+          <% product.productImage.forEach((img, idx) => { %>
+            <img src="/uploads/product-images/<%= img %>" 
+                data-index="<%= idx %>"
+                class="thumbnail h-20 w-20 object-cover rounded-lg border hover:ring-2 hover:ring-primary transition cursor-pointer">
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="flex flex-col justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-2"><%= product.name %></h1>
+          <p class="text-sm text-gray-600 mb-4">By <%= product.publisher %></p>
+  
+          <!-- Ratings -->
+          <div class="flex items-center space-x-2 mb-4">
+            <% for (let i = 0; i < Math.floor(product.rating || 4); i++) { %>
+              <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c..."/></svg>
+            <% } %>
+            <span class="text-sm text-gray-500">(124 reviews)</span>
+          </div>
+  
+          <!-- Stock -->
+          <% if (product.status === 'Available') { %>
+            <p class="text-green-600 font-medium mb-4">In Stock</p>
+          <% } else if (product.status === 'Out of Stock') { %>
+            <p class="text-red-500 font-medium mb-4">Out of Stock</p>
+          <% } else { %>
+            <p class="text-gray-500 font-medium mb-4">Discontinued</p>
+          <% } %>
+  
+          <!-- Pricing -->
+          <% if (product.productOffer > 0) { 
+            const discounted = (product.price * (1 - product.productOffer / 100)).toFixed(2); %>
+            <div class="flex items-center space-x-3 mb-4">
+              <span class="text-xl text-gray-400 line-through">₹<%= product.price.toFixed(2) %></span>
+              <span class="text-2xl text-primary font-bold">₹<%= discounted %></span>
+              <span class="text-sm text-green-500">Save <%= product.productOffer %>%</span>
+            </div>
+          <% } else { %>
+            <p class="text-2xl text-primary font-bold mb-4">₹<%= product.price.toFixed(2) %></p>
+          <% } %>
+  
+          <!-- Highlights -->
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Highlights</h2>
+            <ul class="list-disc list-inside text-gray-600 space-y-1">
+              <li>Color: <%= product.color %></li>
+              <li>Category: <%= product.category.name %></li>
+              <li>Publisher: <%= product.publisher %></li>
+            </ul>
+          </div>
+  
+          <!-- Add to Cart -->
+          <button class="w-full bg-primary text-white py-3 rounded-md hover:bg-primary-dark transition text-sm font-medium">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Related Products -->
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+      <div class="mt-16">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">You might also like</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <% relatedProducts.forEach(prod => { %>
+            <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition group">
+              <img src="/uploads/product-images/<%= prod.productImage[0] %>" alt="<%= prod.name %>" class="w-full h-60 object-cover">
+              <div class="p-4">
+                <h3 class="text-gray-900 font-medium mb-1"><%= prod.name %></h3>
+                <p class="text-sm text-gray-500 mb-2"><%= prod.publisher %></p>
+                <p class="text-primary font-bold">₹<%= prod.price.toFixed(2) %></p>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+  </main>
+  </div>
+</section>
+
+
+<script>
+  const mainImage = document.getElementById("mainImage");
+  const thumbnails = document.querySelectorAll(".thumbnail");
+  const zoomResult = document.getElementById("zoomResult");
+
+  function updateZoomImage(src) {
+    zoomResult.style.backgroundImage = `url('${src}')`;
+  }
+
+  thumbnails.forEach(thumbnail => {
+    thumbnail.addEventListener("click", () => {
+      const newSrc = thumbnail.getAttribute("src");
+      mainImage.src = newSrc;
+      updateZoomImage(newSrc);
+    });
+  });
+
+  mainImage.addEventListener("mouseenter", () => {
+    zoomResult.style.display = "block";
+    zoomResult.classList.remove("hidden");
+    updateZoomImage(mainImage.src);
+  });
+
+  mainImage.addEventListener("mouseleave", () => {
+    zoomResult.style.display = "none";
+    zoomResult.classList.add("hidden");
+  });
+
+  mainImage.addEventListener("mousemove", function (e) {
+    const rect = mainImage.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+
+    // Update zoomResult background and positioning
+    zoomResult.style.backgroundSize = `${mainImage.offsetWidth * 2}px ${mainImage.offsetHeight * 2}px`;
+    zoomResult.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+  });
+</script>
+
+
+  <%- include("../partials/userFooter") %>

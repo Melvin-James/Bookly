@@ -1,0 +1,182 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-[#007D8B]">Category Management</h1>
+    <form id="searchForm" class="flex space-x-2" onsubmit="return false;">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Search by name or email"
+        class="px-4 py-2 border rounded-md"
+      />
+      <button class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]" onclick="performSearch()">Search</button>
+      <button type="button" onclick="clearSearch()" class="px-4 py-2 border rounded-md text-gray-600 hover:text-black">Clear</button>
+    </form>
+  </div>
+
+  <!-- Users Table -->
+  <div class="overflow-x-auto bg-white rounded-lg shadow">
+    <table class="min-w-full table-auto">
+      <thead class="bg-[#007D8B] text-white">
+        <tr>
+          <th class="py-3 px-4 text-left">Index</th>
+          <th class="py-3 px-4 text-left">Name</th>
+          <th class="py-3 px-4 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="categoryTableBody">
+        <% categories.forEach((category, index) => { %>
+          <tr class="border-b">
+            <td class="py-3 px-4"><%= index + 1 %></td>
+            <td class="py-3 px-4"><%= category.name %></td>
+            <td class="py-3 px-4 text-center space-x-2">
+              <button
+                class="toggle-block-btn text-sm px-4 py-2 rounded-md text-white <%= category.isListed ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' %>"
+                data-category-id="<%= category._id %>"
+                data-is-listed="<%= category.isListed %>"
+                onclick="showConfirmation(this)">
+                <%= category.isListed ? 'Unlist' : 'List' %>
+              </button>
+              <a href="/admin/category-edit/<%= category._id %>"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+                Edit
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="pagination" class="mt-6 flex justify-center space-x-2"></div>
+  <a href="/admin/category-add"
+    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+    Add category
+  </a>
+
+  <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-80">
+      <p id="modalMessage" class="mb-4 text-gray-700 text-center">Are you sure?</p>
+      <div class="flex justify-between">
+        <button onclick="confirmAction()" class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]">Confirm</button>
+        <button onclick="closeModal()" class="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedButton = null;
+
+  function showConfirmation(button) {
+    selectedButton = button;
+    const isListed = button.getAttribute('data-is-listed') === 'true';
+    document.getElementById('modalMessage').textContent = `Are you sure you want to ${isListed ? 'Unlist' : 'List'} this category?`;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('confirmationModal').classList.add('hidden');
+    selectedButton = null;
+  }
+
+  async function confirmAction() {
+    if (!selectedButton) return;
+    const categoryId = selectedButton.getAttribute('data-category-id');
+    const isListed = selectedButton.getAttribute('data-is-listed') === 'true';
+
+    try {
+      const res = await fetch(`/admin/categories/${categoryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isListed: !isListed })
+      });
+
+      if (res.ok) {
+        selectedButton.innerText = isListed ? 'List' : 'Unlist';
+        selectedButton.setAttribute('data-is-listed', (!isListed).toString());
+        selectedButton.className = `toggle-block-btn text-sm px-4 py-2 rounded-md text-white ${
+          !isListed ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+        }`;
+      } else {
+        alert("Failed to update status.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred.");
+    } finally {
+      closeModal();
+    }
+  }
+
+  function performSearch() {
+    const query = document.getElementById('searchInput').value;
+    fetch(`/admin/search-category?query=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        renderCategory(data.categories);
+      })
+      .catch(err => console.error("Search error:", err));
+  }
+
+  function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    performPagination();
+  }
+
+  let currentPage = 1;
+
+  function performPagination(page = 1) {
+    fetch(`/admin/category-pagination?page=${page}`)
+      .then(res => res.json())
+      .then(data => {
+        currentPage = data.currentPage;
+        renderCategory(data.categories);
+        renderPagination(data.totalPages);
+      })
+      .catch(err => console.error("Pagination error:", err));
+  }
+
+  function renderCategory(categories) {
+    const tbody = document.querySelector('#categoryTableBody');
+    tbody.innerHTML = '';
+    categories.forEach((category, index) => {
+      const isListed = category.isListed;
+      const row = document.createElement('tr');
+      row.className = 'border-b';
+      row.innerHTML = `
+        <td class="py-3 px-4">${index + 1}</td>
+        <td class="py-3 px-4">${category.name}</td>
+        <td class="py-3 px-4 text-center space-x-2">
+          <button class="toggle-block-btn text-sm px-4 py-2 rounded-md text-white ${isListed ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}"
+            data-category-id="${category._id}"
+            data-is-listed="${isListed}"
+            onclick="showConfirmation(this)">
+            ${isListed ? 'Unlist' : 'List'}
+          </button>
+          <a href="/admin/category-edit/${category._id}"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+            Edit
+          </a>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function renderPagination(totalPages) {
+    const container = document.querySelector('#pagination');
+    container.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.innerText = i;
+      btn.className = `px-4 py-2 rounded-md ${
+        i === currentPage ? 'bg-[#007D8B] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+      }`;
+      btn.onclick = () => performPagination(i);
+      container.appendChild(btn);
+    }
+  }
+
+  // Initial load
+  window.onload = () => performPagination();
+</script>

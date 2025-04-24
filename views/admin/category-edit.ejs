@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Category</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="/images/favicon.ico" />
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md p-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <h1 class="text-xl font-bold text-[#007D8B]">Bookly Admin</h1>
+      <a href="/admin/category" class="text-gray-600 hover:text-[#007D8B] text-sm">← Back to Categories</a>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
+    <h2 class="text-2xl font-semibold text-[#007D8B] mb-6">Edit Category</h2>
+
+    <form action="/admin/category-edit/<%= category._id %>" method="POST" class="space-y-6">
+      
+      <!-- Category Name -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value="<%= category.name %>"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+        />
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          rows="4"
+          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+        ><%= category.description || '' %></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="bg-[#007D8B] hover:bg-[#005f66] text-white px-6 py-2 rounded-md transition-colors shadow"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
+    &copy; <%= new Date().getFullYear() %> Bookly Admin Panel. All rights reserved.
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Bookly</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #007D8B;
+            --primary-dark: #005F66;
+            --light: #f8f9fa;
+            --gray: #e9ecef;
+            --dark: #212529;
+            --error: #e74c3c;
+            --radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .signup-card {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .form-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-header p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            gap: 0.5rem;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active, .step.completed {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .step.completed::after {
+            content: '✓';
+        }
+        
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background-color: var(--gray);
+            margin: auto 0;
+            position: relative;
+        }
+        
+        .step-line.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            background-color: var(--primary);
+            animation: fillLine 0.5s ease-out;
+        }
+        
+        @keyframes fillLine {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        .form-container {
+            padding: 1.5rem;
+        }
+        
+        .form-section {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 125, 139, 0.2);
+        }
+        
+        .error-message {
+            color: var(--error);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: var(--radius);
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            margin-top: 0.5rem;
+        }
+        
+        .image-upload {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .image-upload-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            border: 2px dashed #adb5bd;
+            margin: 0 auto 0.75rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .image-upload-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-upload-preview .placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            color: #6c757d;
+            width: 100%;
+            padding: 0 0.5rem;
+        }
+        
+        .image-upload-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary);
+            color: white;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .image-upload-label:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .image-upload input[type="file"] {
+            display: none;
+        }
+        
+        .form-navigation {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .form-navigation .btn {
+            flex: 1;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        
+        @media (max-width: 480px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .signup-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-card">
+        <div class="form-header">
+            <h1>Bookly-signup</h1>
+            <p>Join us in just a few simple steps</p>
+        </div>
+        
+        <div class="progress-steps">
+            <div class="step active" data-step="1">1</div>
+            <div class="step-line"></div>
+            <div class="step" data-step="2">2</div>
+            <div class="step-line"></div>
+            <div class="step" data-step="3">3</div>
+        </div>
+        
+        <div class="form-container">
+            <form id="signupForm" enctype="multipart/form-data">
+                <!-- Personal Details Section -->
+                <div class="form-section active" data-section="1">
+                    <div class="image-upload">
+                        <div class="image-upload-preview" id="imagePreview">
+                            <span class="placeholder">profile</span>
+                        </div>
+                        <label for="userImage" class="image-upload-label">Upload Profile</label>
+                        <input type="file" id="userImage" name="userImage" accept="image/*">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="Your full name">
+                        <div class="error-message" id="name-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com">
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="10-digit number">
+                        <div class="error-message" id="phone-error"></div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="••••••">
+                            <div class="error-message" id="password-error"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="••••••">
+                            <div class="error-message" id="confirmPassword-error"></div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn" id="nextBtn1">Continue</button>
+                </div>
+                
+                <!-- Address Details Section -->
+                <div class="form-section" data-section="2">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="addressType">Type</label>
+                            <select id="addressType" name="addressType" class="form-control">
+                                <option value="">Select</option>
+                                <option value="Home">Home</option>
+                                <option value="Work">Work</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="error-message" id="addressType-error"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="recipientName">Recipient</label>
+                            <input type="text" id="recipientName" name="recipientName" class="form-control" placeholder="Recipient name">
+                            <div class="error-message" id="recipientName-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" class="form-control" placeholder="City">
+                            <div class="error-message" id="city-error"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" id="state" name="state" class="form-control" placeholder="State">
+                            <div class="error-message" id="state-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="landmark">Landmark</label>
+                        <input type="text" id="landmark" name="landmark" class="form-control" placeholder="Nearby landmark">
+                        <div class="error-message" id="landmark-error"></div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="pincode">Pincode</label>
+                            <input type="text" id="pincode" name="pincode" class="form-control" placeholder="6 digits">
+                            <div class="error-message" id="pincode-error"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="addressPhone">Phone</label>
+                            <input type="tel" id="addressPhone" name="addressPhone" class="form-control" placeholder="Contact number">
+                            <div class="error-message" id="addressPhone-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="altPhone">Alt. Phone (Optional)</label>
+                        <input type="tel" id="altPhone" name="altPhone" class="form-control" placeholder="Alternate number">
+                        <div class="error-message" id="altPhone-error"></div>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" id="prevBtn2">Back</button>
+                        <button type="button" class="btn" id="nextBtn2">Continue</button>
+                    </div>
+                </div>
+                
+                <!-- Verification Section -->
+                <div class="form-section" data-section="3">
+                    <div class="form-group">
+                        <label for="otp">Verification Code</label>
+                        <input type="text" id="otp" name="otp" class="form-control" placeholder="Enter 6-digit OTP">
+                        <div class="error-message" id="otp-error"></div>
+                    </div>
+                    
+                    <div class="form-group text-center">
+                        <p style="font-size: 0.875rem;">Didn't receive code? <a href="#" id="resendOtp" style="color: var(--primary); text-decoration: none;">Resend OTP</a></p>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" id="prevBtn3">Back</button>
+                        <button type="submit" class="btn" id="submitBtn">Complete Signup</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="form-footer">
+                Already have an account? <a href="/user/login">Log In</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+          const steps = $('.form-section');
+          let currentStep = 0;
+      
+          function goToStep(index) {
+            steps.removeClass('active');
+            steps.eq(index).addClass('active');
+            $('.step').removeClass('active');
+            $('.step').eq(index).addClass('active');
+          }
+      
+          $('#userImage').on('change', function () {
+            const file = this.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                $('#imagePreview').html(`<img src="${e.target.result}" alt="Profile" />`);
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+      
+      
+          $('#nextBtn1').click(function () {
+            const formData = new FormData($('#signupForm')[0]);
+            $.ajax({
+              url: '/user/signup',
+              method: 'POST',
+              data: formData,
+              contentType: false,
+              processData: false,
+              success: function (res) {
+                goToStep(1);
+              },
+              error: function (xhr) {
+                const errors = xhr.responseJSON?.errors || {};
+                $('.error-message').hide();
+                for (let field in errors) {
+                  $(`#${field}-error`).text(errors[field]).show();
+                }
+              }
+            });
+          });
+      
+      
+          $('#nextBtn2').click(function () {
+            const addressData = {
+              addressType: $('#addressType').val(),
+              recipientName: $('#recipientName').val(),
+              city: $('#city').val(),
+              state: $('#state').val(),
+              landmark: $('#landmark').val(),
+              pincode: $('#pincode').val(),
+              addressPhone: $('#addressPhone').val(),
+              altPhone: $('#altPhone').val()
+            };
+      
+            $.ajax({
+              url: '/user/address',
+              method: 'POST',
+              data: addressData,
+              success: function (res) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'OTP sent to email',
+                  toast: true,
+                  position: 'top-end',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+                goToStep(2);
+              },
+              error: function (xhr) {
+                const errors = xhr.responseJSON?.errors || {};
+                $('.error-message').hide();
+                for (let field in errors) {
+                  $(`#${field}-error`).text(errors[field]).show();
+                }
+              }
+            });
+          });
+      
+      
+          $('#signupForm').submit(function (e) {
+            e.preventDefault();
+            const otp = $('#otp').val();
+            $.ajax({
+              url: '/user/verify-otp',
+              method: 'POST',
+              data: { otp },
+              success: function (res) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Signup successful!',
+                  text: 'Redirecting to login...',
+                  showConfirmButton: false,
+                  timer: 2000
+                }).then(() => {
+                  window.location.href = '/user/login';
+                });
+              },
+              error: function (xhr) {
+                $('#otp-error').text(xhr.responseJSON?.error || 'Invalid OTP').show();
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Invalid OTP',
+                  toast: true,
+                  position: 'top-end',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              }
+            });
+          });
+      
+          $('#prevBtn2').click(() => goToStep(0));
+          $('#prevBtn3').click(() => goToStep(1));
+      
+          $('#resendOtp').click(function (e) {
+            e.preventDefault();
+            $('#otp-error').hide();
+            $('#otp').val('');
+            $('#nextBtn2').click();
+          });
+        });
+      </script>
+      
+</body>
+</html>

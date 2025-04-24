@@ -1,0 +1,389 @@
+<%- include("../partials/userHead") %>
+  <!-- Hero Section -->
+  <section class="bg-secondary py-16 md:py-24">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div class="space-y-6">
+          <span class="inline-block text-sm font-medium text-primary px-3 py-1 bg-primary bg-opacity-10 rounded-full">New Collection</span>
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-balance">Discover your next favorite book</h1>
+          <p class="text-lg text-gray-600 max-w-md">Curated collection of books across four genres at unbeatable prices with free shipping.</p>
+          <div class="flex flex-wrap gap-4">
+            <a href="/shop" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+              Browse Collection
+            </a>
+            <a href="/categories" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+              Explore Categories
+            </a>
+          </div>
+        </div>
+        <div class="relative">
+          <img src="/images/bookly_banner.webp" alt="Featured Books" class="w-full h-auto rounded-lg shadow-lg">
+          <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-lg hidden md:block">
+            <div class="flex items-center space-x-2">
+              <div class="flex -space-x-2">
+                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://cdn.lucidpic.com/cdn-cgi/image/w=600,format=auto,metadata=none/66c4384702f8f.png" alt="User">
+                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://images.generated.photos/Mb2q8qz61hU5YkiAC9TiyEROjOx-lheGZ-qr6c8S2rk/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92Ml8w/MzA5ODg2LmpwZw.jpg" alt="User">
+                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://cdn.lucidpic.com/6756dd315eb69.png" alt="User">
+              </div>
+              <div class="text-sm">
+                <p class="font-medium">Trusted by 10k+ readers</p>
+                <div class="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <span class="text-gray-500 ml-1">4.9/5</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="py-16">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold">Browse by Category</h2>
+        <p class="text-gray-600 mt-2">Find your perfect read from our curated collections</p>
+      </div>
+      
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <a href="/categories/sci-fi" class="group">
+          <div class="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col items-center justify-center">
+            <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+              <i class="fas fa-rocket"></i>
+            </div>
+            <h3 class="font-medium">Sci-Fi</h3>
+          </div>
+        </a>
+        <a href="/categories/fantasy" class="group">
+          <div class="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col items-center justify-center">
+            <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+              <i class="fas fa-dragon"></i>
+            </div>
+            <h3 class="font-medium">Fantasy</h3>
+          </div>
+        </a>
+        <a href="/categories/horror" class="group">
+          <div class="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col items-center justify-center">
+            <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+              <i class="fas fa-ghost"></i>
+            </div>
+            <h3 class="font-medium">Horror</h3>
+          </div>
+        </a>
+        <a href="/categories/humor" class="group">
+          <div class="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col items-center justify-center">
+            <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+              <i class="fas fa-laugh"></i>
+            </div>
+            <h3 class="font-medium">Humor</h3>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Best Sellers Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">Explore our collections</h2>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <% products.forEach((product) => { %>
+          <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 group">
+            <div class="relative">
+              <img src="/uploads/product-images/<%=product.productImage[0]%>" alt="<%= product.name %>" class="w-full h-64 object-cover">
+              <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <a href="/user/product-details/<%= product._id %>">
+                  <button class="bg-white text-gray-800 px-4 py-2 rounded-md text-sm font-medium mr-2 hover:bg-gray-100 transition-colors">
+                    View
+                  </button>
+                </a>
+                
+                <button class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition-colors" data-id="<%= product._id %>">Add to Cart</button>
+              </div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-medium text-gray-900 mb-1"><%= product.name %></h3>
+              <p class="text-sm text-gray-500 mb-2"><%= product.publisher %></p>
+      
+              <% if (product.productOffer > 0) { %>
+                <div class="flex items-center space-x-2">
+                  <span class="text-sm text-gray-400 line-through">₹<%= product.price.toFixed(2) %></span>
+                  <span class="font-bold text-primary">
+                    ₹<%= (product.price * (1 - product.productOffer / 100)).toFixed(2) %>
+                  </span>
+                </div>
+              <% } else { %>
+                <p class="font-bold text-primary">₹<%= product.price.toFixed(2) %></p>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+  </section>    
+
+  <!-- Testimonials Section -->
+  <section class="py-16">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold">What Our Readers Say</h2>
+        <p class="text-gray-600 mt-2">Trusted by thousands of book lovers worldwide</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+          <div class="flex items-center mb-4">
+            <img src="https://cdn.lucidpic.com/cdn-cgi/image/w=600,format=auto,metadata=none/66c4384702f8f.png" alt="Sarah Johnson" class="w-12 h-12 rounded-full object-cover">
+            <div class="ml-4">
+              <h3 class="font-medium">Ebi Johnson</h3>
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-600">"Bookly has completely transformed my reading experience. The selection is incredible, and the prices are unbeatable. I've discovered so many new authors thanks to their personalized recommendations!"</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+          <div class="flex items-center mb-4">
+            <img src="https://cdn.lucidpic.com/6756dd315eb69.png" alt="Michael Chen" class="w-12 h-12 rounded-full object-cover">
+            <div class="ml-4">
+              <h3 class="font-medium">Michael</h3>
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-600">"The delivery is always prompt, and the books arrive in perfect condition. I appreciate the thoughtful packaging and the little bookmark that comes with each order. It's these small details that keep me coming back!"</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+          <div class="flex items-center mb-4">
+            <img src="https://images.generated.photos/Mb2q8qz61hU5YkiAC9TiyEROjOx-lheGZ-qr6c8S2rk/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92Ml8w/MzA5ODg2LmpwZw.jpg" alt="Emily Rodriguez" class="w-12 h-12 rounded-full object-cover">
+            <div class="ml-4">
+              <h3 class="font-medium">Emily James</h3>
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-600">"As a teacher, I often need to order multiple copies of books for my classroom. Bookly's bulk ordering system and educational discounts have been a game-changer for my budget. The customer service is exceptional too!"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="py-16 bg-primary">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-xl mx-auto text-center text-white">
+        <h2 class="text-3xl font-bold mb-4">Join Our Newsletter</h2>
+        <p class="mb-6">Stay updated with new releases, exclusive deals, and reading recommendations!</p>
+        <form class="flex flex-col sm:flex-row gap-2">
+          <input type="email" placeholder="Your email address" class="flex-1 px-4 py-3 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-white">
+          <button type="submit" class="px-6 py-3 bg-white text-primary font-medium rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-white transition-colors">
+            Subscribe
+          </button>
+        </form>
+        <p class="mt-4 text-sm opacity-80">We respect your privacy. Unsubscribe at any time.</p>
+      </div>
+    </div>
+  </section>
+
+<%- include("../partials/userFooter") %>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Utility functions
+    const toggleVisibility = (el) => el?.classList.toggle('hidden');
+    const showElement = (el) => el?.classList.remove('hidden');
+    const hideElement = (el) => el?.classList.add('hidden');
+    const lockScroll = () => document.body.style.overflow = 'hidden';
+    const unlockScroll = () => document.body.style.overflow = '';
+
+    // Mobile Menu Toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton?.addEventListener('click', () => toggleVisibility(mobileMenu));
+
+    // Search Overlay Toggle
+    const searchButton = document.getElementById('search-button');
+    const searchOverlay = document.getElementById('search-overlay');
+    const closeSearch = document.getElementById('close-search');
+    searchButton?.addEventListener('click', () => {
+      showElement(searchOverlay);
+      lockScroll();
+    });
+    closeSearch?.addEventListener('click', () => {
+      hideElement(searchOverlay);
+      unlockScroll();
+    });
+
+    // Sort Dropdown Toggle
+    const sortDropdownButton = document.getElementById('sort-dropdown-button');
+    const sortDropdownMenu = document.getElementById('sort-dropdown-menu');
+    sortDropdownButton?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleVisibility(sortDropdownMenu);
+    });
+
+    // Filter Dropdown Toggle
+    const filterDropdownButton = document.getElementById('filter-dropdown-button');
+    const filterDropdownMenu = document.getElementById('filter-dropdown-menu');
+    filterDropdownButton?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleVisibility(filterDropdownMenu);
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+      if (!sortDropdownButton?.contains(e.target) && !sortDropdownMenu?.contains(e.target)) {
+        hideElement(sortDropdownMenu);
+      }
+      if (!filterDropdownButton?.contains(e.target) && !filterDropdownMenu?.contains(e.target)) {
+        hideElement(filterDropdownMenu);
+      }
+    });
+
+    // Quick View Modal
+    const quickViewButtons = document.querySelectorAll('[data-id]');
+    const quickViewModal = document.getElementById('quick-view-modal');
+    const closeQuickView = document.getElementById('close-quick-view');
+    const quickViewContent = document.getElementById('quick-view-content');
+
+    quickViewButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const productId = button.getAttribute('data-id');
+
+        // Placeholder content (replace with real product data)
+        quickViewContent.innerHTML = `
+          <div>
+            <img src="/placeholder.svg" alt="Product Image" class="w-full h-auto rounded-lg">
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold mb-2">Product Title</h2>
+            <div class="flex items-center mb-2">
+              ${'<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>'.repeat(5)}
+              <span class="text-xs text-gray-500 ml-1">(42 reviews)</span>
+            </div>
+            <p class="text-xl font-bold text-primary mb-4">$24.99</p>
+            <p class="text-gray-600 mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+              <div class="flex items-center">
+                <button class="w-10 h-10 rounded-l-md border border-gray-300 flex items-center justify-center hover:bg-gray-100">-</button>
+                <input type="number" min="1" value="1" class="w-16 h-10 border-t border-b border-gray-300 text-center">
+                <button class="w-10 h-10 rounded-r-md border border-gray-300 flex items-center justify-center hover:bg-gray-100">+</button>
+              </div>
+            </div>
+            <button class="w-full bg-primary text-white py-3 rounded-md font-medium hover:bg-primary-dark transition-colors">Add to Cart</button>
+            <div class="mt-6">
+              <div class="flex items-center text-sm text-gray-500 mb-2">
+                <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <span>Free shipping on orders over $35</span>
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>30-day return policy</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        showElement(quickViewModal);
+        lockScroll();
+      });
+    });
+
+    closeQuickView?.addEventListener('click', () => {
+      hideElement(quickViewModal);
+      unlockScroll();
+    });
+
+    quickViewModal?.addEventListener('click', (e) => {
+      if (e.target === quickViewModal) {
+        hideElement(quickViewModal);
+        unlockScroll();
+      }
+    });
+
+    // ESC key to close open modals/overlays
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideElement(quickViewModal);
+        hideElement(searchOverlay);
+        hideElement(sortDropdownMenu);
+        hideElement(filterDropdownMenu);
+        unlockScroll();
+      }
+    });
+  });
+</script>
+
+

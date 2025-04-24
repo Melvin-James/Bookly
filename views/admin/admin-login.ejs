@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdminLogin-Bookly</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 380px;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #007D8B;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
+        }
+        .error {
+            color: red;
+            font-size: 15px;
+            text-align: left;
+            margin-left: 10px;
+        }
+        .btn {
+            width: 100%;
+            background: #007D8B;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #005F66;
+        }
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #ccc;
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+        .google-btn img {
+            width: 18px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Bookly Admin Login</h2>
+        <form id="adminLogin-form">
+            <div class="form-group">
+                <input type="email" id="email" name="email" placeholder="Email">
+                <p class="error" id="error-email"></p>
+            </div>
+
+            <div class="form-group">
+                <input type="password" id="password" name="password" placeholder="Password">
+                <p class="error" id="error-password"></p>
+            </div>
+
+            <button type="submit" class="btn">Log in</button>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#adminLogin-form").submit(function (event) {
+                event.preventDefault();
+
+                const formData = {
+                    email: $("#email").val().trim(),
+                    password: $("#password").val(),
+                };
+
+                if (!formData.email || !formData.password) {
+                    Swal.fire({
+                        toast:true,
+                        position:'top-end',
+                        icon: "error",
+                        title: "All fields are required",
+                        showConfirmButton: false,
+                        timer:2000
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    url: "/admin/login",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        $(".error").text(""); 
+
+                        if (response.errors) {
+                            for (const field in response.errors) {
+                                $(`#error-${field}`).text(response.errors[field]);
+                            }
+                        } else {
+                            Swal.fire({
+                                toast :true,
+                                position:'top-end',
+                                icon: "success",
+                                title: "Login success!",
+                                showConfirmButton: false,
+                                timer:1000
+                            }).then(() => {
+                                window.location.href = response.redirectTo;
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
