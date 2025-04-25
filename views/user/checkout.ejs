@@ -1,0 +1,65 @@
+<%- include('../partials/userHead') %>
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold theme mb-6">Checkout</h1>
+
+  <form method="POST" action="/user/checkout" class="grid md:grid-cols-3 gap-8">
+    <!-- Address Selection -->
+    <div class="md:col-span-2 space-y-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Select Shipping Address</h2>
+
+        <% if (addresses.length > 0) { %>
+          <div class="space-y-4">
+            <% addresses.forEach((addr, i) => { %>
+              <label class="block border p-4 rounded-md hover:border-primary transition cursor-pointer">
+                <input type="radio" name="selectedAddress" value="<%= i %>" required class="mr-2">
+                <strong><%= addr.name %></strong> — <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %><br>
+                <span class="text-sm text-gray-600">📞 <%= addr.phone %>, Alt: <%= addr.altPhone %></span><br>
+                <span class="text-sm text-gray-500">Landmark: <%= addr.landmark %></span>
+              </label>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-red-500">No saved addresses. Please <a href="/user/profile/addresses/add" class="text-primary underline">add one</a>.</p>
+        <% } %>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Payment Method</h2>
+        <label class="block">
+          <input type="radio" name="paymentMethod" value="COD" checked required class="mr-2">
+          Cash on Delivery (COD)
+        </label>
+        <!-- Future: Add Razorpay or Online gateway here -->
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+      <div class="space-y-2 text-sm text-gray-700">
+        <% cartItems.forEach(item => { %>
+          <div class="flex justify-between">
+            <span><%= item.product.name %> x <%= item.quantity %></span>
+            <span>₹ <%= (item.product.price * item.quantity).toFixed(2) %></span>
+          </div>
+        <% }) %>
+      </div>
+      <hr class="my-4" />
+      <div class="flex justify-between font-semibold text-lg">
+        <span>Total:</span>
+        <span>₹ <%= cartTotal.toFixed(2) %></span>
+      </div>
+
+      <div class="mt-6">
+        <button type="submit" class="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition">
+          Confirm Order
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<%- include('../partials/userFooter') %>

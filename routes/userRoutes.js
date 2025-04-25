@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const userControllers=require('../controllers/user/userControllers');
 const homeControllers = require('../controllers/user/homeControllers');
-const profileControllers = require('../controllers/user/profileControllers')
+const profileControllers = require('../controllers/user/profileControllers');
+const cartControllers = require('../controllers/user/cartControllers');
+const checkOutControllers = require('../controllers/user/checkOutControllers');
 const {userAuth,adminAuth}=require('../middlewares/auth');
 const uploadTo=require('../middlewares/multer')
 const uploadProfileImage = uploadTo('profileImages');
@@ -43,5 +45,21 @@ router.post('/profile/verify-otp',profileControllers.postVerifyOtp);
 router.get('/profile/change-password', userAuth, profileControllers.getChangePassword);
 router.post('/profile/change-password', userAuth, profileControllers.postChangePassword);
 
+router.get('/profile/addresses',userAuth,profileControllers.getAllAddresses);
+router.get('/profile/addresses/add',userAuth,profileControllers.getAddAddressPage);
+router.post('/profile/addresses/add',userAuth,profileControllers.postAddAddress);
+
+router.get('/profile/addresses/edit/:addressId',userAuth,profileControllers.getEditAddressPage);
+router.post('/profile/addresses/edit/:addressId',userAuth,profileControllers.postEditAddress);
+router.post('/profile/addresses/delete/:addressId',userAuth,profileControllers.deleteAddress);
+
+router.get('/cart',userAuth,cartControllers.getCartPage);
+router.post('/cart/add/:productId',userAuth,cartControllers.addToCart);
+router.post('/cart/update/:productId',userAuth,cartControllers.updateCartQuantity);
+router.post('/cart/remove/:productId',userAuth,cartControllers.removeFromCart);
+
+
+router.get('/checkout',userAuth,checkOutControllers.getCheckoutPage);
+router.post('/checkout',userAuth,checkOutControllers.postCheckout);
 
 module.exports = router;

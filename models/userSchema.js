@@ -16,7 +16,11 @@ const userSchema = new Schema({
     isAdmin: { type: Boolean, default: false },
 
     wishlist: [{ type: Schema.Types.ObjectId, ref: "Product" }],
-    cart: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+    cart: [{
+        product: { type: Schema.Types.ObjectId, ref: "Product" },
+        quantity: { type: Number, default: 1 }
+      }],
+      
 
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },

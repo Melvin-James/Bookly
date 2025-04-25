@@ -1,0 +1,47 @@
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold theme">My Addresses</h2>
+      <a href="/user/profile/addresses/add" class="bg-theme text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+        + Add Address
+      </a>
+    </div>
+  
+    <% if (addressData.length) { %>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% addressData.forEach((addr) => { %>
+          <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition relative">
+  
+            <!-- Default Badge -->
+            <span class="absolute top-2 right-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">Default</span>
+  
+            <h4 class="font-semibold text-lg mb-1"><%= addr.name %></h4>
+            <p class="text-gray-700 text-sm mb-1"><%= addr.addressType %> Address</p>
+            <p class="text-gray-600 text-sm"><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></p>
+            <p class="text-gray-600 text-sm">Landmark: <%= addr.landmark %></p>
+            <p class="text-gray-600 text-sm">📞 <%= addr.phone %> | 📱 <%= addr.altPhone %></p>
+  
+            <div class="flex justify-end gap-3 mt-4">
+              <!-- Edit Icon -->
+              <a href="/user/profile/addresses/edit/<%= addr._id %>" class="text-theme hover:text-blue-700 transition" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6-6m2 2L9 21H3v-6l12-12z" />
+                </svg>
+              </a>
+  
+              <!-- Delete Icon -->
+              <form action="/user/profile/addresses/delete/<%= addr._id %>" method="POST" onsubmit="return confirm('Are you sure?')">
+                <button type="submit" class="text-red-500 hover:text-red-700 transition" title="Delete">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7L5 7M10 11v6M14 11v6M5 7l1-4h12l1 4M6 21h12a2 2 0 002-2V7H4v12a2 2 0 002 2z" />
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-gray-500">No addresses found.</p>
+    <% } %>
+  </div>
+  

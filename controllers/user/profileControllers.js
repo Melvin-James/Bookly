@@ -3,6 +3,143 @@ const Address = require('../../models/addressSchema');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 
+const getAllAddresses = async(req,res)=>{
+    try{
+        const userId = req.session.user._id;
+        const userAddresses = await Address.findOne({userId});
+
+        res.render('userLayout',{
+            body:'addresses',
+            userData:req.session.user,
+            addressData:userAddresses?.address || []
+        });
+    }catch(error){
+        console.error('Error loading addresses:',error);
+        res.status(500).render('error',{message:'Failed to load addresses'});
+    }
+};
+
+const getAddAddressPage = (req,res)=>{
+    try{
+        res.render('userLayout',{
+            body:'addAddress',
+            userData:req.session.user,
+            address:null,
+            formAction:'/user/profile/addresses/add'
+        });
+    }catch(error){
+        console.error('Error loading add address page:',error);
+        res.status(500).render('error',{message:'Add address page failed'});
+    }
+};
+
+const postAddAddress = async(req,res)=>{
+    try{
+        const userId = req.session.user._id;
+        const{
+            addressType, name, city, state,
+            landmark, pincode, phone, altPhone
+        }=req.body;
+
+    if(!addressType || !name || !city || !state || !landmark || !pincode || !phone || !altPhone){
+        return res.render('userLayout',{
+            body:'addAddress',
+            userData:req.session.user,
+            error:'All fields are required'
+        });
+    }
+
+    const existing = await Address.findOne({userId});
+
+    if(existing){
+        existing.address.push({
+            addressType,name,city,state,landmark,
+            pincode,phone,altPhone
+        });
+        await existing.save();
+    }else{
+        await Address.create({
+            userId,
+            address:[{
+                addressType, name, city, state, landmark, pincode, phone, altPhone
+            }]
+        });
+    }
+
+    res.redirect('/user/profile/addresses');
+}catch(error){
+    console.error('Error adding address:',error);
+    res.render(500).render('error',{message:'Failed to add address'});
+}
+};
+
+const getEditAddressPage = async (req,res)=>{
+    try{
+        const userId = req.session.user._id;
+        const addressId = req.params.addressId;
+
+        const userAddresses = await Address.findOne({userId});
+        const addressToEdit = userAddresses?.address.id(addressId);
+
+        if(!addressToEdit) throw new Error('Address not found');
+
+        res.render('userLayout',{
+            body:'addAddress',
+            userData:req.session.user,
+            address:addressToEdit,
+            formAction:`/user/profile/addresses/edit/${addressId}`
+        });
+    }catch(error){
+        console.error('Error loading address for edit:',error);
+        res.status(500).render('error',{message:'failed to load address for editing'});
+    }
+};
+
+const postEditAddress = async(req,res)=>{
+    try{
+        const userId = req.session.user._id;
+        const addressId = req.params.addressId;
+        const{
+            addressType,name,city,state,
+            landmark,pincode,phone, altPhone
+        }=req.body;
+
+        const userAddresses = await Address.findOne({userId});
+        const addressToEdit = userAddresses.address.id(addressId);
+
+        if(!addressToEdit) throw new Error('Address not found');
+
+        Object.assign(addressToEdit, {
+            addressType, name, city, state, landmark, pincode, phone, altPhone
+        });
+
+        await userAddresses.save();
+        res.redirect('/user/profile/addresses');
+    }catch(error){
+        console.error('Error updating address:',error);
+        res.status(500).render('error',{message:'Failed to update address'});
+    }
+};
+
+const deleteAddress = async(req,res)=>{
+    try{
+        const userId = req.session.user._id;
+        const addressId =req.params.addressId;
+
+        const userAddresses = await Address.findOne({userId});
+
+        userAddresses.address = userAddresses.address.filter(
+            addr=>addr._id.toString() !== addressId
+        );
+
+        await userAddresses.save();
+        res.redirect('/user/profile/addresses');
+    }catch(error){
+        console.error('Error deleting address:',error);
+        res.status(500).render('error',{message:'Failed to delete address'});
+    }
+};
+
 const getProfilePage = async(req,res)=>{
     try{
         const user = req.session.user;
@@ -135,7 +272,7 @@ const postChangePassword = async(req,res)=>{
         const userId = req.session.user._id;
         const userData = await User.findById(userId);
 
-        const isMatch = awiat bcrypt.compare(currentPassword, userData.password);
+        const isMatch = await bcrypt.compare(currentPassword, userData.password);
         if(!isMatch){
             return res.render('userLayout',{
                 body:'changePassword',
@@ -172,4 +309,12 @@ module.exports={
     postEditProfile,
     getVerifyOtp,
     postVerifyOtp,
+    getChangePassword,
+    postChangePassword,
+    getAllAddresses,
+    getAddAddressPage,
+    postAddAddress,
+    getEditAddressPage,
+    postEditAddress,
+    deleteAddress,
 }
