@@ -1,0 +1,97 @@
+<div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-2xl font-bold theme mb-6">Order Details</h1>
+  
+    <!-- Order Meta -->
+    <div class="bg-white rounded-lg shadow p-5 mb-6 border border-gray-100">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-gray-800">Order ID: <%= order._id %></h2>
+        <% let statusClass = order.status === 'Cancelled' ? 'bg-red-500' : 'bg-green-500'; %>
+        <span class="text-sm text-white <%= statusClass %> px-3 py-1 rounded-full"><%= order.status %></span>
+
+      </div>
+      <p class="text-gray-600 text-sm mt-2">
+        Placed on: <%= new Date(order.createdAt).toLocaleString() %><br>
+        Payment Method: <strong><%= order.paymentMethod %></strong><br>
+        Total Amount: ₹<%= order.totalAmount.toFixed(2) %>
+      </p>
+    </div>
+  
+    <!-- Shipping Address -->
+    <div class="bg-white rounded-lg shadow p-5 mb-6 border border-gray-100">
+      <h3 class="text-md font-semibold mb-2 text-primary">Shipping Address</h3>
+      <div class="text-sm text-gray-700 space-y-1">
+        <p><strong>Name:</strong> <%= order.address.name %></p>
+        <p><%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %></p>
+        <p><strong>Landmark:</strong> <%= order.address.landmark %></p>
+        <p><strong>Phone:</strong> <%= order.address.phone %> | <strong>Alt:</strong> <%= order.address.altPhone %></p>
+      </div>
+    </div>
+  
+    <!-- Products -->
+    <div class="bg-white rounded-lg shadow p-5 mb-6 border border-gray-100">
+      <h3 class="text-md font-semibold mb-4 text-primary">Ordered Items</h3>
+      <div class="space-y-4">
+        <% order.items.forEach(item => { %>
+          <div class="flex items-center gap-4">
+            <img src="/uploads/product-images/<%= item.product.productImage[0] %>" class="w-16 h-16 object-cover rounded" alt="<%= item.product.name %>">
+            <div class="flex-1">
+              <p class="font-medium text-gray-800"><%= item.product.name %></p>
+              <p class="text-sm text-gray-600">Quantity: <%= item.quantity %></p>
+              <p class="text-sm text-gray-600">Price: ₹<%= (item.product.price * item.quantity).toFixed(2) %></p>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  
+    <!-- Cancel Button -->
+  <% if (order.status === "Placed") { %>
+    <button 
+      onclick="confirmCancel('<%= order._id %>')" 
+      class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600 transition">
+      Cancel Order
+    </button>
+  <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  function confirmCancel(orderId) {
+    Swal.fire({
+      title: 'Cancel this order?',
+      text: "This action cannot be undone.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e53e3e',
+      cancelButtonColor: '#ccc',
+      confirmButtonText: 'Yes, cancel it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/user/profile/orders/${orderId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Cancelled!',
+              text: 'Your order has been cancelled.',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              location.href = '/user/profile/orders';
+            });
+          } else {
+            Swal.fire('Error', data.message, 'error');
+          }
+        })
+        .catch(() => {
+          Swal.fire('Error', 'Something went wrong.', 'error');
+        });
+      }
+    });
+  }
+</script>
+  

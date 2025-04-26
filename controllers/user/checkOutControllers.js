@@ -62,14 +62,26 @@ const postCheckout = async (req,res)=>{
         user.cart = [];
         await user.save();
 
-        res.redirect('/order-success');
+        res.redirect('/user/order-success');
     }catch(error){
         console.error('Order placement error:',error);
         res.status(500).render('error',{message:'Failed to place order.'});
     }
 };
 
+const getOrderSuccessPage = async(req,res)=>{
+    try{
+        res.render('order-success',{
+            userData: req.session.user
+        });
+    }catch(error){
+        console.error('Error loading orderSuccessPage:',error);
+        res.status(500).render('error',{message:'Failed to load order success page'});
+    }   
+}
+
 module.exports={
     getCheckoutPage,
     postCheckout,
+    getOrderSuccessPage,
 }

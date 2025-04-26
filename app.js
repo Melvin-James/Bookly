@@ -8,10 +8,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const path = require('path');
 const flash = require('connect-flash'); 
 
-
 db();
 
-// Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

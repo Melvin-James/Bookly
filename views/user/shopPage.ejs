@@ -12,7 +12,6 @@
               value="<%= filters.search %>"
               class="w-full border border-gray-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-            <!-- Preserve other filters when searching -->
             <% if (filters.sort) { %><input type="hidden" name="sort" value="<%= filters.sort %>"><% } %>
             <% if (filters.category) { %><input type="hidden" name="category" value="<%= filters.category %>"><% } %>
             <% if (filters.priceRange) { %><input type="hidden" name="priceRange" value="<%= filters.priceRange %>"><% } %>
@@ -146,8 +145,13 @@
                     View
                   </button>
                 </a>
-                
-                <button class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition-colors" data-id="<%= product._id %>">Add to Cart</button>
+                <form method="POST" action="/user/cart/add/<%= product._id %>">
+                  <button 
+                    type="submit"
+                    class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition-colors">
+                    Add to Cart
+                  </button>
+                </form>
               </div>
             </div>
             <div class="p-4">

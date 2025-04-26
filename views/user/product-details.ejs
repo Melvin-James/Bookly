@@ -92,9 +92,13 @@
           </div>
   
           <!-- Add to Cart -->
-          <button class="w-full bg-primary text-white py-3 rounded-md hover:bg-primary-dark transition text-sm font-medium">
-            Add to Cart
-          </button>
+          <form method="POST" action="/user/cart/add/<%= product._id %>">
+            <button 
+              type="submit"
+              class="w-full bg-primary text-white py-3 rounded-md hover:bg-primary-dark transition text-sm font-medium">
+              Add to Cart
+            </button>
+          </form>
         </div>
       </div>
     </div>

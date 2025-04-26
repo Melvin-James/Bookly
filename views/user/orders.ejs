@@ -1,0 +1,51 @@
+<div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-2xl font-bold theme mb-6">My Orders</h1>
+    
+    <% if (orders.length > 0) { %>
+      <div class="space-y-6">
+        <% orders.forEach(order => { %>
+          <div class="bg-white shadow rounded-lg p-5 border border-gray-100 hover:shadow-md transition">
+            <div class="flex justify-between items-center mb-3">
+              <h2 class="text-lg font-semibold">Order ID: <%= order._id %></h2>
+              <% let statusClass = order.status === 'Cancelled' ? 'bg-red-500' : 'bg-green-500'; %>
+              <span class="text-sm text-white <%= statusClass %> px-3 py-1 rounded-full"><%= order.status %></span>
+
+            </div>
+            
+            <div class="text-sm text-gray-700 mb-4">
+              <div class="grid grid-cols-2 gap-2">
+                <div><strong>Placed on:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></div>
+                <div><strong>Total:</strong> ₹<%= order.totalAmount.toFixed(2) %></div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <h3 class="font-medium text-gray-800 mb-2">Items</h3>
+              <ul class="list-inside space-y-1">
+                <% order.items.forEach(item => { %>
+                  <li class="flex justify-between">
+                    <span><%= item.product.name %> x <%= item.quantity %></span>
+                    <span>₹<%= (item.product.price * item.quantity).toFixed(2) %></span>
+                  </li>
+                <% }) %>
+              </ul>
+            </div>
+            
+            <div class="flex justify-end mt-4">
+              <a href="/user/profile/orders/<%= order._id %>" 
+                 class="inline-flex items-center gap-2 bg-primary text-dark px-4 py-2 rounded-md text-sm hover:bg-primary-dark transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                View Details
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="bg-white shadow rounded-lg p-8 text-center">
+        <p class="text-gray-500">You have no past orders.</p>
+      </div>
+    <% } %>
+  </div>

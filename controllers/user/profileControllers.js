@@ -1,5 +1,7 @@
 const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
+const Order = require('../../models/orderSchema');
+
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 
@@ -303,6 +305,73 @@ const postChangePassword = async(req,res)=>{
     }
 };
 
+const getOrdersPage = async(req,res)=>{
+    try{
+        const userId = req.session.user._id;
+
+        const orders = await Order.find({user:userId})
+          .sort({createdAt:-1})
+          .populate('items.product');
+
+          res.render('userLayout',{
+            body:'orders',
+            userData:req.session.user,
+            orders
+          });
+    }catch(error){
+        console.error('Failed to load orders:',error);
+        res.status(500).render('error',{message:'could not load order history.'});
+    }
+};
+
+const getOrderDetails = async(req,res)=>{
+    try{
+        const userId = req.session.user._id;
+        const orderId = req.params.id;
+
+        const order = await Order.findOne({_id:orderId, user:userId})
+        .populate('items.product');
+
+        if(!order){
+            return res.status(404).render('error',{message:'Order not found'});
+        }
+
+        res.render('userLayout',{
+            body:'orderDetails',
+            userData:req.session.user,
+            order
+        });
+    }catch(error){
+        console.error('Error loading order details:',error);
+        res.status(500).render('error',{message:'Failed to load order details'});
+    }
+};
+
+const cancelOrder = async(req,res)=>{
+    try{
+        const orderId = req.params.id;
+        const userId = req.session.user._id;
+
+        const order = await Order.findOne({_id:orderId, user:userId});
+
+        if(!order){
+            return res.status(404).json({success:false,message:'Order not found'});
+        }
+
+        if(order.status!=='Placed'){
+            return res.status(400).json({success:false,message:'Cannot cancel this order'});
+        }
+
+        order.status = 'Cancelled';
+        await order.save();
+
+        return res.status(200).json({success:true, message:'Order cancelled'});
+    }catch(error){
+        console.error('cancel order error:',error);
+        return res.status(500).json({success:false, message:'Server error'});
+    }
+}
+
 module.exports={
     getProfilePage,
     getEditProfile,
@@ -317,4 +386,7 @@ module.exports={
     getEditAddressPage,
     postEditAddress,
     deleteAddress,
+    getOrdersPage,
+    getOrderDetails,
+    cancelOrder,
 }
