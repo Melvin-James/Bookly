@@ -4,6 +4,7 @@ const adminControllers = require('../controllers/admin/adminControllers');
 const customerControllers = require('../controllers/admin/customerControllers');
 const categoryControllers = require('../controllers/admin/categoryControllers');
 const productControllers = require('../controllers/admin/productControllers');
+const orderControllers = require('../controllers/admin/orderControllers');
 const {userAuth,adminAuth}=require('../middlewares/auth');
 const uploadTo = require('../middlewares/multer');
 const uploadProductImage = uploadTo('product-images');
@@ -36,5 +37,10 @@ router.get('/product-add',adminAuth,productControllers.getAddProduct);
 router.post('/product-add',adminAuth,uploadProductImage.array('productImage', 3),productControllers.addProduct);
 router.get('/product-edit/:id',adminAuth,productControllers.getEditProduct);
 router.patch('/product-edit/:id',adminAuth,uploadProductImage.array('productImage',3),productControllers.updateProduct);
+
+
+router.get('/orders',adminAuth,orderControllers.getAdminOrders);
+router.get('/orders/:id', adminAuth, orderControllers.getAdminOrderDetails);
+router.post('/orders/:orderId/status', adminAuth, orderControllers.updateOrderStatus);
 
 module.exports=router;

@@ -6,7 +6,10 @@ const userSchema = new Schema({
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    
+    wallet: {
+      type: Number,
+      default: 0
+    },
     otp: { type: String },  
     otpExpires: { type: Date, index: { expires: '1m' } },
 

@@ -1,0 +1,89 @@
+
+<div class="max-w-6xl mx-auto px-6 py-8">
+  <h1 class="text-2xl font-bold text-primary mb-6">Order Details</h1>
+
+  <!-- Basic Order Info -->
+  <div class="bg-white rounded-lg shadow p-6 space-y-4">
+    <div class="flex justify-between">
+      <h2 class="text-lg font-semibold text-gray-800">Order ID: <%= order.orderId %></h2>
+      <span class="px-3 py-1 rounded-full text-white <% if (order.status === 'Cancelled') { %> bg-red-500 <% } else { %> bg-green-500 <% } %>">
+        <%= order.status %>
+      </span>
+    </div>
+
+    <p class="text-gray-600 text-sm">
+      Placed on: <%= new Date(order.createdAt).toLocaleString() %><br>
+      Payment Method: <%= order.paymentMethod %><br>
+      Total Amount: ₹<%= order.totalAmount.toFixed(2) %>
+    </p>
+
+    <!-- Address Section -->
+    <div>
+      <h3 class="text-md font-semibold text-primary mb-2">Shipping Address</h3>
+      <p class="text-gray-700 text-sm">
+        <%= order.address.name %>, <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %><br>
+        Landmark: <%= order.address.landmark %><br>
+        📞 <%= order.address.phone %> | Alt: <%= order.address.altPhone %>
+      </p>
+    </div>
+
+    <!-- Products Ordered -->
+    <div>
+      <h3 class="text-md font-semibold text-primary mb-2">Products</h3>
+      <ul class="space-y-4">
+        <% order.items.forEach(item => { %>
+          <li class="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+            <div class="flex items-center gap-3">
+              <img src="/uploads/product-images/<%= item.product.productImage[0] %>" class="w-16 h-16 object-cover rounded" alt="<%= item.product.name %>">
+              <div>
+                <p class="font-medium"><%= item.product.name %></p>
+                <p class="text-sm text-gray-600">Qty: <%= item.quantity %></p>
+              </div>
+            </div>
+            <div class="text-sm font-semibold">
+              ₹<%= (item.product.price * item.quantity).toFixed(2) %>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+
+    <!-- Status Update -->
+    <div class="pt-6">
+      <form action="/admin/orders/<%= order._id %>/status" method="POST" class="space-y-4">
+        <label for="status" class="block text-sm font-semibold text-gray-700">Change Order Status</label>
+        <select id="status" name="status" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+          <option value="Placed" <% if (order.status === 'Placed') { %> selected <% } %>>Placed</option>
+          <option value="Shipped" <% if (order.status === 'Shipped') { %> selected <% } %>>Shipped</option>
+          <option value="Out for Delivery" <% if (order.status === 'Out for Delivery') { %> selected <% } %>>Out for Delivery</option>
+          <option value="Delivered" <% if (order.status === 'Delivered') { %> selected <% } %>>Delivered</option>
+          <option value="Cancelled" <% if (order.status === 'Cancelled') { %> selected <% } %>>Cancelled</option>
+          <option value="Cancelled" <% if (order.status === 'Cancelled') { %> selected <% } %>>Returned</option>
+        </select>
+
+        <button type="submit" class="w-full bg-[#007D8B] text-dark py-2 rounded-md hover:bg-primary-dark transition">
+          Update Status
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<% if (statusUpdated) { %>
+    <script>
+      Swal.fire({
+        toast: true,
+        icon: 'success',
+        title: 'Order status updated successfully',
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+      });
+    </script>
+  <% } %>
+  
+  
+
+

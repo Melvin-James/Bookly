@@ -12,10 +12,15 @@
               
               <!-- Remove from wishlist button -->
               <form action="/user/wishlist/<%= product._id %>" method="POST" class="absolute top-2 right-2">
-                <button class="text-red-500 bg-white p-1 rounded-full shadow hover:bg-red-500 hover:text-white transition" title="Remove">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                <button 
+                    type="button" 
+                    onclick="removeFromWishlist('<%= product._id %>')" 
+                    class="text-red-500 bg-white p-1 rounded-full shadow hover:bg-red-500 hover:text-white transition" 
+                    title="Remove">
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
               </form>
             </div>
@@ -52,3 +57,42 @@
     <% } %>
   </div>
   <%- include("../partials/userFooter") %>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function removeFromWishlist(productId) {
+      fetch(`/user/wishlist/${productId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Removed from wishlist!',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          setTimeout(() => {
+            location.reload(); // refresh wishlist page
+          }, 1600);
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops',
+            text: data.message
+          });
+        }
+      })
+      .catch(err => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Something went wrong'
+        });
+      });
+    }
+    </script>
+    

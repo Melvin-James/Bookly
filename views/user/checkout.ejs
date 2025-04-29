@@ -1,65 +1,157 @@
-<%- include('../partials/userHead') %>
+<%- include("../partials/userHead") %>
 
-<div class="max-w-6xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold theme mb-6">Checkout</h1>
+<div class="max-w-7xl mx-auto px-4 py-8">
 
-  <form method="POST" action="/user/checkout" class="grid md:grid-cols-3 gap-8">
-    <!-- Address Selection -->
-    <div class="md:col-span-2 space-y-6">
+  <h1 class="text-3xl font-bold text-primary mb-8">Checkout</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+    <!-- Left: Address and Payment -->
+    <div class="md:col-span-2 space-y-8">
+
+      <!-- Address Selection -->
       <div class="bg-white p-6 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-4">Select Shipping Address</h2>
-
-        <% if (addresses.length > 0) { %>
-          <div class="space-y-4">
-            <% addresses.forEach((addr, i) => { %>
-              <label class="block border p-4 rounded-md hover:border-primary transition cursor-pointer">
-                <input type="radio" name="selectedAddress" value="<%= i %>" required class="mr-2">
-                <strong><%= addr.name %></strong> — <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %><br>
-                <span class="text-sm text-gray-600">📞 <%= addr.phone %>, Alt: <%= addr.altPhone %></span><br>
-                <span class="text-sm text-gray-500">Landmark: <%= addr.landmark %></span>
-              </label>
-            <% }) %>
-          </div>
+        <h2 class="text-xl font-semibold mb-4">Select Delivery Address</h2>
+        <% if (addressData.length) { %>
+          <form id="placeOrderForm" action="/user/place-order" method="POST">
+            <div class="space-y-4">
+              <% addressData.forEach(addr => { %>
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="radio" name="addressId" value="<%= addr._id %>" class="mt-1" required />
+                  <div>
+                    <p class="font-medium"><%= addr.name %> - <%= addr.addressType %></p>
+                    <p class="text-sm text-gray-600">
+                      <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %><br>
+                      📞 <%= addr.phone %> | Alt: <%= addr.altPhone %>
+                    </p>
+                  </div>
+                </label>
+              <% }) %>
+            </div>
         <% } else { %>
-          <p class="text-red-500">No saved addresses. Please <a href="/user/profile/addresses/add" class="text-primary underline">add one</a>.</p>
+          <p class="text-gray-500">No saved addresses. <a href="/user/profile/addresses/add" class="text-primary underline">Add Address</a></p>
         <% } %>
       </div>
 
       <!-- Payment Method -->
       <div class="bg-white p-6 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-4">Payment Method</h2>
-        <label class="block">
-          <input type="radio" name="paymentMethod" value="COD" checked required class="mr-2">
-          Cash on Delivery (COD)
+        <h2 class="text-xl font-semibold mb-4">Select Payment Method</h2>
+
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="radio" name="paymentMethod" value="COD" checked required class="accent-primary" />
+          <span class="text-gray-700">Cash on Delivery (COD)</span>
         </label>
-        <!-- Future: Add Razorpay or Online gateway here -->
+
       </div>
+
     </div>
 
-    <!-- Order Summary -->
-    <div class="bg-white p-6 rounded-lg shadow">
-      <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
-      <div class="space-y-2 text-sm text-gray-700">
+    <!-- Right: Order Summary -->
+    <div class="bg-white p-6 rounded-lg shadow space-y-6">
+
+      <!-- Coupon Box -->
+      <div class="space-y-2">
+        <h2 class="text-xl font-semibold mb-2">Have a Coupon?</h2>
+        <div class="flex gap-2">
+          <input type="text" id="couponCode" class="border rounded-md px-4 py-2 w-full" placeholder="Enter Coupon Code" />
+          <button type="button" id="applyCouponBtn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition">
+            Apply
+          </button>
+          <button type="button" id="removeCouponBtn" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition hidden">
+            Remove
+          </button>
+        </div>
+      </div>
+
+      <!-- Cart Items -->
+      <div class="space-y-3 border-t pt-4">
         <% cartItems.forEach(item => { %>
-          <div class="flex justify-between">
-            <span><%= item.product.name %> x <%= item.quantity %></span>
-            <span>₹ <%= (item.product.price * item.quantity).toFixed(2) %></span>
+          <div class="flex justify-between text-sm">
+            <span><%= item.product.name %> × <%= item.quantity %></span>
+            <span>₹<%= (item.product.price * item.quantity).toFixed(2) %></span>
           </div>
         <% }) %>
       </div>
-      <hr class="my-4" />
-      <div class="flex justify-between font-semibold text-lg">
-        <span>Total:</span>
-        <span>₹ <%= cartTotal.toFixed(2) %></span>
+
+      <!-- Total Summary -->
+      <div class="border-t pt-4 text-gray-800 space-y-2">
+        <div class="flex justify-between font-medium">
+          <span>Subtotal:</span>
+          <span>₹<%= cartTotal.toFixed(2) %></span>
+        </div>
+
+        <div class="flex justify-between text-sm text-green-600" id="discountSection" style="display: none;">
+          <span>Coupon Discount:</span>
+          <span id="discountAmount">- ₹0</span>
+        </div>
+
+        <div class="flex justify-between text-lg font-bold">
+          <span>Total Payable:</span>
+          <span id="totalPayable">₹<%= cartTotal.toFixed(2) %></span>
+        </div>
       </div>
 
-      <div class="mt-6">
-        <button type="submit" class="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition">
-          Confirm Order
+      <!-- Place Order Button -->
+      <div class="pt-6">
+        <button type="submit" class="w-full bg-primary text-white py-3 rounded-md hover:bg-primary-dark transition">
+          Place Order
         </button>
       </div>
     </div>
-  </form>
+
+    </form>
+
+  </div>
+
 </div>
 
-<%- include('../partials/userFooter') %>
+<%- include("../partials/userFooter") %>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Coupon JS -->
+<script>
+  document.getElementById('applyCouponBtn').addEventListener('click', async () => {
+    const code = document.getElementById('couponCode').value.trim();
+    if (!code) {
+      Swal.fire('Enter a coupon code first!', '', 'info');
+      return;
+    }
+
+    const response = await fetch('/user/apply-coupon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ couponCode: code })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      Swal.fire('Coupon Applied!', data.message, 'success');
+      document.getElementById('discountSection').style.display = 'flex';
+      document.getElementById('discountAmount').innerText = `- ₹${data.discount.toFixed(2)}`;
+      document.getElementById('totalPayable').innerText = `₹${data.finalTotal.toFixed(2)}`;
+      document.getElementById('applyCouponBtn').classList.add('hidden');
+      document.getElementById('removeCouponBtn').classList.remove('hidden');
+    } else {
+      Swal.fire('Failed!', data.message, 'error');
+    }
+  });
+
+  document.getElementById('removeCouponBtn').addEventListener('click', async () => {
+    const response = await fetch('/user/remove-coupon', { method: 'POST' });
+    const data = await response.json();
+    if (data.success) {
+      Swal.fire('Coupon Removed!', data.message, 'success');
+      document.getElementById('discountSection').style.display = 'none';
+      document.getElementById('discountAmount').innerText = '- ₹0';
+      document.getElementById('totalPayable').innerText = '₹<%= cartTotal.toFixed(2) %>';
+      document.getElementById('applyCouponBtn').classList.remove('hidden');
+      document.getElementById('removeCouponBtn').classList.add('hidden');
+    } else {
+      Swal.fire('Failed!', data.message, 'error');
+    }
+  });
+</script>

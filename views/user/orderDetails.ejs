@@ -1,10 +1,10 @@
 <div class="max-w-5xl mx-auto p-6">
     <h1 class="text-2xl font-bold theme mb-6">Order Details</h1>
   
-    <!-- Order Meta -->
+
     <div class="bg-white rounded-lg shadow p-5 mb-6 border border-gray-100">
       <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-gray-800">Order ID: <%= order._id %></h2>
+        <h2 class="text-lg font-semibold text-gray-800">Order ID: <%= order.orderId %></h2>
         <% let statusClass = order.status === 'Cancelled' ? 'bg-red-500' : 'bg-green-500'; %>
         <span class="text-sm text-white <%= statusClass %> px-3 py-1 rounded-full"><%= order.status %></span>
 
@@ -38,9 +38,16 @@
               <p class="font-medium text-gray-800"><%= item.product.name %></p>
               <p class="text-sm text-gray-600">Quantity: <%= item.quantity %></p>
               <p class="text-sm text-gray-600">Price: ₹<%= (item.product.price * item.quantity).toFixed(2) %></p>
+              <% if (item.status === 'Placed') { %>
+                <button onclick="cancelProduct('<%= order._id %>', '<%= item._id %>')" class="text-red-500 hover:text-red-700">
+                  Cancel Item
+                </button>
+              <% } else { %>
+                <span class="text-gray-500"><%= item.status %></span>
+              <% } %>
             </div>
           </div>
-        <% }) %>
+        <% }) %>  
       </div>
     </div>
   
@@ -52,6 +59,23 @@
       Cancel Order
     </button>
   <% } %>
+
+  <% if (order.status === "Delivered" && !order.isReturnRequested) { %>
+    <button 
+      onclick="confirmReturn('<%= order._id %>')" 
+      class="bg-yellow-500 text-white px-5 py-2 rounded hover:bg-yellow-600 transition mt-4">
+      Return Order
+    </button>
+  <% } else if (order.isReturnRequested) { %>
+    <div class="text-sm text-yellow-600 mt-4 font-semibold">
+      Return Requested: <%= order.returnReason %>
+    </div>
+  <% } %>
+  <a href="/user/profile/orders/<%= order._id %>/invoice" 
+    class="text-sm text-yellow-600 mt-4 font-semibold">
+   Download Invoice
+ </a>
+ 
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -93,5 +117,81 @@
       }
     });
   }
+
+  function confirmReturn(orderId) {
+  Swal.fire({
+    title: 'Return Order',
+    input: 'textarea',
+    inputLabel: 'Reason for Return',
+    inputPlaceholder: 'Enter your reason here...',
+    inputAttributes: {
+      'aria-label': 'Reason for return'
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Submit Return',
+    cancelButtonText: 'Cancel',
+    inputValidator: (value) => {
+      if (!value) {
+        return 'Please provide a reason!';
+      }
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/user/profile/orders/${orderId}/return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: result.value })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Return Requested!',
+            text: data.message,
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            location.href = '/user/profile/orders';
+          });
+        } else {
+          Swal.fire('Error', data.message, 'error');
+        }
+      })
+      .catch(() => {
+        Swal.fire('Error', 'Something went wrong.', 'error');
+      });
+    }
+  });
+}
+function cancelProduct(orderId, itemId) {
+  Swal.fire({
+    title: 'Cancel this product?',
+    text: "Are you sure you want to cancel?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#e53e3e',
+    cancelButtonColor: '#ccc',
+    confirmButtonText: 'Yes, Cancel it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/user/profile/orders/${orderId}/cancel-item/${itemId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire('Cancelled!', data.message, 'success').then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire('Error!', data.message, 'error');
+        }
+      });
+    }
+  });
+}
+
 </script>
   

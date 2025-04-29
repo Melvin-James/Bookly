@@ -136,24 +136,52 @@
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <% products.forEach((product) => { %>
-          <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 group">
+          <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 group relative">
+      
+            <!-- Wishlist Heart Icon -->
+            <form method="POST" action="/user/wishlist/<%= product._id %>" class="absolute top-2 right-2 z-10">
+              <!-- Wishlist Heart Icon (AJAX version) -->
+              <button 
+              type="button" 
+              onclick="toggleWishlist('<%= product._id %>')" 
+              class="absolute top-2 right-2 z-10 bg-white p-1 rounded-full shadow hover:bg-red-500 hover:text-white transition">
+
+              <% if (userData?.wishlist?.includes(product._id)) { %>
+                <!-- Filled Heart -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4 8.28 4 10 5.5 12 7.09 14 5.5 15.72 4 17.5 4 20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              <% } else { %>
+                <!-- Outlined Heart -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.414 4.414 0 015.364-.364L12 7.414l2.318-2.318a4.414 4.414 0 015.364.364c1.562 1.562 1.562 4.096 0 5.657L12 21 4.318 11.975a4 4 0 010-5.657z" />
+                  </svg>
+              <% } %>
+              </button>
+
+            </form>
+      
+            <!-- Product Image and Hover Actions -->
             <div class="relative">
-              <img src="/uploads/product-images/<%=product.productImage[0]%>" alt="<%= product.name %>" class="w-full h-64 object-cover">
-              <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.name %>" class="w-full h-64 object-cover">
+      
+              <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-2">
                 <a href="/user/product-details/<%= product._id %>">
-                  <button class="bg-white text-gray-800 px-4 py-2 rounded-md text-sm font-medium mr-2 hover:bg-gray-100 transition-colors">
+                  <button class="bg-white text-gray-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">
                     View
                   </button>
                 </a>
                 <form method="POST" action="/user/cart/add/<%= product._id %>">
                   <button 
                     type="submit"
-                    class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition-colors">
+                    class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition">
                     Add to Cart
                   </button>
                 </form>
               </div>
             </div>
+      
+            <!-- Product Info -->
             <div class="p-4">
               <h3 class="font-medium text-gray-900 mb-1"><%= product.name %></h3>
               <p class="text-sm text-gray-500 mb-2"><%= product.publisher %></p>
@@ -172,6 +200,7 @@
           </div>
         <% }) %>
       </div>
+      
       
       <!-- Pagination -->
       <% if (totalPages > 1) { %>
@@ -213,7 +242,44 @@
       <% } %>
   </section> 
 <%- include("../partials/userFooter") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+function toggleWishlist(productId) {
+  fetch(`/user/wishlist/${productId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: data.message,
+        showConfirmButton: false,
+        timer: 1500
+      });
+      setTimeout(() => {
+        location.reload();
+      }, 1600);
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops',
+        text: data.message
+      });
+    }
+  })
+  .catch(err => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Something went wrong'
+    });
+  });
+}
   document.addEventListener('DOMContentLoaded', function() {
   // Handle filter form submission
   const filterForm = document.getElementById('filter-form');
@@ -360,4 +426,5 @@
     });
   }
 });
+
 </script>

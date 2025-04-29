@@ -2,9 +2,10 @@ const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Customers = require('../../models/userSchema');
 
+
 const getShopProducts = async function(req, res) {
   try {
-
+    const user = await Customers.findById(req.session.user._id);
     const { search, sort, category, priceRange, page = 1 } = req.query;
     const limit = 12; 
     const skip = (page - 1) * limit;
@@ -106,8 +107,8 @@ const getShopProducts = async function(req, res) {
       sortOption = { createdAt: -1 }; 
     }
     
-    console.log('Combined Query:', JSON.stringify(query, null, 2));
-    console.log('Sort Options:', sortOption);
+    // console.log('Combined Query:', JSON.stringify(query, null, 2));
+    // console.log('Sort Options:', sortOption);
     
     const products = await Product.find(query)
       .sort(sortOption)
@@ -122,6 +123,7 @@ const getShopProducts = async function(req, res) {
     
     res.render('shopPage', {
       products,
+      userData:user,
       categories,
       currentPage: parseInt(page),
       totalPages: Math.ceil(totalProducts / limit),

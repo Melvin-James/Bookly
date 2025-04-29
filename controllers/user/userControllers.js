@@ -163,8 +163,8 @@ const homePage = async (req, res) => {
     const products = await Product.find({ isBlocked: false }).sort({
       createdAt: -1,
     });
-
-    res.render("homePage", { products });
+    const user = await User.findById(req.session.user._id);
+    res.render("homePage", { products,userData:user });
   } catch (err) {
     console.error(err);
     res.status(500).render("error", { message: "Server Error" });

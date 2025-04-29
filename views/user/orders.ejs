@@ -1,12 +1,24 @@
 <div class="max-w-5xl mx-auto p-6">
     <h1 class="text-2xl font-bold theme mb-6">My Orders</h1>
-    
+    <!-- Search Bar -->
+    <form action="/user/profile/orders" method="GET" class="flex mb-6">
+      <input 
+        type="text" 
+        name="search" 
+        placeholder="Search orders by ID..." 
+        class="flex-1 border px-4 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary"
+      >
+      <button type="submit" class="bg-primary text-dark px-4 py-2 rounded-r-md hover:bg-primary-dark transition">
+        Search
+      </button>
+    </form>
+
     <% if (orders.length > 0) { %>
       <div class="space-y-6">
         <% orders.forEach(order => { %>
           <div class="bg-white shadow rounded-lg p-5 border border-gray-100 hover:shadow-md transition">
             <div class="flex justify-between items-center mb-3">
-              <h2 class="text-lg font-semibold">Order ID: <%= order._id %></h2>
+              <h2 class="text-lg font-semibold">Order ID: <%= order.orderId %></h2>
               <% let statusClass = order.status === 'Cancelled' ? 'bg-red-500' : 'bg-green-500'; %>
               <span class="text-sm text-white <%= statusClass %> px-3 py-1 rounded-full"><%= order.status %></span>
 

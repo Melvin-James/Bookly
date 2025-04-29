@@ -1,9 +1,62 @@
 const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
+const mongoose = require('mongoose');
 
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const PDFDocument = require('pdfkit');
+
+const downloadInvoice = async(req,res)=>{
+    const doc = require('pdfkit');
+    try{
+        const userId = req.session.user._id;
+        const orderId = req.params.id;
+
+        const order = await Order.findOne({_id:orderId, user:userId}).populate('items.product');
+
+        if(!order){
+            return res.status(404).render('error',{message:'Order not found'});
+        }
+
+        const doc = new PDFDocument({margin:50})
+
+        res.setHeader('Content-Type','application/pdf');
+        res.setHeader('Content-Disposition',`attachment; filename=invoice-${order._id}.pdf`);
+
+        doc.pipe(res);
+
+        doc.fontSize(20).fillColor('#007D8B').text('Bookly-Invoice',{align:'center'});
+        doc.moveDown();
+
+        doc.fontSize(12).fillColor('#333').text(`Order Id:${order.orderId}`);
+        doc.text(`Order Date:${new Date(order.createdAt).toLocaleDateString()}`);
+        doc.text(`Payment Method: ${order.paymentMethod}`);
+        doc.text(`Order Status: ${order.status}`);
+        doc.moveDown();
+
+        doc.fontSize(14).fillColor('#007D8B').text('Shipping Address');
+        doc.moveDown(0.5);
+        doc.fontSize(12).fillColor('#333')
+            .text(order.address.name)
+            .text(`${order.address.city}, ${order.address.state} - ${order.address.pincode}`)
+            .text(`Phone: ${order.address.phone}, Alt:${order.address.altPhone}`);
+        doc.moveDown();
+    
+
+    doc.fontSize(14).fillColor('#007D8B').text('Items Ordered');
+    doc.moveDown(0.5);
+    doc.fontSize(12).fillColor('#333')
+      .text(`Subtotal: ₹${order.totalAmount + (order.discountAmount || 0)}`)
+      .text(`Discount: -₹${order.totalAmount.toFixed(2)}`);
+
+    doc.end();
+
+}catch(error){
+    console.error('Download Invoice error:',error);
+    res.status(500).render('error',{message:'Failed to generate invoice'});
+}
+};
 
 const getAllAddresses = async(req,res)=>{
     try{
@@ -308,8 +361,16 @@ const postChangePassword = async(req,res)=>{
 const getOrdersPage = async(req,res)=>{
     try{
         const userId = req.session.user._id;
+        const searchQuery = req.query.search || '';
 
-        const orders = await Order.find({user:userId})
+        let query = { user: userId };
+
+        if (searchQuery) {
+        query.orderId = { $regex: searchQuery, $options: 'i' };
+        }
+
+
+        const orders = await Order.find(query)
           .sort({createdAt:-1})
           .populate('items.product');
 
@@ -372,6 +433,58 @@ const cancelOrder = async(req,res)=>{
     }
 }
 
+const returnOrder = async (req, res) => {
+    try {
+      const userId = req.session.user._id;
+      const orderId = req.params.id;
+      const { reason } = req.body;
+  
+      const order = await Order.findOne({ _id: orderId, user: userId });
+  
+      if (!order || order.status !== 'Delivered') {
+        return res.status(400).json({ success: false, message: 'Invalid order for return' });
+      }
+  
+      order.isReturnRequested = true;
+      order.returnReason = reason;
+      await order.save();
+  
+      res.json({ success: true, message: 'Return request submitted successfully' });
+  
+    } catch (error) {
+      console.error('Return order error:', error);
+      res.status(500).json({ success: false, message: 'Failed to submit return request' });
+    }
+};
+  
+const cancelOrderItem = async (req, res) => {
+    try {
+      const { orderId, itemId } = req.params;
+  
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.json({ success: false, message: 'Order not found' });
+      }
+  
+      const item = order.items.id(itemId); 
+      if (!item) {
+        return res.json({ success: false, message: 'Item not found' });
+      }
+  
+      if (item.status !== 'Placed') {
+        return res.json({ success: false, message: 'Item already cancelled or returned' });
+      }
+  
+      item.status = 'Cancelled';
+      await order.save();
+  
+      res.json({ success: true, message: 'Product cancelled successfully!' });
+    } catch (error) {
+      console.error('Cancel product error:', error);
+      res.json({ success: false, message: 'Failed to cancel product' });
+    }
+  };
+  
 module.exports={
     getProfilePage,
     getEditProfile,
@@ -389,4 +502,7 @@ module.exports={
     getOrdersPage,
     getOrderDetails,
     cancelOrder,
+    returnOrder,
+    downloadInvoice,
+    cancelOrderItem,
 }

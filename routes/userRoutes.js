@@ -7,7 +7,7 @@ const profileControllers = require('../controllers/user/profileControllers');
 const cartControllers = require('../controllers/user/cartControllers');
 const checkOutControllers = require('../controllers/user/checkOutControllers');
 const wishlistControllers = require('../controllers/user/wishlistControllers');
-
+const couponControllers = require('../controllers/user/couponControllers');
 
 const {userAuth,adminAuth}=require('../middlewares/auth');
 const uploadTo=require('../middlewares/multer')
@@ -58,21 +58,28 @@ router.post('/profile/addresses/delete/:addressId',userAuth,profileControllers.d
 router.get('/profile/orders',userAuth,profileControllers.getOrdersPage);
 router.get('/profile/orders/:id',userAuth,profileControllers.getOrderDetails);
 router.post('/profile/orders/:id/cancel',userAuth,profileControllers.cancelOrder);
+router.post('/profile/orders/:id/return', userAuth, profileControllers.returnOrder);
+router.post('/profile/orders/:orderId/cancel-item/:itemId', userAuth, profileControllers.cancelOrderItem);
+router.get('/profile/orders/:id/invoice',userAuth,profileControllers.downloadInvoice);
+
+
 
 router.get('/cart',userAuth,cartControllers.getCartPage);
 router.post('/cart/add/:productId',userAuth,cartControllers.addToCart);
 router.post('/cart/update/:productId',userAuth,cartControllers.updateCartQuantity);
 router.post('/cart/remove/:productId',userAuth,cartControllers.removeFromCart);
+router.get('/itemsInCartcount',cartControllers.getItemsInCartCount)
 
 
 router.get('/checkout',userAuth,checkOutControllers.getCheckoutPage);
-router.post('/checkout',userAuth,checkOutControllers.postCheckout);
+router.post('/place-order',userAuth,checkOutControllers.placeOrder);
 
 
 router.get('/order-success',userAuth,checkOutControllers.getOrderSuccessPage);
 
-
 router.get('/wishlist',userAuth,wishlistControllers.getWishlistPage);
 router.post('/wishlist/:productId',userAuth,wishlistControllers.toggleWishlist);
+router.post('/apply-coupon',userAuth,couponControllers.applyCoupon);
+router.post('/remove-coupon',userAuth,couponControllers.removeCoupon);
 
 module.exports = router;

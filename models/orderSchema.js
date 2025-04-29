@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
+  orderId: {
+    type: String,
+    required: true,
+    unique: true
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -14,10 +19,17 @@ const orderSchema = new mongoose.Schema({
     },
     quantity: {
       type: Number,
-      required: true
+      required: true,
+      default: 1
+    },
+    status: {
+      type: String,
+      enum: ['Placed', 'Cancelled', 'Returned'],
+      default: 'Placed'
     }
-  }],
+  }],  
   address: {
+    addressType:String,
     name: String,
     city: String,
     state: String,
@@ -31,13 +43,23 @@ const orderSchema = new mongoose.Schema({
     enum: ["COD", "Online"],
     default: "COD"
   },
-  totalAmount: Number,
+  totalAmount: {type:Number, required: true},
   status: {
     type: String,
-    enum: ["Pending", "Placed", "Shipped", "Delivered", "Cancelled"],
+    enum: ["Placed", "Shipped", "Delivered", "Cancelled","Out for Delivery","Returned"],
     default: "Placed"
-  }
-}, { timestamps: true }); // ✅ Auto adds createdAt + updatedAt
+  },
+  returnReason: {
+    type: String,
+    default: null
+  },
+  isReturnRequested: {
+    type: Boolean,
+    default: false
+  },
+  couponApplied:{type:String},
+  discountAmount:{type:Number, default:0},
+}, { timestamps: true });
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

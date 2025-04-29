@@ -86,11 +86,23 @@ const removeFromCart = async(req,res)=>{
         console.error('Error removing from cart:',error);
         res.status(500).render('error',{message:'Failed to remove item'});
     }
+    
 };
+
+const getItemsInCartCount = async (req,res)=>{
+    const userId = req.session.user._id;
+    let value =0
+    if(!userId)  return res.status(404).json({success:false,value})
+    const userCart = await User.findById(userId).select('cart -_id')
+    value  = userCart.cart.length
+    return res.status(200).json({success:true,value})
+}
+
 
 module.exports ={
     getCartPage,
     addToCart,
     updateCartQuantity,
     removeFromCart,
+    getItemsInCartCount,
 }
