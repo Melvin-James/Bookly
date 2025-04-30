@@ -25,7 +25,6 @@ const orderSchema = new mongoose.Schema({
     status: {
       type: String,
       enum: ['Placed', 'Cancelled', 'Returned'],
-      default: 'Placed'
     }
   }],  
   address: {
@@ -47,7 +46,6 @@ const orderSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["Placed", "Shipped", "Delivered", "Cancelled","Out for Delivery","Returned"],
-    default: "Placed"
   },
   returnReason: {
     type: String,
@@ -57,6 +55,7 @@ const orderSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isReturnApproved: { type: Boolean, default: false },
   couponApplied:{type:String},
   discountAmount:{type:Number, default:0},
 }, { timestamps: true });

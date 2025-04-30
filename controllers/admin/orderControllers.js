@@ -1,6 +1,6 @@
 const User = require('../../models/userSchema');
 const Order = require('../../models/orderSchema');
-
+const Product = require('../../models/productSchema');
 const getAdminOrders = async (req, res) => {
   try {
     const orders = await Order.find()
@@ -29,12 +29,14 @@ const getAdminOrderDetails = async (req, res) => {
     }
 
     const statusUpdated = req.query.statusUpdated === 'true';
+    const returnStatus = req.query.returnStatus || null;
 
     res.render('layout',{
       body:'adminOrderDetails',
       admin: req.session.admin,
       order,
       statusUpdated,
+      returnStatus,
     });
 
   } catch (error) {
@@ -48,7 +50,7 @@ const updateOrderStatus = async (req, res) => {
     const orderId = req.params.orderId;
     const { status } = req.body;
 
-    const allowedStatuses = ['Placed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
+    const allowedStatuses = ['Placed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled','Returned'];
     if (!allowedStatuses.includes(status)) {
       return res.status(400).render('error', { message: 'Invalid order status selected.' });
     }
@@ -69,8 +71,60 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const approveReturnRequest = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Order.findById(orderId);
+
+    if (!order || !order.isReturnRequested || order.isReturnApproved) {
+      return res.status(400).json({ success: false, message: 'Invalid return request.' });
+    }
+
+    const user = await User.findById(order.user);
+    user.wallet = (user.wallet || 0) + order.totalAmount;
+    await user.save();
+
+    for (let item of order.items) {
+      await Product.findByIdAndUpdate(item.product, { $inc: { quantity: item.quantity } });
+    }
+
+
+    order.isReturnApproved = true;
+    order.status = 'Returned';
+    await order.save();
+    res.redirect(`/admin/orders/${orderId}?returnStatus=approved`);
+
+  } catch (error) {
+    console.error('Error approving return request:', error);
+    res.status(500).render('error', { message: 'Failed to approve return request.' });
+  }
+};
+
+const rejectReturnRequest = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Order.findById(orderId);
+
+    if (!order || !order.isReturnRequested || order.isReturnApproved) {
+      return res.status(400).json({ success: false, message: 'Invalid return request.' });
+    }
+
+    order.isReturnRequested = false;
+    order.returnReason = null;
+    await order.save();
+
+    res.redirect(`/admin/orders/${orderId}?returnStatus=rejected`);
+  } catch (error) {
+    console.error('Error rejecting return request:', error);
+    res.status(500).render('error', { message: 'Failed to reject return request.' });
+  }
+};
+
+
 module.exports = {
   getAdminOrders,
   getAdminOrderDetails,
   updateOrderStatus,
+  approveReturnRequest,
+  rejectReturnRequest,
 };

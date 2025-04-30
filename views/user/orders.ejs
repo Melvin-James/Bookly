@@ -19,8 +19,18 @@
           <div class="bg-white shadow rounded-lg p-5 border border-gray-100 hover:shadow-md transition">
             <div class="flex justify-between items-center mb-3">
               <h2 class="text-lg font-semibold">Order ID: <%= order.orderId %></h2>
-              <% let statusClass = order.status === 'Cancelled' ? 'bg-red-500' : 'bg-green-500'; %>
-              <span class="text-sm text-white <%= statusClass %> px-3 py-1 rounded-full"><%= order.status %></span>
+              <% 
+                let statusColors = {
+                  'Placed': 'bg-yellow-300',
+                  'Shipped': 'bg-blue-400',
+                  'Out for Delivery': 'bg-green-600',
+                  'Delivered': 'bg-lime-400',
+                  'Cancelled': 'bg-red-500',
+                  'Returned': 'bg-orange-500'
+               };
+               let statusClass = statusColors[order.status] || 'bg-gray-500'; 
+              %>
+             <span class="text-sm text-white <%= statusClass %> px-3 py-1 rounded-full"><%= order.status %></span>
 
             </div>
             

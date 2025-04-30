@@ -6,7 +6,13 @@
   <div class="bg-white rounded-lg shadow p-6 space-y-4">
     <div class="flex justify-between">
       <h2 class="text-lg font-semibold text-gray-800">Order ID: <%= order.orderId %></h2>
-      <span class="px-3 py-1 rounded-full text-white <% if (order.status === 'Cancelled') { %> bg-red-500 <% } else { %> bg-green-500 <% } %>">
+      <span class="px-3 py-1 rounded-full text-white 
+        <% if (order.status === 'Placed') { %> bg-yellow-300 <% } 
+          else if (order.status === 'Shipped') { %> bg-blue-400 <% } 
+          else if (order.status === 'Out for Delivery') { %> bg-green-600 <% } 
+          else if (order.status === 'Delivered') { %> bg-lime-400 <% } 
+          else if (order.status === 'Cancelled') { %> bg-red-500 <% } 
+          else if (order.status === 'Returned') { %> bg-orange-500 <% } %>">
         <%= order.status %>
       </span>
     </div>
@@ -58,18 +64,34 @@
           <option value="Out for Delivery" <% if (order.status === 'Out for Delivery') { %> selected <% } %>>Out for Delivery</option>
           <option value="Delivered" <% if (order.status === 'Delivered') { %> selected <% } %>>Delivered</option>
           <option value="Cancelled" <% if (order.status === 'Cancelled') { %> selected <% } %>>Cancelled</option>
-          <option value="Cancelled" <% if (order.status === 'Cancelled') { %> selected <% } %>>Returned</option>
+          <option value="Returned" <% if (order.status === 'Returned') { %> selected <% } %>>Returned</option>
         </select>
 
         <button type="submit" class="w-full bg-[#007D8B] text-dark py-2 rounded-md hover:bg-primary-dark transition">
           Update Status
-        </button>
+        </button>        
       </form>
+      <% if (order.isReturnRequested && order.status === 'Delivered') { %>
+          <div class="mt-4 flex gap-4">
+            <form method="POST" action="/admin/orders/<%= order._id %>/approve-return">
+              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                Approve Return
+              </button>
+            </form>
+        
+            <form method="POST" action="/admin/orders/<%= order._id %>/reject-return">
+              <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
+                Reject Return
+              </button>
+            </form>
+          </div>
+        <% } %>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <% if (statusUpdated) { %>
     <script>
       Swal.fire({
@@ -83,6 +105,31 @@
       });
     </script>
   <% } %>
+
+  <% if (returnStatus === 'approved') { %>
+    <script>
+      Swal.fire({
+        toast: true,
+        icon: 'success',
+        title: 'Return approved and refunded to wallet!',
+        position: 'top-end',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    </script>
+  <% } else if (returnStatus === 'rejected') { %>
+    <script>
+      Swal.fire({
+        toast: true,
+        icon: 'info',
+        title: 'Return request rejected.',
+        position: 'top-end',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    </script>
+  <% } %>
+  
   
   
 

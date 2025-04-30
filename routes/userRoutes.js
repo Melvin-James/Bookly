@@ -8,7 +8,7 @@ const cartControllers = require('../controllers/user/cartControllers');
 const checkOutControllers = require('../controllers/user/checkOutControllers');
 const wishlistControllers = require('../controllers/user/wishlistControllers');
 const couponControllers = require('../controllers/user/couponControllers');
-
+const walletControllers = require('../controllers/user/walletControllers');
 const {userAuth,adminAuth}=require('../middlewares/auth');
 const uploadTo=require('../middlewares/multer')
 const uploadProfileImage = uploadTo('profileImages');
@@ -81,5 +81,7 @@ router.get('/wishlist',userAuth,wishlistControllers.getWishlistPage);
 router.post('/wishlist/:productId',userAuth,wishlistControllers.toggleWishlist);
 router.post('/apply-coupon',userAuth,couponControllers.applyCoupon);
 router.post('/remove-coupon',userAuth,couponControllers.removeCoupon);
+
+router.get('/wallet', userAuth,walletControllers.getWalletPage);
 
 module.exports = router;

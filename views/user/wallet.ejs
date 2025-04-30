@@ -1,0 +1,27 @@
+<div class="max-w-3xl mx-auto mt-8 px-4">
+    <div class="bg-white rounded-lg shadow p-6">
+  
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-primary">My Wallet</h2>
+        <a href="/user/profile" class="text-sm text-primary hover:underline">
+          ← Back to Profile
+        </a>
+      </div>
+  
+      <div class="bg-gray-50 p-6 rounded-lg text-center shadow-inner">
+        <p class="text-gray-700 text-lg mb-2">Your current wallet balance is</p>
+        <p class="text-3xl font-bold text-green-600">₹ <%= walletBalance.toFixed(2) %></p>
+      </div>
+  
+      <!-- Optional future section: transaction history -->
+      <div class="mt-8">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Wallet Transactions</h3>
+        <ul class="space-y-3">
+          <li class="flex justify-between text-sm">
+            <span>Refund from Order #123456</span>
+            <span class="text-green-500 font-medium">+₹500</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>

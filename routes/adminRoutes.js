@@ -42,5 +42,7 @@ router.patch('/product-edit/:id',adminAuth,uploadProductImage.array('productImag
 router.get('/orders',adminAuth,orderControllers.getAdminOrders);
 router.get('/orders/:id', adminAuth, orderControllers.getAdminOrderDetails);
 router.post('/orders/:orderId/status', adminAuth, orderControllers.updateOrderStatus);
+router.post('/orders/:id/approve-return', adminAuth, orderControllers.approveReturnRequest);
+router.post('/orders/:id/reject-return', adminAuth, orderControllers.rejectReturnRequest);
 
 module.exports=router;
