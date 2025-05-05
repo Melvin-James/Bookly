@@ -24,6 +24,8 @@
           <th class="py-3 px-4 text-left">Status</th>
           <th class="py-3 px-4 text-center">Edit</th>
           <th class="py-3 px-4 text-center">Block/Unblock</th>
+          <th class="py-3 px-4 text-center">Offer</th>
+          <th class="py-3 px-4 text-center">Apply</th>
         </tr>
       </thead>
       <tbody>
@@ -33,24 +35,37 @@
             <td class="py-3 px-4"><%= product.category?.name || 'N/A' %></td>
             <td class="py-3 px-4"><%= product.price %></td>
             <td class="py-3 px-4">
-              <% if (product.isBlocked) { %>
-                <span class="px-2 py-1 text-sm rounded-md bg-red-100 text-red-700">Blocked</span>
-              <% } else { %>
-                <span class="px-2 py-1 text-sm rounded-md bg-green-100 text-green-700">Active</span>
-              <% } %>
+              <span class="px-2 py-1 text-sm rounded-md 
+                <%= product.isBlocked ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' %>">
+                <%= product.isBlocked ? 'Blocked' : 'Active' %>
+              </span>
             </td>
             <td class="py-3 px-4 text-center">
-              <a href="/admin/product-edit/<%= product._id %>" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">Edit</a>
+              <a href="/admin/product-edit/<%= product._id %>" 
+                 class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+                Edit
+              </a>
             </td>
             <td class="py-3 px-4 text-center">
               <button
                 class="toggle-block-btn text-sm px-4 py-2 rounded-md 
-                <%= product.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600' %> text-white"
-                data-user-id="<%= product._id %>"
+                  <%= product.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600' %> text-white"
+                data-product-id="<%= product._id %>"
                 data-is-blocked="<%= product.isBlocked %>"
                 onclick="showConfirmation(this)">
                 <%= product.isBlocked ? 'Unblock' : 'Block' %>
               </button>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <input type="number" name="offer" value="<%= product.productOffer %>" 
+                     min="0" max="90" class="border rounded px-3 py-2 w-20" />
+            </td>
+            <td class="py-3 px-4 text-center">
+              <form method="POST" action="/admin/product-offer/<%= product._id %>">
+                <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded-md text-sm">
+                  Apply
+                </button>
+              </form>
             </td>
           </tr>
         <% }) %>
@@ -184,7 +199,14 @@
               ${product.isBlocked ? 'Unblock' : 'Block'}
             </button>
           </td>
-        `;
+          <td class="py-3 px-4 text-center">
+            <input type="number" name="offer" value="${product.productOffer}" min="0" max="90" class="border rounded px-3 py-2 w-20" />
+          </td>
+          <td class="py-3 px-4 text-center">
+            <form method="POST" action="/admin/product-offer/${product._id}">
+              <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded-md text-sm">Apply</button>
+            </form>
+          </td>`;
         tbody.appendChild(row);
       });
     }

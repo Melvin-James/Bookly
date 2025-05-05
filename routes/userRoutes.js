@@ -73,9 +73,9 @@ router.get('/itemsInCartcount',cartControllers.getItemsInCartCount)
 
 router.get('/checkout',userAuth,checkOutControllers.getCheckoutPage);
 router.post('/place-order',userAuth,checkOutControllers.placeOrder);
-
-
+router.post('/create-order', userAuth, checkOutControllers.createRazorpayOrder);
 router.get('/order-success',userAuth,checkOutControllers.getOrderSuccessPage);
+router.get('/order-failure', userAuth, checkOutControllers.getOrderFailurePage);
 
 router.get('/wishlist',userAuth,wishlistControllers.getWishlistPage);
 router.post('/wishlist/:productId',userAuth,wishlistControllers.toggleWishlist);
@@ -83,5 +83,6 @@ router.post('/apply-coupon',userAuth,couponControllers.applyCoupon);
 router.post('/remove-coupon',userAuth,couponControllers.removeCoupon);
 
 router.get('/wallet', userAuth,walletControllers.getWalletPage);
+
 
 module.exports = router;

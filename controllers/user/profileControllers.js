@@ -2,7 +2,6 @@ const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
 const mongoose = require('mongoose');
-
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const PDFDocument = require('pdfkit');

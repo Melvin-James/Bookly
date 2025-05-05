@@ -8,9 +8,10 @@
         placeholder="Search orders by ID..." 
         class="flex-1 border px-4 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary"
       >
-      <button type="submit" class="bg-primary text-dark px-4 py-2 rounded-r-md hover:bg-primary-dark transition">
+      <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded-r-md hover:bg-opacity-90 transition">
         Search
       </button>
+      
     </form>
 
     <% if (orders.length > 0) { %>
@@ -47,20 +48,21 @@
                 <% order.items.forEach(item => { %>
                   <li class="flex justify-between">
                     <span><%= item.product.name %> x <%= item.quantity %></span>
-                    <span>₹<%= (item.product.price * item.quantity).toFixed(2) %></span>
+                    <span>₹<%= item.product.price.toFixed(2) %></span>
                   </li>
                 <% }) %>
               </ul>
             </div>
             
             <div class="flex justify-end mt-4">
-              <a href="/user/profile/orders/<%= order._id %>" 
-                 class="inline-flex items-center gap-2 bg-primary text-dark px-4 py-2 rounded-md text-sm hover:bg-primary-dark transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <a href="/user/profile/orders/<%= order._id %>"  
+                style="background-color: #007D8B; color: white; padding: 8px 16px; border-radius: 6px; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.3s ease;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                         d="M12 4.5C7.305 4.5 3.295 7.395 1.5 12c1.795 4.605 5.805 7.5 10.5 7.5s8.705-2.895 10.5-7.5c-1.795-4.605-5.805-7.5-10.5-7.5zM12 15a3 3 0 100-6 3 3 0 000 6z" />
                 </svg>
                 View Details
-              </a>
+             </a>
             </div>
           </div>
         <% }) %>

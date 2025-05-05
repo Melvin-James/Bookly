@@ -5,6 +5,10 @@ const customerControllers = require('../controllers/admin/customerControllers');
 const categoryControllers = require('../controllers/admin/categoryControllers');
 const productControllers = require('../controllers/admin/productControllers');
 const orderControllers = require('../controllers/admin/orderControllers');
+const inventoryControllers = require('../controllers/admin/inventoryControllers');
+const couponControllers = require('../controllers/admin/couponControllers');
+const offerControllers = require('../controllers/admin/offerControllers');
+
 const {userAuth,adminAuth}=require('../middlewares/auth');
 const uploadTo = require('../middlewares/multer');
 const uploadProductImage = uploadTo('product-images');
@@ -45,4 +49,15 @@ router.post('/orders/:orderId/status', adminAuth, orderControllers.updateOrderSt
 router.post('/orders/:id/approve-return', adminAuth, orderControllers.approveReturnRequest);
 router.post('/orders/:id/reject-return', adminAuth, orderControllers.rejectReturnRequest);
 
+router.get('/inventory', adminAuth, inventoryControllers.getInventoryPage);
+router.get('/search-stock', adminAuth, inventoryControllers.searchStock);
+router.get('/stock-pagination', adminAuth, inventoryControllers.getPaginatedStock);
+router.post('/inventory/update-stock/:productId', adminAuth, inventoryControllers.updateStock);
+router.post('/inventory/update-status/:productId', adminAuth, inventoryControllers.updateProductStatus);
+
+router.get('/coupons',adminAuth,couponControllers.getCouponPage);
+router.post('/coupons/create',adminAuth,couponControllers.createCoupon);
+router.post('/coupons/delete/:id',adminAuth,couponControllers.deleteCoupon);
+
+router.post('/product-offer/:id',offerControllers.setProductOffer);
 module.exports=router;

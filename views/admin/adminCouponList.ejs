@@ -1,0 +1,138 @@
+<div class="max-w-6xl mx-auto px-6 py-8">
+  <h1 class="text-2xl font-bold text-primary mb-6">Coupon Management</h1>
+
+  <!-- Create Coupon Form -->
+  <div class="bg-white p-6 rounded-lg shadow mb-8">
+    <h2 class="text-xl font-semibold mb-4">Create New Coupon</h2>
+    <form method="POST" action="/admin/coupons/create" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <input type="text" name="code" required placeholder="Coupon Code (e.g. BOOK50)" class="border px-3 py-2 rounded" />
+
+      <select name="discountType" required class="border px-3 py-2 rounded">
+        <option value="">Select Discount Type</option>
+        <option value="Flat">Flat</option>
+        <option value="Percentage">Percentage</option>
+      </select>
+
+      <input type="number" step="0.01" name="discountAmount" required placeholder="Discount Amount" class="border px-3 py-2 rounded" />
+      <input type="number" step="0.01" name="maxDiscount" placeholder="Max Discount (only for % type)" class="border px-3 py-2 rounded" />
+
+      <input type="number" step="0.01" name="minCartAmount" placeholder="Min Cart Amount" class="border px-3 py-2 rounded" />
+      <input type="number" name="usageLimit" value="1" min="1" placeholder="Usage Limit" class="border px-3 py-2 rounded" />
+
+      <input type="date" name="expiresAt" required class="border px-3 py-2 rounded" />
+
+      <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded col-span-full hover:bg-primary-dark transition">
+        Create Coupon
+      </button>
+    </form>
+  </div>
+
+  <!-- Coupon List Table -->
+  <div class="bg-white p-6 rounded-lg shadow">
+    <h2 class="text-xl font-semibold mb-4">All Coupons</h2>
+    <table class="w-full table-auto text-sm text-left">
+      <thead class="bg-gray-100 text-gray-700">
+        <tr>
+          <th class="px-4 py-2">Code</th>
+          <th class="px-4 py-2">Type</th>
+          <th class="px-4 py-2">Amount</th>
+          <th class="px-4 py-2">Min Cart</th>
+          <th class="px-4 py-2">Max Discount</th>
+          <th class="px-4 py-2">Expires</th>
+          <th class="px-4 py-2">Limit</th>
+          <th class="px-4 py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+        <% coupons.forEach(coupon => { %>
+          <tr>
+            <td class="px-4 py-2 font-semibold"><%= coupon.code %></td>
+            <td class="px-4 py-2"><%= coupon.discountType %></td>
+            <td class="px-4 py-2">₹<%= coupon.discountAmount %></td>
+            <td class="px-4 py-2">₹<%= coupon.minCartAmount || 0 %></td>
+            <td class="px-4 py-2"><%= coupon.discountType === 'Percentage' ? coupon.maxDiscount || '-' : '-' %></td>
+            <td class="px-4 py-2"><%= new Date(coupon.expiresAt).toLocaleDateString() %></td>
+            <td class="px-4 py-2"><%= coupon.usageLimit %></td>
+            <td class="px-4 py-2">
+                <button onclick="confirmDeleteCoupon('<%= coupon._id %>')" class="text-red-600 hover:underline">Delete</button>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- Toast -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<% if (req.query.created === 'true') { %>
+  <script>
+    Swal.fire({
+      toast: true,
+      icon: 'success',
+      title: 'Coupon created successfully!',
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 2000
+    });
+  </script>
+<% } %>
+<% if (req.query.deleted === 'true') { %>
+  <script>
+    Swal.fire({
+      toast: true,
+      icon: 'info',
+      title: 'Coupon deleted!',
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 2000
+    });
+  </script>
+<% } %>
+<script>
+  function confirmDeleteCoupon(couponId) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "This will permanently delete the coupon.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#007D8B',
+      cancelButtonColor: '#007D8B',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/admin/coupons/delete/${couponId}`, {
+            method: 'POST',
+          });
+          const data = await res.json();
+          if (data.success) {
+            Swal.fire({
+              toast: true,
+              icon: 'success',
+              title: 'Coupon deleted successfully',
+              position: 'top-end',
+              timer: 2000,
+              showConfirmButton: false,
+            });
+            setTimeout(() => {
+              location.reload();
+            }, 1000);
+          } else {
+            throw new Error(data.message || 'Delete failed');
+          }
+        } catch (err) {
+          Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message,
+          confirmButtonColor: '#007D8B',
+        });
+        }
+      }
+    });
+  }
+</script>
+

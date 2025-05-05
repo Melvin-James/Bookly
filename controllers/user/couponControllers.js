@@ -24,9 +24,13 @@ const applyCoupon = async(req,res)=>{
         }
 
         let cartTotal = 0;
-        for(let product of user.cart){
-            cartTotal += product.price;
-        }
+        for (let cartItem of user.cart) {
+            const product = await Product.findById(cartItem.product);
+            if (product) {
+              cartTotal += product.price * cartItem.quantity;
+            }
+          }
+          
 
         if(cartTotal < coupon.minCartAmount){
             return res.status(400).json({success:false,message:`Minimum cart amount should be ₹${coupon.minCartAmount}`});
@@ -42,6 +46,14 @@ const applyCoupon = async(req,res)=>{
             }
         }
         const finalTotal = cartTotal - discount;
+
+        if (user.couponUsage?.get(coupon.code) >= coupon.usageLimit) {
+            return res.status(400).json({
+              success: false,
+              message: 'Coupon usage limit reached!'
+            });
+          }
+          
 
         req.session.coupon = {
             code:coupon.code,

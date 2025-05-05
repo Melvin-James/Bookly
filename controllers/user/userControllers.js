@@ -162,7 +162,7 @@ const homePage = async (req, res) => {
   try {
     const products = await Product.find({ isBlocked: false }).sort({
       createdAt: -1,
-    });
+    }).limit(4);
     const user = await User.findById(req.session.user._id);
     res.render("homePage", { products,userData:user });
   } catch (err) {

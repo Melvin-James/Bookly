@@ -27,7 +27,11 @@ const userSchema = new Schema({
 
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
-
+    couponUsage: {
+      type: Map,
+      of: Number,
+      default: {}
+    },    
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);

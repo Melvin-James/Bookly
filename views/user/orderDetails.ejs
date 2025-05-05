@@ -53,7 +53,7 @@
           <p class="font-medium text-gray-800"><%= item.product.name %></p>
           <p class="text-sm text-gray-600">Quantity: <%= item.quantity %></p>
           <p class="text-sm text-gray-600">
-            Price: ₹<%= (item.product.price * item.quantity).toFixed(2) %>
+            Price: ₹<%= order.totalAmount.toFixed(2) %>
           </p>
           <% if (item.status === 'Placed') { %>
           <button
@@ -91,12 +91,19 @@
     Return Requested: <%= order.returnReason %>
   </div>
   <% } %>
-  <a
-    href="/user/profile/orders/<%= order._id %>/invoice"
-    class="text-sm text-yellow-600 mt-4 font-semibold"
-  >
+  <br><br>
+  <button onclick="window.location.href='/user/profile/orders/<%= order._id %>/invoice'"
+    style="background-color: #007D8B; color: white; padding: 8px 16px; border-radius: 6px; font-size: 14px; 
+           display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; transition: background-color 0.3s ease;"
+    onmouseover="this.style.backgroundColor='#005F6B'" 
+    onmouseout="this.style.backgroundColor='#007D8B'">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+             d="M12 5v14m-7-7l7 7 7-7M5 19h14" />
+    </svg>
     Download Invoice
-  </a>
+ </button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -107,8 +114,8 @@
       text: "This action cannot be undone.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#e53e3e",
-      cancelButtonColor: "#ccc",
+      confirmButtonColor: "#007D8B",
+      cancelButtonColor: "#007D8B",
       confirmButtonText: "Yes, cancel it!",
     }).then((result) => {
       if (result.isConfirmed) {
@@ -125,15 +132,26 @@
                 text: "Your order has been cancelled.",
                 timer: 2000,
                 showConfirmButton: false,
+                confirmButtonColor: "#007D8B",
               }).then(() => {
                 location.href = "/user/profile/orders";
               });
             } else {
-              Swal.fire("Error", data.message, "error");
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message,
+                confirmButtonColor: '#007D8B',
+              });
             }
           })
           .catch(() => {
-            Swal.fire("Error", "Something went wrong.", "error");
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Something went wrong.',
+              confirmButtonColor: '#007D8B',
+            });
           });
       }
     });
@@ -148,6 +166,8 @@
       inputAttributes: {
         "aria-label": "Reason for return",
       },
+      confirmButtonColor:'#007D8B',
+      cancelButtonColor:'#007D8B',
       showCancelButton: true,
       confirmButtonText: "Submit Return",
       cancelButtonText: "Cancel",
@@ -191,8 +211,8 @@
       text: "Are you sure you want to cancel?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#e53e3e",
-      cancelButtonColor: "#ccc",
+      confirmButtonColor: "#007D8B",
+      cancelButtonColor: "#007D8B",
       confirmButtonText: "Yes, Cancel it!",
     }).then((result) => {
       if (result.isConfirmed) {
@@ -203,11 +223,21 @@
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
-              Swal.fire("Cancelled!", data.message, "success").then(() => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Cancelled!',
+                text: data.message,
+                confirmButtonColor: '#007D8B',
+              }).then(() => {
                 location.reload();
               });
             } else {
-              Swal.fire("Error!", data.message, "error");
+              Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message,
+                confirmButtonColor: '#007D8B',
+              });
             }
           });
       }

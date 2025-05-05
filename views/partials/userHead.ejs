@@ -119,15 +119,17 @@
     </div>
   </header>
   <script>
-
-document.addEventListener("DOMContentLoaded", function () {
-    fetch('/user/itemsInCartcount')
+    document.addEventListener("DOMContentLoaded", function () {
+      fetch('/user/itemsInCartcount')
         .then(response => response.json())
         .then(data => {
-          console.log("Cart Count:", data)
-          document.getElementById('cartItemsCount').innerText = data.value
+          const badge = document.getElementById('cartItemsCount');
+          if (badge) {
+            const count = data?.value ?? 0;
+            badge.innerText = count > 0 ? count : '';
+            badge.style.display = count > 0 ? 'flex' : 'none';
+          }
         })
         .catch(error => console.error("Error fetching cart count:", error));
-});
-
+    });
   </script>

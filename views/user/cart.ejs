@@ -1,87 +1,154 @@
 <%- include("../partials/userHead") %>
 
 <div class="max-w-6xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6 theme">My Cart</h1>
-  
-    <% if (cartItems.length > 0) { %>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Cart Items -->
-        <div class="lg:col-span-2 space-y-6">
-          <% cartItems.forEach(item => { %>
-            <div class="flex flex-col sm:flex-row items-center gap-4 bg-white shadow rounded-lg p-4">
-              <!-- Image -->
-              <div class="w-24 h-24 flex-shrink-0">
-                <img src="/uploads/product-images/<%= item.product.productImage[0] %>" alt="<%= item.product.name %>" class="w-full h-full object-cover rounded-md">
-              </div>
-  
-              <!-- Info -->
-              <div class="flex-1">
-                <h2 class="text-lg font-semibold"><%= item.product.name %></h2>
-                <p class="text-gray-600 text-sm">₹ <%= item.product.price.toFixed(2) %></p>
-                <p class="text-gray-500 text-xs mt-1"><%= item.product.category %></p>
-              </div>
-  
-              <!-- Quantity Controls -->
-              <div class="flex items-center gap-2">
-                <form action="/user/cart/update/<%= item.product._id %>" method="POST">
-                  <input type="hidden" name="action" value="decrease" />
-                  <button class="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition">−</button>
-                </form>
-  
-                <span class="px-3 py-1 border rounded text-sm"><%= item.quantity %></span>
-  
-                <form action="/user/cart/update/<%= item.product._id %>" method="POST">
-                  <input type="hidden" name="action" value="increase" />
-                  <button class="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition">+</button>
-                </form>
-              </div>
-  
-              <!-- Remove Button -->
-              <form action="/user/cart/remove/<%= item.product._id %>" method="POST">
-                <button class="text-red-500 hover:text-red-700 transition" title="Remove">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                </button>
-              </form>
-            </div>
-          <% }) %>
-        </div>
-  
-        <!-- Cart Summary -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-xl font-semibold mb-4">Order Summary</h3>
-          <% cartItems.forEach(item => { %>
-            <div class="flex justify-between text-sm text-gray-700 mb-2">
-              <span><%= item.product.name %> x <%= item.quantity %></span>
-              <span>₹ <%= (item.product.price * item.quantity).toFixed(2) %></span>
-            </div>
-          <% }) %>
-  
-          <hr class="my-4" />
-  
-          <div class="flex justify-between text-lg font-semibold">
-            <span>Total:</span>
-            <span>₹ <%= cartTotal.toFixed(2) %></span>
-          </div>
-  
-          <div class="mt-6">
-            <a href="/user/checkout" class="w-full inline-block bg-primary text-white text-center py-2 rounded-md hover:bg-primary-dark transition">
-              Proceed to Checkout
-            </a>
-          </div>
-        </div>
-      </div>
-    <% } else { %>
-      <div class="text-center py-16">
-        <h2 class="text-2xl font-bold text-gray-700 mb-4">Your cart is empty 🛒</h2>
-        <a href="/user/shop" class="bg-primary text-white px-5 py-2 rounded hover:bg-primary-dark transition">
-          Continue Shopping
-        </a>
-      </div>
-    <% } %>
-  </div>
+  <h1 class="text-3xl font-bold mb-6 theme">My Cart</h1>
 
-  
+  <% if (cartItems.length > 0) { %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Cart Items -->
+      <div class="lg:col-span-2 space-y-6">
+        <% cartItems.forEach(item => { %>
+          <div class="cart-item flex flex-col sm:flex-row items-center gap-4 bg-white shadow rounded-lg p-4" data-product-id="<%= item.product._id %>">
+            <!-- Image -->
+            <div class="w-24 h-24 flex-shrink-0">
+              <img src="/uploads/product-images/<%= item.product.productImage[0] %>" alt="<%= item.product.name %>" class="w-full h-full object-cover rounded-md">
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1">
+              <h2 class="text-lg font-semibold"><%= item.product.name %></h2>
+              <p class="text-gray-600 text-sm">₹ <%= item.product.price.toFixed(2) %></p>
+              <p class="text-gray-500 text-xs mt-1"><%= item.product.description %></p>
+            </div>
+
+            <!-- Quantity Controls -->
+            <div class="flex items-center gap-2">
+              <button class="qty-btn bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition"
+                      data-action="decrease"
+                      data-product-id="<%= item.product._id %>">−</button>
+
+              <span class="quantity px-3 py-1 border rounded text-sm"
+                    data-product-id="<%= item.product._id %>"><%= item.quantity %></span>
+
+              <button class="qty-btn bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition"
+                      data-action="increase"
+                      data-product-id="<%= item.product._id %>">+</button>
+            </div>
+
+            <!-- Remove Button -->
+            <button class="remove-btn text-red-500 hover:text-red-700 transition"
+                    data-product-id="<%= item.product._id %>">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        <% }) %>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-xl font-semibold mb-4">Order Summary</h3>
+        <% cartItems.forEach(item => { 
+          const offer = item.product.productOffer || 0;
+          const discounted = item.product.price * (1 - offer / 100);
+        %>
+          <div class="flex justify-between text-sm text-gray-700 mb-2">
+            <span><%= item.product.name %> x <%= item.quantity %></span>
+            ₹<%= (discounted * item.quantity).toFixed(2) %>
+          </div>
+        <% }) %>
+
+        <hr class="my-4" />
+
+        <div class="flex justify-between text-lg font-semibold">
+          <span>Total:</span>
+          <span>₹ <%= cartTotalDiscounted.toFixed(2) %></span>
+        </div>
+
+        <div class="mt-6">
+          <a href="/user/checkout" class="w-full inline-block bg-primary text-white text-center py-2 rounded-md hover:bg-primary-dark transition">
+            Proceed to Checkout
+          </a>
+        </div>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="text-center py-16">
+      <h2 class="text-2xl font-bold text-gray-700 mb-4">Your cart is empty 🛒</h2>
+      <a href="/user/shop" class="bg-primary text-white px-5 py-2 rounded hover:bg-primary-dark transition">
+        Continue Shopping
+      </a>
+    </div>
+  <% } %>
+</div>
+
 <%- include("../partials/userFooter") %>
-  
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.querySelectorAll('.qty-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const productId = button.dataset.productId;
+      const action = button.dataset.action;
+
+      try {
+        const res = await fetch(`/user/cart/update/${productId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action })
+        });
+
+        const result = await res.json();
+
+        if (result.limitReached) {
+          Swal.fire({
+            toast: true,
+            icon: 'info',
+            title: 'Maximum quantity of 10 reached',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        } else if (result.success) {
+          document.querySelector(`.quantity[data-product-id="${productId}"]`).textContent = result.newQuantity;
+          location.reload(); // Or update totals dynamically
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+
+  document.querySelectorAll('.remove-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const productId = button.dataset.productId;
+
+      try {
+        const res = await fetch(`/user/cart/remove/${productId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          Swal.fire({
+            toast: true,
+            icon: 'success',
+            title: 'Item removed',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 1500
+          });
+
+          document.querySelector(`.cart-item[data-product-id="${productId}"]`).remove();
+          location.reload(); 
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+</script>

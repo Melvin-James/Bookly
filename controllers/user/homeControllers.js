@@ -1,6 +1,7 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Customers = require('../../models/userSchema');
+const category = require('../../models/categorySchema');
 
 
 const getShopProducts = async function(req, res) {
@@ -165,6 +166,7 @@ const getProductDetails = async (req, res) => {
   const relatedProducts = await Product.find({
     _id: { $ne: product._id },
     isBlocked: false,
+    category: product.category._id,
     status: 'Available'
   }).limit(4);
 

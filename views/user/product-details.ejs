@@ -92,35 +92,63 @@
           </div>
   
           <!-- Add to Cart -->
-          <form method="POST" action="/user/cart/add/<%= product._id %>">
-            <button 
-              type="submit"
-              class="w-full bg-primary text-white py-3 rounded-md hover:bg-primary-dark transition text-sm font-medium">
-              Add to Cart
-            </button>
-          </form>
+          <button 
+            class="add-to-cart-btn w-full bg-primary text-white py-3 rounded-md hover:bg-primary-dark transition text-sm font-medium" 
+            data-product-id="<%= product._id %>">
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>
   
     <!-- Related Products -->
-    <% if (relatedProducts && relatedProducts.length > 0) { %>
-      <div class="mt-16">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">You might also like</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <% relatedProducts.forEach(prod => { %>
-            <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition group">
-              <img src="/uploads/product-images/<%= prod.productImage[0] %>" alt="<%= prod.name %>" class="w-full h-60 object-cover">
-              <div class="p-4">
-                <h3 class="text-gray-900 font-medium mb-1"><%= prod.name %></h3>
-                <p class="text-sm text-gray-500 mb-2"><%= prod.publisher %></p>
-                <p class="text-primary font-bold">₹<%= prod.price.toFixed(2) %></p>
-              </div>
+    <div class="mt-6">
+    <h2 class="text-lg font-bold mb-4">Related Books</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <% relatedProducts.forEach(function(book) { %>
+            <div class="border p-4 rounded-md shadow-sm group relative overflow-hidden">
+                
+
+                <img src="/uploads/product-images/<%= book.productImage[0] %>" 
+                     alt="<%= book.name %>" 
+                     class="w-full h-40 object-cover rounded-md transition-transform group-hover:scale-105 duration-300">
+                
+
+                <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 
+                            flex items-center justify-center transition-opacity duration-300 gap-2">
+                    <a href="/user/product-details/<%= book._id %>">
+                        <button class="bg-white text-gray-800 px-4 py-2 rounded-md text-sm font-medium 
+                                       hover:bg-gray-100 transition-colors">
+                            View
+                        </button>
+                    </a>
+                    <button 
+                      class="add-to-cart-btn bg-primary text-white px-4 py-2 rounded-md text-sm font-medium 
+                            hover:bg-primary-dark transition-colors" 
+                      data-product-id="<%= book._id %>">
+                      Add to Cart
+                    </button>
+                </div>
+
+                <div class="p-4">
+                    <h3 class="font-medium text-gray-900"><%= book.name %></h3>
+                    <p class="text-sm text-gray-500"><%= book.publisher %></p>
+
+                    <% if (book.productOffer > 0) { %>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-400 line-through">₹<%= book.price.toFixed(2) %></span>
+                            <span class="font-bold text-primary">
+                                ₹<%= (book.price * (1 - book.productOffer / 100)).toFixed(2) %>
+                            </span>
+                        </div>
+                    <% } else { %>
+                        <p class="font-bold text-primary">₹<%= book.price.toFixed(2) %></p>
+                    <% } %>
+                </div>
             </div>
-          <% }) %>
-        </div>
-      </div>
-    <% } %>
+        <% }); %>
+    </div>
+</div>
   </main>
   </div>
 </section>
@@ -165,6 +193,65 @@
     // Update zoomResult background and positioning
     zoomResult.style.backgroundSize = `${mainImage.offsetWidth * 2}px ${mainImage.offsetHeight * 2}px`;
     zoomResult.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const productId = button.getAttribute('data-product-id');
+
+      try {
+        const response = await fetch(`/user/cart/add/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.alreadyInCart) {
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'info',
+            title: 'Already in cart',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        } else if (result.added) {
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Added to cart',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        } else {
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: result.message || 'Something went wrong',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        }
+      } catch (error) {
+        console.error('Add to cart failed:', error);
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: 'Server error',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      }
+    });
   });
 </script>
 

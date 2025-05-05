@@ -108,3 +108,22 @@
       </div>
     </div>
   </div>
+  <script>
+    async function updateCartCount() {
+      try {
+        const res = await fetch('/user/cart/count');
+        const data = await res.json();
+        const badge = document.getElementById('cartItemsCount');
+        if (badge) {
+          const count = data?.value ?? 0;
+          badge.innerText = count > 0 ? count : '';
+          badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+      } catch (err) {
+        console.error('Error updating cart count:', err);
+      }
+    }
+    updateCartCount();
+    window.updateCartCount = updateCartCount;
+  </script>
+  
