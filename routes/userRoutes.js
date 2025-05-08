@@ -68,8 +68,7 @@ router.get('/cart',userAuth,cartControllers.getCartPage);
 router.post('/cart/add/:productId',userAuth,cartControllers.addToCart);
 router.post('/cart/update/:productId',userAuth,cartControllers.updateCartQuantity);
 router.post('/cart/remove/:productId',userAuth,cartControllers.removeFromCart);
-router.get('/itemsInCartcount',cartControllers.getItemsInCartCount)
-
+router.get('/itemsInCartcount',cartControllers.getItemsInCartCount);
 
 router.get('/checkout',userAuth,checkOutControllers.getCheckoutPage);
 router.post('/place-order',userAuth,checkOutControllers.placeOrder);
@@ -79,6 +78,8 @@ router.get('/order-failure', userAuth, checkOutControllers.getOrderFailurePage);
 
 router.get('/wishlist',userAuth,wishlistControllers.getWishlistPage);
 router.post('/wishlist/:productId',userAuth,wishlistControllers.toggleWishlist);
+router.post('/wishlist/move-to-cart/:productId', wishlistControllers.moveToCart);
+
 router.post('/apply-coupon',userAuth,couponControllers.applyCoupon);
 router.post('/remove-coupon',userAuth,couponControllers.removeCoupon);
 

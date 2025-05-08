@@ -151,13 +151,11 @@
                 </a>
                 
                 <% if (product.status === 'Available' && product.quantity > 0) { %>
-                  <form method="POST" action="/user/cart/add/<%= product._id %>">
-                    <button 
-                      type="submit"
-                      class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition">
+                  <button 
+                      class="add-to-cart-btn bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition" 
+                      data-product-id="<%= product._id %>">
                       Add to Cart
-                    </button>
-                  </form>
+                  </button>
                 <% } else { %>
                   <button 
                     disabled
@@ -481,6 +479,54 @@
         hideElement(sortDropdownMenu);
         hideElement(filterDropdownMenu);
         unlockScroll();
+      }
+    });
+  });
+
+  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const productId = button.dataset.productId;
+
+      try {
+        const response = await fetch(`/user/cart/add/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          if (data.alreadyInCart) {
+            Swal.fire({
+              toast: true,
+              icon: 'info',
+              title: 'Product is already in cart',
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 2000
+            });
+          } else if (data.added) {
+            Swal.fire({
+              toast: true,
+              icon: 'success',
+              title: 'Product added to cart',
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 2000
+            });
+          }
+        } else {
+          throw new Error(data.message || 'Something went wrong');
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message,
+          confirmButtonColor: '#007D8B'
+        });
       }
     });
   });

@@ -25,7 +25,11 @@ const orderSchema = new mongoose.Schema({
     status: {
       type: String,
       enum: ['Placed', 'Cancelled', 'Returned'],
-    }
+    },
+    originalPrice: Number,
+    discountedPrice: Number,
+    productName: String,
+    productImage: String,
   }],  
   address: {
     addressType:String,
@@ -59,6 +63,7 @@ const orderSchema = new mongoose.Schema({
   couponApplied:{type:String},
   discountAmount:{type:Number, default:0},
 }, { timestamps: true });
+
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

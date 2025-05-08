@@ -2,6 +2,7 @@ const Coupon = require('../../models/couponSchema');
 const cart = require('../../models/productSchema');
 const Product = require('../../models/productSchema');
 const User = require('../../models/userSchema');
+
 const applyCoupon = async(req,res)=>{
     try{
         const userId = req.session.user._id;
@@ -27,7 +28,9 @@ const applyCoupon = async(req,res)=>{
         for (let cartItem of user.cart) {
             const product = await Product.findById(cartItem.product);
             if (product) {
-              cartTotal += product.price * cartItem.quantity;
+                const offer = product.productOffer || 0;
+                const discounted = product.price * (1-offer/100);
+                cartTotal += discounted * cartItem.quantity;
             }
           }
           

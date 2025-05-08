@@ -115,21 +115,16 @@
       <!-- Cart Items -->
       <div class="space-y-3 border-t pt-4">
         <% 
-          let cartTotal = 0;
-          cartItems.forEach(item => {
-            const offer = item.product.productOffer || 0;
-            const discounted = item.product.price * (1 - offer / 100);
-            cartTotal += discounted * item.quantity;
-          });
+          const cartTotalDisplay = cartTotal;
         %>
-
+      <input type="hidden" id="originalTotal" value="<%= cartTotal.toFixed(2) %>" />
       </div>
 
       <!-- Total Summary -->
       <div class="border-t pt-4 text-gray-800 space-y-2">
         <div class="flex justify-between font-medium">
           <span>Subtotal:</span>
-          <span>₹<%= cartTotal.toFixed(2) %></span>
+          <span>₹<%= cartTotalDisplay.toFixed(2) %></span>
         </div>
 
         <div class="flex justify-between text-sm text-green-600" id="discountSection" style="display: none;">
@@ -139,7 +134,7 @@
 
         <div class="flex justify-between text-lg font-bold">
           <span>Total Payable:</span>
-          <span id="totalPayable">₹<%= cartTotal.toFixed(2) %></span>
+          <span id="totalPayable">₹<%= cartTotalDisplay.toFixed(2) %></span>
         </div>
       </div>
 
@@ -167,6 +162,7 @@
 <script>
   document.getElementById('applyCouponBtn').addEventListener('click', async () => {
     const code = document.getElementById('couponCode').value.trim();
+    const originalTotal = parseFloat(document.getElementById('originalTotal').value);
     if (!code) {
       Swal.fire({
         icon: 'info',
@@ -194,7 +190,6 @@
       });
       document.getElementById('discountSection').style.display = 'flex';
       document.getElementById('discountAmount').innerText = `- ₹${data.discount.toFixed(2)}`;
-      <input type="hidden" id="originalTotal" value="<%= cartTotal.toFixed(2) %>" />
       document.getElementById('totalPayable').innerText = `₹${data.finalTotal.toFixed(2)}`;
       document.getElementById('applyCouponBtn').classList.add('hidden');
       document.getElementById('removeCouponBtn').classList.remove('hidden');

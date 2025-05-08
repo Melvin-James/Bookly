@@ -43,7 +43,37 @@ const toggleWishlist = async(req,res)=>{
     }
 };
 
+const moveToCart = async (req, res) => {
+    try {
+      const userId = req.session.user._id;
+      const productId = req.params.productId;
+  
+      const user = await User.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found.' });
+      }
+  
+      const alreadyInCart = user.cart.some(item => item.product.toString() === productId);
+  
+      if (!alreadyInCart) {
+        user.cart.push({ product: productId, quantity: 1 });
+      }
+
+      user.wishlist.pull(productId);
+  
+      await user.save();
+  
+      res.json({ success: true, message: 'Moved to cart' });
+  
+    } catch (error) {
+      console.error('Error moving to cart:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  };
+
 module.exports ={
     getWishlistPage,
     toggleWishlist,
+    moveToCart,
 }

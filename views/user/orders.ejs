@@ -38,7 +38,14 @@
             <div class="text-sm text-gray-700 mb-4">
               <div class="grid grid-cols-2 gap-2">
                 <div><strong>Placed on:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></div>
-                <div><strong>Total:</strong> ₹<%= order.totalAmount.toFixed(2) %></div>
+                <div><strong>Total Paid:</strong> ₹<%= order.totalAmount.toFixed(2) %></div>
+            
+                <% if (order.couponDiscount && order.couponDiscount > 0) { %>
+                  <div><strong>Coupon (<%= order.couponApplied %>) Discount:</strong> - ₹<%= order.couponDiscount.toFixed(2) %></div>
+                <% } %>
+                <% if (order.productDiscount && order.productDiscount > 0) { %>
+                  <div><strong>Product Offer Discount:</strong> - ₹<%= order.productDiscount.toFixed(2) %></div>
+                <% } %>
               </div>
             </div>
             
@@ -48,11 +55,16 @@
                 <% order.items.forEach(item => { %>
                   <li class="flex justify-between">
                     <span><%= item.product.name %> x <%= item.quantity %></span>
-                    <span>₹<%= item.product.price.toFixed(2) %></span>
+                    <% if (item.discountedPrice !== undefined) { %>
+                      <span>₹<%= (item.discountedPrice * item.quantity).toFixed(2) %></span>
+                    <% } else { %>
+                      <span class="text-gray-500 italic">Price not available</span>
+                    <% } %>
                   </li>
                 <% }) %>
               </ul>
             </div>
+            
             
             <div class="flex justify-end mt-4">
               <a href="/user/profile/orders/<%= order._id %>"  

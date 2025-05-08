@@ -1,6 +1,7 @@
 const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
+const Product = require('../../models/productSchema');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
@@ -425,6 +426,12 @@ const cancelOrder = async(req,res)=>{
         order.status = 'Cancelled';
         await order.save();
 
+        for (let item of order.items) {
+            await Product.findByIdAndUpdate(item.product._id, {
+              $inc: { quantity: item.quantity }
+            });
+          }
+
         return res.status(200).json({success:true, message:'Order cancelled'});
     }catch(error){
         console.error('cancel order error:',error);
@@ -437,7 +444,7 @@ const returnOrder = async (req, res) => {
       const userId = req.session.user._id;
       const orderId = req.params.id;
       const { reason } = req.body;
-  
+
       const order = await Order.findOne({ _id: orderId, user: userId });
   
       if (!order || order.status !== 'Delivered') {
@@ -447,7 +454,7 @@ const returnOrder = async (req, res) => {
       order.isReturnRequested = true;
       order.returnReason = reason;
       await order.save();
-  
+      
       res.json({ success: true, message: 'Return request submitted successfully' });
   
     } catch (error) {
@@ -482,7 +489,7 @@ const cancelOrderItem = async (req, res) => {
       console.error('Cancel product error:', error);
       res.json({ success: false, message: 'Failed to cancel product' });
     }
-  };
+};
   
 module.exports={
     getProfilePage,

@@ -24,8 +24,6 @@
           <th class="py-3 px-4 text-left">Status</th>
           <th class="py-3 px-4 text-center">Edit</th>
           <th class="py-3 px-4 text-center">Block/Unblock</th>
-          <th class="py-3 px-4 text-center">Offer</th>
-          <th class="py-3 px-4 text-center">Apply</th>
         </tr>
       </thead>
       <tbody>
@@ -55,17 +53,6 @@
                 onclick="showConfirmation(this)">
                 <%= product.isBlocked ? 'Unblock' : 'Block' %>
               </button>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <input type="number" name="offer" value="<%= product.productOffer %>" 
-                     min="0" max="90" class="border rounded px-3 py-2 w-20" />
-            </td>
-            <td class="py-3 px-4 text-center">
-              <form method="POST" action="/admin/product-offer/<%= product._id %>">
-                <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded-md text-sm">
-                  Apply
-                </button>
-              </form>
             </td>
           </tr>
         <% }) %>
@@ -198,14 +185,6 @@
               onclick="showConfirmation(this)">
               ${product.isBlocked ? 'Unblock' : 'Block'}
             </button>
-          </td>
-          <td class="py-3 px-4 text-center">
-            <input type="number" name="offer" value="${product.productOffer}" min="0" max="90" class="border rounded px-3 py-2 w-20" />
-          </td>
-          <td class="py-3 px-4 text-center">
-            <form method="POST" action="/admin/product-offer/${product._id}">
-              <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded-md text-sm">Apply</button>
-            </form>
           </td>`;
         tbody.appendChild(row);
       });

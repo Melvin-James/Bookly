@@ -36,13 +36,13 @@
               <% } %>
   
               <!-- Move to Cart -->
-              <form action="/user/cart/add/<%= product._id %>" method="POST" class="mt-auto">
-                <button 
-                  class="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition disabled:opacity-50"
-                  <% if (product.status === 'Out of Stock') { %> disabled <% } %>>
-                  Move to Cart
-                </button>
-              </form>
+              <button 
+                type="button"
+                class="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition disabled:opacity-50"
+                onclick="moveToCart('<%= product._id %>')"
+                <% if (product.status === 'Out of Stock') { %> disabled <% } %>>
+                Move to Cart
+              </button>
             </div>
           </div>
         <% }) %>
@@ -50,7 +50,7 @@
     <% } else { %>
       <div class="text-center py-16">
         <h3 class="text-lg text-gray-700 mb-4">Your wishlist is empty ❤️</h3>
-        <a href="/shop" class="bg-theme text-white px-5 py-2 rounded hover:bg-opacity-90 transition">
+        <a href="/user/shop" class="bg-[#007D8B] text-white px-5 py-2 rounded hover:bg-opacity-90 transition">
           Browse Books
         </a>
       </div>
@@ -94,5 +94,76 @@
         });
       });
     }
+    </script>
+    <script>
+      function moveToCart(productId, button) {
+        fetch(`/user/wishlist/moveToCart/${productId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: 'Moved to cart!',
+              showConfirmButton: false,
+              timer: 1500
+            });
+            // Optionally remove the item from DOM without reload
+            button.closest('.flex.flex-col').remove();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops',
+              text: data.message || 'Could not move to cart'
+            });
+          }
+        })
+        .catch(err => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong'
+          });
+        });
+      }
+      function moveToCart(productId) {
+  fetch(`/user/wishlist/move-to-cart/${productId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Moved to cart!',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        setTimeout(() => {
+          location.reload(); // refresh wishlist
+        }, 1600);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops',
+          text: data.message
+        });
+      }
+    })
+    .catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Something went wrong'
+      });
+    });
+}
     </script>
     

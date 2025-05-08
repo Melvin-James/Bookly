@@ -408,7 +408,6 @@ function toggleWishlist(productId) {
         searchForm.appendChild(categoryInput);
       }
       
-      // Preserve priceRange parameter if it exists
       const priceRangeParam = urlParams.get('priceRange');
       if (priceRangeParam) {
         const priceRangeInput = document.createElement('input');
@@ -418,12 +417,10 @@ function toggleWishlist(productId) {
         searchForm.appendChild(priceRangeInput);
       }
       
-      // Submit the form
       searchForm.submit();
     });
   }
   
-  // Sort Dropdown Toggle and Link Handling
   const sortDropdownButton = document.getElementById('sort-dropdown-button');
   const sortDropdownMenu = document.getElementById('sort-dropdown-menu');
   
@@ -439,7 +436,6 @@ function toggleWishlist(productId) {
     });
   }
   
-  // Filter Dropdown Toggle
   const filterDropdownButton = document.getElementById('filter-dropdown-button');
   const filterDropdownMenu = document.getElementById('filter-dropdown-menu');
   
