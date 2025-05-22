@@ -4,6 +4,7 @@ const Product = require("../../models/productSchema");
 const Address = require("../../models/addressSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
+const crypto = require('crypto');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',

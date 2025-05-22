@@ -7,55 +7,89 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const PDFDocument = require('pdfkit');
 
-const downloadInvoice = async(req,res)=>{
-    const doc = require('pdfkit');
-    try{
-        const userId = req.session.user._id;
-        const orderId = req.params.id;
+const downloadInvoice = async (req, res) => {
+  try {
+    const userId = req.session.user._id;
+    const orderId = req.params.id;
 
-        const order = await Order.findOne({_id:orderId, user:userId}).populate('items.product');
+    const order = await Order.findOne({ _id: orderId, user: userId })
+      .populate('items.product');
 
-        if(!order){
-            return res.status(404).render('error',{message:'Order not found'});
-        }
+    if (!order) {
+      return res.status(404).render('error', { message: 'Order not found' });
+    }
 
-        const doc = new PDFDocument({margin:50})
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin: 50 });
 
-        res.setHeader('Content-Type','application/pdf');
-        res.setHeader('Content-Disposition',`attachment; filename=invoice-${order._id}.pdf`);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=invoice-${order._id}.pdf`);
 
-        doc.pipe(res);
+    doc.pipe(res);
 
-        doc.fontSize(20).fillColor('#007D8B').text('Bookly-Invoice',{align:'center'});
-        doc.moveDown();
+    // Header
+    doc.fontSize(20).fillColor('#007D8B').text('Bookly - Invoice', { align: 'center' });
+    doc.moveDown();
 
-        doc.fontSize(12).fillColor('#333').text(`Order Id:${order.orderId}`);
-        doc.text(`Order Date:${new Date(order.createdAt).toLocaleDateString()}`);
-        doc.text(`Payment Method: ${order.paymentMethod}`);
-        doc.text(`Order Status: ${order.status}`);
-        doc.moveDown();
+    // Order Summary
+    doc.fontSize(12).fillColor('#333')
+      .text(`Order ID: ${order.orderId}`)
+      .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
+      .text(`Payment Method: ${order.paymentMethod}`)
+      .text(`Order Status: ${order.status}`)
+      .moveDown();
 
-        doc.fontSize(14).fillColor('#007D8B').text('Shipping Address');
-        doc.moveDown(0.5);
-        doc.fontSize(12).fillColor('#333')
-            .text(order.address.name)
-            .text(`${order.address.city}, ${order.address.state} - ${order.address.pincode}`)
-            .text(`Phone: ${order.address.phone}, Alt:${order.address.altPhone}`);
-        doc.moveDown();
-    
+    // Address
+    doc.fontSize(14).fillColor('#007D8B').text('Shipping Address');
+    doc.moveDown(0.5);
+    const { name, city, state, pincode, phone, altPhone } = order.address;
+    doc.fontSize(12).fillColor('#333')
+      .text(name)
+      .text(`${city}, ${state} - ${pincode}`)
+      .text(`Phone: ${phone}, Alt: ${altPhone}`)
+      .moveDown();
 
+    // Items Table
     doc.fontSize(14).fillColor('#007D8B').text('Items Ordered');
     doc.moveDown(0.5);
+
+    let subtotal = 0;
+
+    order.items.forEach(item => {
+      const { product, quantity, originalPrice, discountedPrice } = item;
+      const itemTotal = discountedPrice * quantity;
+      subtotal += itemTotal;
+
+      doc.fontSize(12).fillColor('#333')
+        .text(`Title: ${product.name}`)
+        .text(`Qty: ${quantity}`)
+        .text(`Original: ₹${originalPrice.toFixed(2)} | Discounted: ₹${discountedPrice.toFixed(2)}`)
+        .text(`Total for this item: ₹${itemTotal.toFixed(2)}`)
+        .moveDown();
+    });
+
+    doc.moveDown();
+
+    const totalDiscount = (order.items.reduce((acc, item) => {
+      const itemDiscount = (item.originalPrice - item.discountedPrice) * item.quantity;
+      return acc + itemDiscount;
+    }, 0)) + (order.discountAmount || 0);
+
+    const grandTotal = order.totalAmount;
+
+    // Summary
+    doc.fontSize(14).fillColor('#007D8B').text('Order Summary');
     doc.fontSize(12).fillColor('#333')
-      .text(`Subtotal: ₹${order.totalAmount + (order.discountAmount || 0)}`)
-      .text(`Discount: -₹${order.totalAmount.toFixed(2)}`);
+      .text(`Subtotal (Before Discounts): ₹${(subtotal + totalDiscount).toFixed(2)}`)
+      .text(`Product/Category Discount + Coupon: -₹${totalDiscount.toFixed(2)}`)
+      .text(`Total Payable: ₹${grandTotal.toFixed(2)}`);
 
     doc.end();
 
-}catch(error){
-    console.error('Download Invoice error:',error);
-    res.status(500).render('error',{message:'Failed to generate invoice'});
-}
+  } catch (error) {
+    console.error('Invoice Download Error:', error);
+    res.status(500).render('error', { message: 'Failed to generate invoice' });
+  }
 };
 
 const getAllAddresses = async(req,res)=>{

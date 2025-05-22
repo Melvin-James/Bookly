@@ -1,0 +1,265 @@
+<div class="p-6">
+  <h1 class="text-2xl font-bold text-[#007D8B] mb-6">Offer Management</h1>
+
+  <!-- Product Offer Section -->
+  <div class="mb-10">
+    <h2 class="text-xl font-semibold mb-4">Product Offers</h2>
+
+    <form id="productOfferForm" class="flex flex-col sm:flex-row gap-4 items-center mb-4">
+      <select name="productId" class="border px-3 py-2 rounded w-full sm:w-64" required>
+        <option value="">Select Product</option>
+        <% products.forEach(p => { %>
+          <option value="<%= p._id %>"><%= p.name %></option>
+        <% }) %>
+      </select>
+      <input 
+        type="number" 
+        name="offer" 
+        min="0" 
+        max="100" 
+        step="1"
+        placeholder="Offer (%)" 
+        class="border px-3 py-2 rounded w-full sm:w-40" 
+        required
+        oninput="validateOfferInput(this)">
+      <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-[#006a75] transition w-full sm:w-auto">
+        <span class="submit-text">Apply Offer</span>
+        <span class="loading-text hidden">Applying...</span>
+      </button>
+    </form>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full table-auto text-left bg-white rounded shadow">
+        <thead class="bg-[#007D8B] text-white">
+          <tr>
+            <th class="px-4 py-2">Product</th>
+            <th class="px-4 py-2">Offer (%)</th>
+            <th class="px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productOffersTable">
+          <% products.forEach(p => { if (p.productOffer > 0) { %>
+            <tr class="border-b" id="product-<%= p._id %>">
+              <td class="px-4 py-2"><%= p.name %></td>
+              <td class="px-4 py-2"><%= p.productOffer %>%</td>
+              <td class="px-4 py-2">
+                <button onclick="removeOffer('product', '<%= p._id %>')" 
+                  class="text-red-600 hover:underline remove-btn">
+                  Remove
+                </button>
+              </td>
+            </tr>
+          <% } }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Category Offer Section -->
+  <div>
+    <h2 class="text-xl font-semibold mb-4">Category Offers</h2>
+
+    <form id="categoryOfferForm" class="flex flex-col sm:flex-row gap-4 items-center mb-4">
+      <select name="categoryId" class="border px-3 py-2 rounded w-full sm:w-64" required>
+        <option value="">Select Category</option>
+        <% categories.forEach(c => { %>
+          <option value="<%= c._id %>"><%= c.name %></option>
+        <% }) %>
+      </select>
+      <input 
+        type="number" 
+        name="offer" 
+        min="0" 
+        max="100" 
+        step="1"
+        placeholder="Offer (%)" 
+        class="border px-3 py-2 rounded w-full sm:w-40" 
+        required
+        oninput="validateOfferInput(this)">
+      <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-[#006a75] transition w-full sm:w-auto">
+        <span class="submit-text">Apply Offer</span>
+        <span class="loading-text hidden">Applying...</span>
+      </button>
+    </form>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full table-auto text-left bg-white rounded shadow">
+        <thead class="bg-[#007D8B] text-white">
+          <tr>
+            <th class="px-4 py-2">Category</th>
+            <th class="px-4 py-2">Offer (%)</th>
+            <th class="px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="categoryOffersTable">
+          <% categories.forEach(c => { if (c.categoryOffer > 0) { %>
+            <tr class="border-b" id="category-<%= c._id %>">
+              <td class="px-4 py-2"><%= c.name %></td>
+              <td class="px-4 py-2"><%= c.categoryOffer %>%</td>
+              <td class="px-4 py-2">
+                <button onclick="removeOffer('category', '<%= c._id %>')" 
+                  class="text-red-600 hover:underline remove-btn">
+                  Remove
+                </button>
+              </td>
+            </tr>
+          <% } }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // Client-side validation
+  function validateOfferInput(input) {
+    let value = parseFloat(input.value);
+    if (isNaN(value)) {
+      input.value = '';
+    } else {
+      value = Math.max(0, Math.min(100, Math.round(value)));
+      input.value = value === 0 ? '' : value;
+    }
+  }
+
+  // Form submission handler
+  async function submitOfferForm(type, form) {
+    const formData = new URLSearchParams(new FormData(form));
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    try {
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.querySelector('.submit-text').classList.add('hidden');
+      submitBtn.querySelector('.loading-text').classList.remove('hidden');
+
+      const response = await fetch(`/admin/offers/${type}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showToast('success', result.message);
+        form.reset();
+        updateOffersTable(type, result[type]);
+      } else {
+        showToast('error', result.message);
+      }
+    } catch (error) {
+      showToast('error', 'Network error. Please try again.');
+      console.error(error);
+    } finally {
+      // Reset button state
+      submitBtn.disabled = false;
+      submitBtn.querySelector('.submit-text').classList.remove('hidden');
+      submitBtn.querySelector('.loading-text').classList.add('hidden');
+    }
+  }
+
+  // Remove offer handler
+  async function removeOffer(type, id) {
+    const button = document.querySelector(`#${type}-${id} .remove-btn`);
+    
+    try {
+      button.disabled = true;
+      button.textContent = 'Removing...';
+
+      const response = await fetch(`/admin/offers/${type}/delete/${id}`, {
+        method: 'POST'
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showToast('success', result.message);
+        document.getElementById(`${type}-${id}`).remove();
+      } else {
+        showToast('error', result.message);
+      }
+    } catch (error) {
+      showToast('error', 'Network error. Please try again.');
+      console.error(error);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Remove';
+      }
+    }
+  }
+
+  // Update offers table dynamically
+  function updateOffersTable(type, item) {
+    const tableBody = document.getElementById(`${type}OffersTable`);
+    const existingRow = document.getElementById(`${type}-${item._id}`);
+
+    if (existingRow) {
+      // Update existing row
+      existingRow.querySelector('td:nth-child(2)').textContent = `${item[`${type}Offer`]}%`;
+    } else if (item[`${type}Offer`] > 0) {
+      // Add new row
+      const row = document.createElement('tr');
+      row.id = `${type}-${item._id}`;
+      row.className = 'border-b';
+      row.innerHTML = `
+        <td class="px-4 py-2">${item.name}</td>
+        <td class="px-4 py-2">${item[`${type}Offer`]}%</td>
+        <td class="px-4 py-2">
+          <button onclick="removeOffer('${type}', '${item._id}')" 
+            class="text-red-600 hover:underline remove-btn">
+            Remove
+          </button>
+        </td>
+      `;
+      tableBody.prepend(row);
+    } else if (existingRow) {
+      // Remove row if offer was set to 0
+      existingRow.remove();
+    }
+  }
+
+  // Toast notification
+  function showToast(icon, message) {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
+    
+    Toast.fire({
+      icon: icon,
+      title: message
+    });
+  }
+
+  // Initialize form event listeners
+  document.getElementById('productOfferForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitOfferForm('product', e.target);
+  });
+
+  document.getElementById('categoryOfferForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitOfferForm('category', e.target);
+  });
+</script>
+
+<style>
+  .loading-text {
+    display: none;
+  }
+  .loading-text:not(.hidden) {
+    display: inline-block;
+  }
+</style>

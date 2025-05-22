@@ -52,8 +52,12 @@
         <div class="flex-1">
           <p class="font-medium text-gray-800"><%= item.product.name %></p>
           <p class="text-sm text-gray-600">Quantity: <%= item.quantity %></p>
-          <p class="text-sm text-gray-600">
-            Price: ₹<%= order.totalAmount.toFixed(2) %>
+          <p class="text-sm text-gray-600">Price:
+            <% if (item.discountedPrice !== undefined) { %>
+              <span>₹<%= (item.discountedPrice * item.quantity).toFixed(2) %></span>
+            <% } else { %>
+              <span class="text-gray-500 italic">Price not available</span>
+            <% } %>
           </p>
           <% if (item.status === 'Placed') { %>
           <button

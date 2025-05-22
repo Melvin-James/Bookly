@@ -59,5 +59,13 @@ router.get('/coupons',adminAuth,couponControllers.getCouponPage);
 router.post('/coupons/create',adminAuth,couponControllers.createCoupon);
 router.post('/coupons/delete/:id',adminAuth,couponControllers.deleteCoupon);
 
-router.post('/product-offer/:id',offerControllers.setProductOffer);
+
+router.get('/offers', adminAuth, offerControllers.getOfferPage);
+router.post('/offers/product', adminAuth, offerControllers.applyProductOffer);
+router.post('/offers/product/:productId', adminAuth, offerControllers.applyProductOffer);
+router.post('/offers/product/delete/:productId', adminAuth, offerControllers.removeProductOffer);
+router.post('/offers/category', adminAuth, offerControllers.applyCategoryOffer);
+router.post('/offers/category/delete/:categoryId', adminAuth, offerControllers.removeCategoryOffer);
+
+
 module.exports=router;

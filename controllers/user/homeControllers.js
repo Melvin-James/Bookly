@@ -162,6 +162,7 @@ const getShopProducts = async function(req, res) {
 }
 
 const getProductDetails = async (req, res) => {
+  const userId = req.session.user._id;
   const product = await Product.findById(req.params.id).populate('category');
   const relatedProducts = await Product.find({
     _id: { $ne: product._id },
@@ -170,7 +171,13 @@ const getProductDetails = async (req, res) => {
     status: 'Available'
   }).limit(4);
 
-  res.render('product-details', { product, relatedProducts });
+  const user = await Customers.findById(userId).populate('wishlist');
+
+  res.render('product-details', 
+    { product, 
+      relatedProducts, 
+      userData:req.session.user,
+    });
 };
 
 const account = async(req,res)=>{
