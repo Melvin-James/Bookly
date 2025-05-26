@@ -12,14 +12,12 @@ const downloadInvoice = async (req, res) => {
     const userId = req.session.user._id;
     const orderId = req.params.id;
 
-    const order = await Order.findOne({ _id: orderId, user: userId })
-      .populate('items.product');
+    const order = await Order.findOne({ _id: orderId, user: userId }).populate('items.product');
 
     if (!order) {
       return res.status(404).render('error', { message: 'Order not found' });
     }
 
-    const PDFDocument = require('pdfkit');
     const doc = new PDFDocument({ margin: 50 });
 
     res.setHeader('Content-Type', 'application/pdf');
@@ -29,9 +27,9 @@ const downloadInvoice = async (req, res) => {
 
     // Header
     doc.fontSize(20).fillColor('#007D8B').text('Bookly - Invoice', { align: 'center' });
-    doc.moveDown();
+    doc.moveDown(1);
 
-    // Order Summary
+    // Order Info
     doc.fontSize(12).fillColor('#333')
       .text(`Order ID: ${order.orderId}`)
       .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
@@ -39,20 +37,32 @@ const downloadInvoice = async (req, res) => {
       .text(`Order Status: ${order.status}`)
       .moveDown();
 
-    // Address
+    // Shipping Address
     doc.fontSize(14).fillColor('#007D8B').text('Shipping Address');
     doc.moveDown(0.5);
     const { name, city, state, pincode, phone, altPhone } = order.address;
     doc.fontSize(12).fillColor('#333')
       .text(name)
       .text(`${city}, ${state} - ${pincode}`)
-      .text(`Phone: ${phone}, Alt: ${altPhone}`)
+      .text(`Phone: ${phone}${altPhone ? `, Alt: ${altPhone}` : ''}`)
       .moveDown();
 
-    // Items Table
+    // Items Table Header
     doc.fontSize(14).fillColor('#007D8B').text('Items Ordered');
     doc.moveDown(0.5);
 
+    const tableTop = doc.y;
+    const itemSpacing = 20;
+
+    doc.fontSize(12).fillColor('#333');
+    doc.text('Product', 50, tableTop);
+    doc.moveDown(0.5);
+    doc.text('Qty', 250, tableTop);
+    doc.text('Price (₹)', 300, tableTop);
+    doc.text('Discounted (₹)', 380, tableTop);
+    doc.text('Total (₹)', 480, tableTop);
+
+    let y = tableTop + 15;
     let subtotal = 0;
 
     order.items.forEach(item => {
@@ -60,29 +70,26 @@ const downloadInvoice = async (req, res) => {
       const itemTotal = discountedPrice * quantity;
       subtotal += itemTotal;
 
-      doc.fontSize(12).fillColor('#333')
-        .text(`Title: ${product.name}`)
-        .text(`Qty: ${quantity}`)
-        .text(`Original: ₹${originalPrice.toFixed(2)} | Discounted: ₹${discountedPrice.toFixed(2)}`)
-        .text(`Total for this item: ₹${itemTotal.toFixed(2)}`)
-        .moveDown();
+      doc.text(product.name, 50, y, { width: 180 });
+      doc.text(quantity.toString(), 250, y);
+      doc.text(originalPrice.toFixed(2), 300, y);
+      doc.text(discountedPrice.toFixed(2), 380, y);
+      doc.text(itemTotal.toFixed(2), 480, y);
+      y += itemSpacing;
     });
 
-    doc.moveDown();
+    doc.moveDown(2);
 
-    const totalDiscount = (order.items.reduce((acc, item) => {
-      const itemDiscount = (item.originalPrice - item.discountedPrice) * item.quantity;
-      return acc + itemDiscount;
-    }, 0)) + (order.discountAmount || 0);
-
-    const grandTotal = order.totalAmount;
+    const discountAmount = order.discountAmount || 0;
+    const totalBeforeDiscount = order.totalAmount + discountAmount;
 
     // Summary
     doc.fontSize(14).fillColor('#007D8B').text('Order Summary');
+    doc.moveDown(0.5);
     doc.fontSize(12).fillColor('#333')
-      .text(`Subtotal (Before Discounts): ₹${(subtotal + totalDiscount).toFixed(2)}`)
-      .text(`Product/Category Discount + Coupon: -₹${totalDiscount.toFixed(2)}`)
-      .text(`Total Payable: ₹${grandTotal.toFixed(2)}`);
+      .text(`Subtotal (Before Discounts): ₹${totalBeforeDiscount.toFixed(2)}`)
+      .text(`Total Discounts (offer + Coupon): -₹${discountAmount.toFixed(2)}`)
+      .text(`Total Paid: ₹${order.totalAmount.toFixed(2)}`);
 
     doc.end();
 
@@ -458,11 +465,16 @@ const cancelOrder = async(req,res)=>{
         }
 
         order.status = 'Cancelled';
+
+        for(let item of order.items){
+          item.status='Cancelled'
+        }
+
         await order.save();
 
         for (let item of order.items) {
             await Product.findByIdAndUpdate(item.product._id, {
-              $inc: { quantity: item.quantity }
+              $inc: { quantity: item.quantity },
             });
           }
 
@@ -487,6 +499,11 @@ const returnOrder = async (req, res) => {
   
       order.isReturnRequested = true;
       order.returnReason = reason;
+
+      for(let item of order.items){
+        item.status='Returned';
+      }
+
       await order.save();
       
       res.json({ success: true, message: 'Return request submitted successfully' });
@@ -498,32 +515,55 @@ const returnOrder = async (req, res) => {
 };
   
 const cancelOrderItem = async (req, res) => {
-    try {
-      const { orderId, itemId } = req.params;
-  
-      const order = await Order.findById(orderId);
-      if (!order) {
-        return res.json({ success: false, message: 'Order not found' });
-      }
-  
-      const item = order.items.id(itemId); 
-      if (!item) {
-        return res.json({ success: false, message: 'Item not found' });
-      }
-  
-      if (item.status !== 'Placed') {
-        return res.json({ success: false, message: 'Item already cancelled or returned' });
-      }
-  
-      item.status = 'Cancelled';
-      await order.save();
-  
-      res.json({ success: true, message: 'Product cancelled successfully!' });
-    } catch (error) {
-      console.error('Cancel product error:', error);
-      res.json({ success: false, message: 'Failed to cancel product' });
+  try {
+    const { orderId, productId } = req.params;
+    const userId = req.session.user._id;
+
+    const order = await Order.findOne({ _id: orderId, user: userId }).populate('items.product');
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
     }
+
+    const item = order.items.find(i => i._id.toString() === productId);
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found in this order.' });
+    }
+
+    if (item.status === 'Cancelled') {
+      return res.status(400).json({ success: false, message: 'This item is already cancelled.' });
+    }
+
+    item.status = 'Cancelled';
+
+    await Product.findByIdAndUpdate(item.product._id, {
+      $inc: { quantity: item.quantity }
+    });
+
+    if (order.paymentMethod === 'Online') {
+      const refundAmount = item.discountedPrice * item.quantity;
+      await User.findByIdAndUpdate(userId, {
+        $inc: { wallet: refundAmount },
+        $push: {
+          walletTransactions: {
+            type: "credit",
+            amount: refundAmount,
+            description: `Refund for order ${order.orderId}`,
+            orderId: order.orderId
+          }
+        }
+      });
+    }
+
+    await order.save();
+
+    return res.json({ success: true, message: 'Product cancelled successfully.' });
+
+  } catch (error) {
+    console.error("Cancel Item Error:", error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
 };
+
   
 module.exports={
     getProfilePage,

@@ -24,7 +24,6 @@ const productSchema = new mongoose.Schema({
     },
     productOffer: {
         type: Number,
-        default: 0
     },
     quantity: {
         type: Number,
@@ -47,6 +46,16 @@ const productSchema = new mongoose.Schema({
         enum: ['Available', 'Out of Stock', 'Discontinued'],
         required: true,
         default: 'Available'
+    },
+    appliedOffer: {
+    type: Number,
+    default: 0,
+    required: true,
+    },
+    discountedPrice: {
+    type: Number,
+    default: 0,
+    required: true,
     },
 }, { timestamps: true });
 

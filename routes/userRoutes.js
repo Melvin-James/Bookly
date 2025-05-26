@@ -14,13 +14,12 @@ const uploadTo=require('../middlewares/multer')
 const uploadProfileImage = uploadTo('profileImages');
 
 router.get('/signup',userControllers.loadSignup);
-router.post('/signup', uploadProfileImage.single('userImage'), userControllers.signupStep1);
-router.post('/address', userControllers.signupStep2);
+router.post('/signup',userControllers.signupStep1);
+router.post("/google-signin", userControllers.googleSignIn)
 router.post('/verify-otp', userControllers.verifyOtp);
+router.post('/resendOtp',userControllers.resendOtp);
 
 router.get('/home',userAuth,userControllers.homePage);
-
-router.post('/resendOtp',userControllers.resendOtp);
 
 router.get('/login',userControllers.loadLogin);
 router.post('/login',userControllers.login);
@@ -33,10 +32,8 @@ router.post('/reset-password',userControllers.resetPassword);
 
 router.get('/logout',userAuth,userControllers.logout);
 
-
-router.get('/product-details/:id',userAuth,homeControllers.getProductDetails);
-
 router.get('/shop',userAuth,homeControllers.getShopProducts);
+router.get('/product-details/:id',userAuth,homeControllers.getProductDetails);
 
 router.get('/profile',userAuth,profileControllers.getProfilePage);
 router.get('/profile/edit',userAuth,profileControllers.getEditProfile);
@@ -59,7 +56,7 @@ router.get('/profile/orders',userAuth,profileControllers.getOrdersPage);
 router.get('/profile/orders/:id',userAuth,profileControllers.getOrderDetails);
 router.post('/profile/orders/:id/cancel',userAuth,profileControllers.cancelOrder);
 router.post('/profile/orders/:id/return', userAuth, profileControllers.returnOrder);
-router.post('/profile/orders/:orderId/cancel-item/:itemId', userAuth, profileControllers.cancelOrderItem);
+router.post('/profile/orders/cancel-item/:orderId/:productId', userAuth, profileControllers.cancelOrderItem);
 router.get('/profile/orders/:id/invoice',userAuth,profileControllers.downloadInvoice);
 
 

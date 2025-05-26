@@ -107,10 +107,7 @@ const getShopProducts = async function(req, res) {
     } else {
       sortOption = { createdAt: -1 }; 
     }
-    
-    // console.log('Combined Query:', JSON.stringify(query, null, 2));
-    // console.log('Sort Options:', sortOption);
-    
+        
     const products = await Product.find(query)
       .sort(sortOption)
       .skip(skip)

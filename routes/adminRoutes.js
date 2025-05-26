@@ -8,7 +8,7 @@ const orderControllers = require('../controllers/admin/orderControllers');
 const inventoryControllers = require('../controllers/admin/inventoryControllers');
 const couponControllers = require('../controllers/admin/couponControllers');
 const offerControllers = require('../controllers/admin/offerControllers');
-
+const salesReportControllers = require('../controllers/admin/salesReportControllers');
 const {userAuth,adminAuth}=require('../middlewares/auth');
 const uploadTo = require('../middlewares/multer');
 const uploadProductImage = uploadTo('product-images');
@@ -68,4 +68,5 @@ router.post('/offers/category', adminAuth, offerControllers.applyCategoryOffer);
 router.post('/offers/category/delete/:categoryId', adminAuth, offerControllers.removeCategoryOffer);
 
 
+router.get('/sales-report',adminAuth,salesReportControllers.getSalesReport);
 module.exports=router;

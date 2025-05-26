@@ -29,8 +29,7 @@ const applyCoupon = async(req,res)=>{
             const product = await Product.findById(cartItem.product);
             if (product) {
                 const offer = product.productOffer || 0;
-                const discounted = product.price * (1-offer/100);
-                cartTotal += discounted * cartItem.quantity;
+                cartTotal += product.discountedPrice * cartItem.quantity;
             }
           }
           

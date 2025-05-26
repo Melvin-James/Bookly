@@ -50,26 +50,35 @@ const updateOrderStatus = async (req, res) => {
     const orderId = req.params.orderId;
     const { status } = req.body;
 
-    const allowedStatuses = ['Placed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled','Returned'];
+    const allowedStatuses = ['Placed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'];
     if (!allowedStatuses.includes(status)) {
       return res.status(400).render('error', { message: 'Invalid order status selected.' });
     }
 
     const order = await Order.findById(orderId);
+
+    for(let item of order.items){
+      item.status=status;
+    }
     if (!order) {
       return res.status(404).render('error', { message: 'Order not found.' });
     }
+
+   if (order.status === 'Delivered' || order.status === 'Returned' || order.status === 'Cancelled'){
+    return res.status(400).render('error', { message: `Cannot modify an order that is already ${order.status}.` });
+   }
 
     order.status = status;
     await order.save();
 
     res.redirect(`/admin/orders/${orderId}?statusUpdated=true`);
-
+    
   } catch (error) {
     console.error('Error updating order status:', error);
     res.status(500).render('error', { message: 'Failed to update order status.' });
   }
 };
+
 
 const approveReturnRequest = async (req, res) => {
   try {

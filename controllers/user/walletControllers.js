@@ -9,6 +9,7 @@ const getWalletPage = async(req,res)=>{
             body:'wallet',
             userData:req.session.user,
             walletBalance:user.wallet || 0,
+            walletTransactions : user.walletTransactions,
         });
     }catch(error){
         console.error('Failed to load wallet page:',error);

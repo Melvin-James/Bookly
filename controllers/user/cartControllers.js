@@ -1,35 +1,40 @@
 const User = require('../../models/userSchema');
 const Product = require('../../models/productSchema');
 
-const getCartPage = async(req,res)=>{
-    try{
-        const userId = req.session.user._id;
-        const user = await User.findById(userId).populate('cart.product');
+const getCartPage = async(req, res) => {
+  try {
+    const userId = req.session.user._id;
+    const user = await User.findById(userId).populate('cart.product');
 
-        const cartItems = user.cart;
+    const cartItems = user.cart;
 
-        let cartTotalOrginal =0;
-        let cartTotalDiscounted =0;
-        cartItems.forEach(item => {
-            let originalPrice = item.product.price * item.quantity;
-            let discountedPrice = originalPrice * (1 - item.product.productOffer / 100);
-            
-            cartTotalOrginal += originalPrice;
-            cartTotalDiscounted += discountedPrice;
-        });
-        
+    let cartTotalOriginal = 0;
+    let cartTotalDiscounted = 0;
 
-        res.render('cart',
-            {userData:req.session.user,
-            cartItems,
-            req,
-            cartTotalDiscounted}
-        );
-    }catch(error){
-        console.error('Error loading cart:',error);
-        res.status(500).render('error',{message:'Unable to load cart'});
-    }
+    cartItems.forEach(item => {
+      const quantity = item.quantity;
+      const originalPrice = item.product.price * quantity;
+      const discountedPrice = item.product.discountedPrice * quantity;
+
+      cartTotalOriginal += originalPrice;
+      cartTotalDiscounted += discountedPrice;
+    });
+    const cartSavings = cartTotalOriginal - cartTotalDiscounted;
+
+    res.render('cart', {
+      userData: req.session.user,
+      cartItems,
+      req,
+      cartTotalDiscounted,
+      cartSavings,
+    });
+
+  } catch (error) {
+    console.error('Error loading cart:', error);
+    res.status(500).render('error', { message: 'Unable to load cart' });
+  }
 };
+
 
 const addToCart = async (req, res) => {
     try {

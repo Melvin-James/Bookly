@@ -55,11 +55,7 @@
                 <% order.items.forEach(item => { %>
                   <li class="flex justify-between">
                     <span><%= item.product.name %> x <%= item.quantity %></span>
-                    <% if (item.discountedPrice !== undefined) { %>
-                      <span>₹<%= (item.discountedPrice * item.quantity).toFixed(2) %></span>
-                    <% } else { %>
-                      <span class="text-gray-500 italic">Price not available</span>
-                    <% } %>
+                      <span>₹<%= (item.product.discountedPrice * item.quantity).toFixed(2) %></span>
                   </li>
                 <% }) %>
               </ul>

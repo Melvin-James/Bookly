@@ -1,0 +1,67 @@
+<form action="/admin/sales-report" method="GET" class="mb-6 flex flex-wrap gap-4 items-end">
+  <div>
+    <label class="block text-sm font-semibold text-gray-700">Filter Type</label>
+    <select name="filter" class="border rounded px-3 py-2">
+      <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Today</option>
+      <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>This Week</option>
+      <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>This Month</option>
+      <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom</option>
+    </select>
+  </div>
+  <div>
+    <label class="block text-sm font-semibold text-gray-700">From</label>
+    <input type="date" name="from" class="border rounded px-3 py-2" value="<%= from || '' %>">
+  </div>
+  <div>
+    <label class="block text-sm font-semibold text-gray-700">To</label>
+    <input type="date" name="to" class="border rounded px-3 py-2" value="<%= to || '' %>">
+  </div>
+  <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-[#005f66] transition">Apply Filter</button>
+</form>
+
+
+
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white p-4 rounded shadow">
+      <h2 class="text-gray-500">Total Orders</h2>
+      <p class="text-xl font-semibold"><%= stats.totalSalesCount %></p>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+      <h2 class="text-gray-500">Total Revenue</h2>
+      <p class="text-xl font-semibold">₹<%= stats.totalSalesAmount.toFixed(2) %></p>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+      <h2 class="text-gray-500">Total Discounts</h2>
+      <p class="text-xl font-semibold">₹<%= stats.totalDiscount.toFixed(2) %></p>
+    </div>
+  </div>
+
+  <table class="w-full bg-white rounded shadow">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Date</th>
+        <th class="px-4 py-2 text-left">Order ID</th>
+        <th class="px-4 py-2 text-left">Amount</th>
+        <th class="px-4 py-2 text-left">Discount</th>
+        <th class="px-4 py-2 text-left">Coupon</th>
+        <th class="px-4 py-2 text-left">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(order => { %>
+        <tr class="border-t">
+          <td class="px-4 py-2"><%= new Date(order.createdAt).toLocaleDateString() %></td>
+          <td class="px-4 py-2"><%= order.orderId %></td>
+          <td class="px-4 py-2">₹<%= order.totalAmount.toFixed(2) %></td>
+          <td class="px-4 py-2">₹<%= order.discountAmount.toFixed(2) %></td>
+          <td class="px-4 py-2"><%= order.couponApplied || '—' %></td>
+          <td class="px-4 py-2"><%= order.status %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+

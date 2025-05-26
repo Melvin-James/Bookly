@@ -91,16 +91,13 @@
           <% } %>
   
           <!-- Pricing -->
-          <% if (product.productOffer > 0) { 
-            const discounted = (product.price * (1 - product.productOffer / 100)).toFixed(2); %>
+  
             <div class="flex items-center space-x-3 mb-4">
               <span class="text-xl text-gray-400 line-through">₹<%= product.price.toFixed(2) %></span>
-              <span class="text-2xl text-primary font-bold">₹<%= discounted %></span>
-              <span class="text-sm text-green-500">Save <%= product.productOffer %>%</span>
+              <span class="text-2xl text-primary font-bold">₹<%= product.discountedPrice %></span>
+              <span class="text-sm text-green-500">Save <%= product.appliedOffer %>%</span>
             </div>
-          <% } else { %>
-            <p class="text-2xl text-primary font-bold mb-4">₹<%= product.price.toFixed(2) %></p>
-          <% } %>
+  
   
           <!-- Highlights -->
           <div class="mb-6">

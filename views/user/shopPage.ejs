@@ -199,21 +199,13 @@
               <h3 class="font-medium text-gray-900 mb-1"><%= product.name %></h3>
               <p class="text-sm text-gray-500 mb-2"><%= product.publisher %></p>
               
-              <% 
-                const offer = product.productOffer || 0;
-                const discountedPrice = (product.price * (1 - offer / 100)).toFixed(2);
-              %>
 
-              <% if (offer > 0) { %>
                 <div class="flex items-center space-x-2">
                   <span class="text-sm text-gray-400 line-through">₹<%= product.price.toFixed(2) %></span>
                   <span class="font-bold text-primary">
-                    ₹<%=discountedPrice %>
+                    ₹<%=product.discountedPrice %>
                   </span>
                 </div>
-              <% } else { %>
-                <p class="font-bold text-primary">₹<%= product.price.toFixed(2) %></p>
-              <% } %>
             </div>
           </div>
         <% }) %>

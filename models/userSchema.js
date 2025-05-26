@@ -4,12 +4,34 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true, unique: true },
+    phone: { type: String, required: true, unique: true, default:'0000000000' },
     password: { type: String, required: true },
     wallet: {
       type: Number,
       default: 0
     },
+    walletTransactions: [{
+      type: {
+        type: String,
+        enum: ['credit', 'debit'],
+        required: true
+      },
+      amount: {
+        type: Number,
+        required: true
+      },
+      description: {
+        type: String,
+        required: true
+      },
+      orderId: {
+        type: String
+      },
+      date: {
+        type: Date,
+        default: Date.now
+      }
+    }],
     otp: { type: String },  
     otpExpires: { type: Date, index: { expires: '1m' } },
 

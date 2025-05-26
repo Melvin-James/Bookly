@@ -26,13 +26,12 @@ const getCheckoutPage = async (req, res) => {
       const product = cartItem.product;
       if (product) {
         const offer = product.productOffer || 0;
-        const discountedPrice = product.price * (1-offer/100);
         cartItems.push({ 
           product, 
           quantity: cartItem.quantity,
-          discountedPrice
+          discountedPrice:product.discountedPrice,
         });
-        cartTotal += discountedPrice * cartItem.quantity;
+        cartTotal += product.discountedPrice * cartItem.quantity;
       }
     }
 
@@ -93,15 +92,14 @@ const placeOrder = async (req, res) => {
     for (let cartItem of user.cart) {
       const product = cartItem.product;
       if (product) {
-        let discountedPrice = product.price * (1 - product.productOffer / 100);
-        let totalPrice = discountedPrice * cartItem.quantity;
+        let totalPrice = product.discountedPrice * cartItem.quantity;
 
         items.push({
           product: product._id,
           quantity: cartItem.quantity,
           status: 'Placed',
           originalPrice: product.price,
-          discountedPrice: discountedPrice,
+          discountedPrice: product.discountedPrice,
           productName: product.name,
           productImage: product.image,
         });
@@ -137,6 +135,7 @@ const placeOrder = async (req, res) => {
       couponApplied: couponCode,
       couponDiscount,
       productDiscount: cartTotalOriginal - cartTotalDiscounted,
+      discountAmount: cartTotalOriginal - finalAmount,
       status: 'Placed',
     });
 
