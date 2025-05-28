@@ -53,7 +53,9 @@ const userSchema = new Schema({
       type: Map,
       of: Number,
       default: {}
-    },    
+    },
+    referralCode: { type: String, unique: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);

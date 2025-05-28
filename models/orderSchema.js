@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
       type: String,
-      enum: ['Placed', 'Cancelled', 'Returned','Delivered','Out for Delivery','shipped'],
+      enum: ['Placed', 'Cancelled', 'Returned','Delivered','Out for Delivery','shipped','Failed'],
     },
     originalPrice: Number,
     discountedPrice: Number,
@@ -49,7 +49,7 @@ const orderSchema = new mongoose.Schema({
   totalAmount: {type:Number, required: true},
   status: {
     type: String,
-    enum: ["Placed", "Shipped", "Delivered", "Cancelled","Out for Delivery","Returned"],
+    enum: ["Placed", "Shipped", "Delivered", "Cancelled","Out for Delivery","Returned","Failed"],
   },
   returnReason: {
     type: String,

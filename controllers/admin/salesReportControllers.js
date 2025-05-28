@@ -1,4 +1,7 @@
 const Order = require('../../models/orderSchema');
+const PDFDocument = require('pdfkit');
+const ExcelJS = require('exceljs');
+const getFilterQuery = require('../../utils/salesFilter');
 
 const getSalesReport = async(req,res)=>{
     try{
@@ -50,7 +53,75 @@ const getSalesReport = async(req,res)=>{
     }
 };
 
+const downloadSalesReportPDF = async(req,res)=>{
+    try{
+        const {filter,from,to} = req.query;
+        const query = getFilterQuery(filter,from,to);
+        const orders = await Order.find(query).populate('user');
+
+        const doc = new PDFDocument();
+        res.setHeader('Content-Disposition', 'attachment; filename="sales-report.pdf"');
+        res.setHeader('Content-Type','application/pdf');
+        doc.pipe(res);
+
+        doc.fontSize(20).text('Bookly-Sales Report', {align:'center'});
+        doc.moveDown();
+
+        orders.forEach((order,i)=>{
+            doc.fontSize(12).text(`${i+1}. Order ID: ${order.orderId}`);
+            doc.text(`User:${order.user?.name || 'N/A'}`);
+            doc.text(`Amount: ₹${order.totalAmount}`);
+            doc.text(`Discount: ₹${order.discountAmount || 0}`);
+            doc.text(`Date: ${order.createdAt.toDateString()}`);
+            doc.moveDown();
+        });
+
+        doc.end();
+    }catch(error){
+        console.error('PDF error:',error);
+        res.status(500).render('error',{message:'Failed to generate PDF'});
+    }
+}
+
+const downloadSalesReportExcel = async(req,res)=>{
+    try{
+        const {filter,from,to}=req.query;
+        const query = getFilterQuery(filter,from,to);
+        const orders = await Order.find(query).populate('user');
+
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Sales Report');
+
+        sheet.columns = [
+            {header:'Order ID', key:'orderId', width:20},
+            {header:'User Name', key:'userName', width:25},
+            {header:'Total Amount', key:'totalAmount', width:15},
+            {header:'Discount', key:'discount', width:15},
+            {header:'Order Date', key:'orderdate', width:20}
+        ];
+
+        orders.forEach(order=>{
+            sheet.addRow({
+                orderId: order.orderId,
+                userName:order.user?.name || 'N/A',
+                totalAmount:order.totalAmount,
+                discount:order.discountAmount || 0,
+                orderDate: order.createdAt.toDateString()
+            });
+        });
+
+        res.setHeader('Content-Disposition', 'attachment; filename="Sales-report.xlsx"');
+        res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        await workbook.xlsx.write(res);
+        res.end();
+    }catch(error){
+        console.error('Excel error:',error);
+        res.status(500).render('error',{message:'Failed to generate Excel Report'})
+    }
+}
 
 module.exports={
     getSalesReport,
+    downloadSalesReportPDF,
+    downloadSalesReportExcel,
 };

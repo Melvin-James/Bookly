@@ -90,24 +90,38 @@ const approveReturnRequest = async (req, res) => {
     }
 
     const user = await User.findById(order.user);
-    user.wallet = (user.wallet || 0) + order.totalAmount;
+
+    const refundAmount = order.totalAmount;
+    user.wallet = (user.wallet || 0) + refundAmount;
+
+
+    const walletTransaction = {
+      type: "credit",
+      amount: refundAmount,
+      description: `Return approved for order ${order.orderId}`,
+      orderId: order.orderId 
+    };
+    user.walletTransactions.push(walletTransaction);
+
     await user.save();
 
     for (let item of order.items) {
       await Product.findByIdAndUpdate(item.product, { $inc: { quantity: item.quantity } });
+      item.status = 'Returned';
     }
-
 
     order.isReturnApproved = true;
     order.status = 'Returned';
     await order.save();
-    res.redirect(`/admin/orders/${orderId}?returnStatus=approved`);
 
+    res.redirect(`/admin/orders/${orderId}?returnStatus=approved`);
+    
   } catch (error) {
     console.error('Error approving return request:', error);
     res.status(500).render('error', { message: 'Failed to approve return request.' });
   }
 };
+
 
 const rejectReturnRequest = async (req, res) => {
   try {

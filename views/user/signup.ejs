@@ -383,6 +383,11 @@
                             </div>
                         </div>
                         
+                        <div class="form-group">
+                            <label for="referralCode">Referral Code (optional)</label>
+                            <input type="text" id="referralCode" name="referralCode" class="form-control" placeholder="e.g. BOOK1234">
+                        </div>
+
                         <button type="button" class="btn" id="nextBtn1">Continue to Verification</button>
                     </div>
                 </div>
@@ -459,7 +464,8 @@
                     email: $('#email').val(),
                     phone: $('#phone').val(),
                     password: $('#password').val(),
-                    confirmPassword: $('#confirmPassword').val()
+                    confirmPassword: $('#confirmPassword').val(),
+                    referralCode: $('#referralCode').val()
                 }
 
                 $.ajax({
@@ -493,6 +499,9 @@
                     method: 'POST',
                     data: { otp },
                     success: function (res) {
+                        if (res.referralRewarded) {
+                            showToast('Referral bonus added to wallets!', 'success');
+                        }
                         showToast('Signup successful! Redirecting...', 'success');
                         setTimeout(() => {
                             window.location.href = '/user/login';

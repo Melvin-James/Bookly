@@ -8,12 +8,12 @@
     <form method="POST" action="<%= formAction %>" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <label class="block font-medium mb-1">Full Name</label>
-        <input name="name" value="<%= address?.name || '' %>" required class="input" />
+        <input name="name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-theme" value="<%= address?.name || '' %>" required class="input" />
       </div>
   
       <div>
         <label class="block font-medium mb-1">Address Type</label>
-        <select name="addressType" required class="input">
+        <select name="addressType" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-theme" required class="input">
           <option value="">Select</option>
           <option value="Home" <%= address?.addressType === 'Home' ? 'selected' : '' %>>Home</option>
           <option value="Work" <%= address?.addressType === 'Work' ? 'selected' : '' %>>Work</option>
@@ -22,32 +22,32 @@
   
       <div>
         <label class="block font-medium mb-1">City</label>
-        <input name="city" value="<%= address?.city || '' %>" required class="input" />
+        <input name="city" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-theme" value="<%= address?.city || '' %>" required class="input" />
       </div>
   
       <div>
         <label class="block font-medium mb-1">State</label>
-        <input name="state" value="<%= address?.state || '' %>" required class="input" />
+        <input name="state" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-theme" value="<%= address?.state || '' %>" required class="input" />
       </div>
   
       <div>
         <label class="block font-medium mb-1">Pincode</label>
-        <input type="number" name="pincode" value="<%= address?.pincode || '' %>" required class="input" />
+        <input type="number" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-theme" name="pincode" value="<%= address?.pincode || '' %>" required class="input" />
       </div>
   
       <div>
         <label class="block font-medium mb-1">Landmark</label>
-        <input name="landmark" value="<%= address?.landmark || '' %>" required class="input" />
+        <input name="landmark" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-theme" value="<%= address?.landmark || '' %>" required class="input" />
       </div>
   
       <div>
         <label class="block font-medium mb-1">Phone</label>
-        <input name="phone" value="<%= address?.phone || '' %>" required class="input" />
+        <input name="phone" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-theme" value="<%= address?.phone || '' %>" required class="input" />
       </div>
   
       <div>
         <label class="block font-medium mb-1">Alt Phone</label>
-        <input name="altPhone" value="<%= address?.altPhone || '' %>" required class="input" />
+        <input name="altPhone" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-theme" value="<%= address?.altPhone || '' %>" required class="input" />
       </div>
   
       <div class="col-span-full pt-4">

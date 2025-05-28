@@ -16,9 +16,9 @@ const uploadProductImage = uploadTo('product-images');
 router.get('/pageerror',adminControllers.pageerror);
 router.get('/login',adminControllers.loadLogin);
 router.post('/login',adminControllers.login);
-router.get('/dashboard',adminAuth,adminControllers.loadDashboard);
 router.get('/logout',adminControllers.logout);
 
+router.get('/dashboard',adminAuth,adminControllers.loadDashboard);
 router.get('/users',adminAuth,customerControllers.customerInfo);
 router.patch('/customer/:id',adminAuth,customerControllers.toggleBlockStatusCustomer);
 router.get('/search-customer',adminAuth,customerControllers.searchCustomers);
@@ -69,4 +69,6 @@ router.post('/offers/category/delete/:categoryId', adminAuth, offerControllers.r
 
 
 router.get('/sales-report',adminAuth,salesReportControllers.getSalesReport);
+router.get('/sales-report/download/pdf',salesReportControllers.downloadSalesReportPDF);
+router.get('/sales-report/download/excel',salesReportControllers.downloadSalesReportExcel);
 module.exports=router;

@@ -176,7 +176,7 @@ const createRazorpayOrder = async (req, res) => {
     const options = {
       amount: amount * 100,
       currency: 'INR',
-      receipt: `receipt_${Date.now()}`
+      receipt: `receipt_${Date.now()}`,
     };
 
     const order = await razorpay.orders.create(options);
@@ -201,6 +201,7 @@ const getOrderSuccessPage = async (req, res) => {
 
 const getOrderFailurePage = async (req, res) => {
   try {
+    
     res.render('order-failure', {
       userData: req.session.user
     });

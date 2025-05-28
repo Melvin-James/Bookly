@@ -3,7 +3,6 @@ const Category = require('../../models/categorySchema');
 const Customers = require('../../models/userSchema');
 const category = require('../../models/categorySchema');
 
-
 const getShopProducts = async function(req, res) {
   try {
     const user = await Customers.findById(req.session.user._id);
@@ -11,89 +10,89 @@ const getShopProducts = async function(req, res) {
     const limit = 12; 
     const skip = (page - 1) * limit;
     
-
     let query = { isBlocked: false };
+    let searchConditions = [];
+    let filterConditions = [];
     
-
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { publisher: { $regex: search, $options: 'i' } }
-      ];
+      searchConditions.push({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { publisher: { $regex: search, $options: 'i' } }
+        ]
+      });
     }
     
-
     if (category) {
-      let categoryCondition;
+      let categoryNames = [];
       
-      if (category.includes(',')) {
-
-        const categoryNames = category.split(',');
+      if (Array.isArray(category)) {
+        categoryNames = category;
+      } else if (typeof category === 'string') {
+        categoryNames = category.includes(',') ? category.split(',').map(name => name.trim()) : [category.trim()];
+      }
+      
+      if (categoryNames.length > 0) {
         const categories = await Category.find({ 
           name: { $in: categoryNames.map(name => new RegExp(`^${name}$`, 'i')) },
           isListed: true 
         });
-        const categoryIds = categories.map(cat => cat._id);
-        categoryCondition = { $in: categoryIds };
-      } else {
-
-        const categoryObj = await Category.findOne({ 
-          name: { $regex: new RegExp(`^${category}$`, 'i') },
-          isListed: true 
-        });
-        categoryCondition = categoryObj ? categoryObj._id : null;
-      }
-      
-      if (categoryCondition) {
-        query.category = categoryCondition;
+        
+        if (categories.length > 0) {
+          const categoryIds = categories.map(cat => cat._id);
+          filterConditions.push({ category: { $in: categoryIds } });
+        }
       }
     }
     
-
     if (priceRange) {
-      const priceFilters = priceRange.split(',');
+      let priceFilters = [];
+
+      if (Array.isArray(priceRange)) {
+        priceFilters = priceRange;
+      } else if (typeof priceRange === 'string') {
+        priceFilters = priceRange.includes(',') ? priceRange.split(',').map(filter => filter.trim()) : [priceRange.trim()];
+      }
+      
       const priceConditions = [];
       
       for (const filter of priceFilters) {
         switch (filter) {
           case 'under300':
-            priceConditions.push({ price: { $lt: 300 } });
+            priceConditions.push({ discountedPrice: { $lt: 300 } });
             break;
           case '300-400':
-            priceConditions.push({ price: { $gte: 300, $lte: 400 } });
+            priceConditions.push({ discountedPrice: { $gte: 300, $lte: 400 } });
             break;
           case '400-500':
-            priceConditions.push({ price: { $gte: 400, $lte: 500 } });
+            priceConditions.push({ discountedPrice: { $gte: 400, $lte: 500 } });
             break;
           case 'over500':
-            priceConditions.push({ price: { $gt: 500 } });
+            priceConditions.push({ discountedPrice: { $gt: 500 } });
             break;
         }
       }
       
       if (priceConditions.length > 0) {
-
-        if (query.$or) {
-          query.$and = [
-            { $or: query.$or },
-            { $or: priceConditions }
-          ];
-          delete query.$or;
-        } else {
-          query.$or = priceConditions;
-        }
+        filterConditions.push({ $or: priceConditions });
       }
+    }
+    
+    const allConditions = [...searchConditions, ...filterConditions];
+    
+    if (allConditions.length > 0) {
+      query.$and = allConditions;
     }
     
     let sortOption = {};
     if (sort) {
       switch (sort) {
         case 'price-low':
-          sortOption = { price: 1 };
+          sortOption = { discountedPrice: 1 };
           break;
         case 'price-high':
-          sortOption = { price: -1 };
+          sortOption = { discountedPrice: -1 };
           break;
         case 'name-asc':
           sortOption = { name: 1 };
@@ -107,21 +106,20 @@ const getShopProducts = async function(req, res) {
     } else {
       sortOption = { createdAt: -1 }; 
     }
-        
+    
     const products = await Product.find(query)
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
       .populate('category', 'name');
     
-
     const totalProducts = await Product.countDocuments(query);
     
     const categories = await Category.find({ isListed: true });
     
     res.render('shopPage', {
       products,
-      userData:user,
+      userData: user,
       categories,
       currentPage: parseInt(page),
       totalPages: Math.ceil(totalProducts / limit),
@@ -132,15 +130,17 @@ const getShopProducts = async function(req, res) {
         category: category || '',
         priceRange: priceRange || ''
       },
-
       buildQueryUrl: function(newParams) {
         const params = { ...req.query };
         
         Object.keys(newParams).forEach(key => {
-          params[key] = newParams[key];
+          if (newParams[key] === undefined || newParams[key] === null || newParams[key] === '') {
+            delete params[key];
+          } else {
+            params[key] = newParams[key];
+          }
         });
         
-
         const queryString = Object.entries(params)
           .filter(([_, value]) => value !== undefined && value !== null && value !== '')
           .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)

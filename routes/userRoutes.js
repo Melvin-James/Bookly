@@ -82,5 +82,4 @@ router.post('/remove-coupon',userAuth,couponControllers.removeCoupon);
 
 router.get('/wallet', userAuth,walletControllers.getWalletPage);
 
-
 module.exports = router;

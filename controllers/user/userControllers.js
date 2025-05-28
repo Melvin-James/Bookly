@@ -5,6 +5,8 @@ const Product = require("../../models/productSchema")
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
 const crypto = require("crypto")
+const generateReferralCode = require('../../utils/generateReferralCode');
+
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -28,7 +30,7 @@ const loadSignup = (req, res) => {
 }
 
 const signupStep1 = async (req, res) => {
-  const { name, email, phone, password, confirmPassword } = req.body
+  const { name, email, phone, password, confirmPassword, referralCode } = req.body
   const errors = {}
 
   if (!name || name.trim() === "") {
@@ -84,7 +86,16 @@ const signupStep1 = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
-    console.log("otp for signup:", otp)
+    console.log("otp for signup:", otp);
+
+    let referredBy = null;
+
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode });
+      if (referrer) {
+        referredBy = referrer._id;
+      }
+    }
 
     req.session.tempUser = {
       name,
@@ -93,6 +104,8 @@ const signupStep1 = async (req, res) => {
       password: hashedPassword,
       otp,
       otpExpires: Date.now() + 60 * 3000,
+      referredBy, 
+      referralCodeUsed: referralCode || null,
     }
     const mailOptions = {
       from: process.env.NODEMAILER_EMAIL,
@@ -180,15 +193,28 @@ const verifyOtp = async (req, res) => {
   }
 
   try {
+    const referredBy = tempUser.referredBy || null;
+
     const user = await User.create({
       name: tempUser.name,
       email: tempUser.email,
       phone: tempUser.phone,
       password: tempUser.password,
+      referredBy,
+      referralCode: generateReferralCode(tempUser.name), // helper function
+      wallet: referredBy ? 50 : 0 // ₹50 for new user if referred
     })
 
+    if (referredBy) {
+      const referrer = await User.findById(referredBy);
+      if (referrer) {
+        referrer.wallet += 100; // ₹100 for referrer
+        await referrer.save();
+      }
+    }
+
     req.session.tempUser = null
-    return res.json({ success: true })
+    return res.json({ success: true, referralRewarded: true });
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: "Signup failed." })
@@ -298,9 +324,8 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body
     const errors = {}
-    const emailVar = email // Declare email variable
 
-    if (!emailVar) {
+    if (!email) {
       errors.email = { msg: "Email is required" }
     }
 
@@ -309,19 +334,19 @@ const login = async (req, res) => {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (emailVar && !emailRegex.test(emailVar)) {
+    if (email && !emailRegex.test(email)) {
       errors.email = { msg: "Invalid email format" }
     }
 
     if (Object.keys(errors).length > 0) {
-      return res.render("login", { errors, formData: { email: emailVar } })
+      return res.render("login", { errors, formData: { email } })
     }
 
-    const user = await User.findOne({ email: emailVar })
-    if (!user) {
+    const user = await User.findOne({ email })
+    if (!user || user.isAdmin) {
       return res.render("login", {
         errors: { login: { msg: "Invalid email or password" } },
-        formData: { email: emailVar },
+        formData: { email},
       })
     }
 
@@ -330,7 +355,7 @@ const login = async (req, res) => {
         errors: {
           login: { msg: "Your account has been blocked by the admin." },
         },
-        formData: { email: emailVar },
+        formData: { email },
       })
     }
 
@@ -338,7 +363,7 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.render("login", {
         errors: { login: { msg: "Invalid email or password" } },
-        formData: { email: emailVar },
+        formData: { email },
       })
     }
 
@@ -354,7 +379,7 @@ const login = async (req, res) => {
     console.error("Login Error:", error)
     return res.render("login", {
       errors: { login: { msg: "Something went wrong, try again!" } },
-      formData: { email: req.body.email }, // Use req.body.email instead of email
+      formData: { email: req.body.email },
     })
   }
 }

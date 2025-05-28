@@ -283,6 +283,9 @@
           name: "Bookly",
           description: "Order Payment",
           order_id: data.order.id,
+          theme: {
+              color: "#007D8B" 
+          },
           handler: function (response) {
             document.getElementById('razorpayPaymentId').value = response.razorpay_payment_id;
             document.getElementById('razorpayOrderId').value = response.razorpay_order_id;
