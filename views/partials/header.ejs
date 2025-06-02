@@ -1,11 +1,27 @@
-<header class="bg-white shadow-md p-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-gray-800">Bookly</h1>
+<header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
+    <div class="flex items-center gap-4">
+        <button id="sidebar-toggle" class="md:hidden text-gray-700 hover:bg-gray-100 p-2 rounded-md">
+            <i class="ri-menu-line text-xl"></i>
+        </button>
+        <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <span class="text-primary"><i class="ri-book-open-line"></i></span>
+            Bookly
+        </h1>
+    </div>
 
-    <div class="flex items-center space-x-4">
-        <span class="text-gray-700">Welcome, Melvin</span>
-        <a href="/admin/logout" class="px-4 py-2 rounded text-white bg-[#007D8B] hover:bg-[#006B78] transition">
-            Logout
-          </a>
-          
+    <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
+            <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full">
+                <i class="ri-notification-3-line text-xl"></i>
+                <span class="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+            </button>
+            
+            <div class="hidden md:flex items-center gap-2">
+                <span class="text-gray-700 text-sm">Welcome</span>
+                <a href="/admin/logout" class="px-4 py-2 rounded text-white bg-primary hover:bg-primary-hover transition">
+                    Logout
+                </a>
+            </div>
+        </div>
     </div>
 </header>

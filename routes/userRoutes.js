@@ -37,7 +37,98 @@ router.get('/product-details/:id',userAuth,homeControllers.getProductDetails);
 
 router.get('/profile',userAuth,profileControllers.getProfilePage);
 router.get('/profile/edit',userAuth,profileControllers.getEditProfile);
-router.post('/profile/edit',userAuth,uploadProfileImage.single('userImage'),profileControllers.postEditProfile);
+const postEditProfile = async (req, res) => {
+    try {
+      const userId = req.session.user._id;
+      const userData = await User.findById(userId);
+  
+      const { name, email, phone } = req.body;
+      const errors = {}
+
+      if(!name || name.trim() === ""){
+        errors.name = "Name is required"
+      }else if(name.length <2){
+        errors.name = "Name must be atleast 2 characters long"
+      }
+
+      if (!email || email.trim() === "") {
+        errors.email = "Email is required"
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+          errors.email = "Please provide a valid email address"
+        }
+      }
+
+      if (!phone || phone.trim() === "") {
+        errors.phone = "Phone number is required"
+      } else {
+        const phoneRegex = /^[0-9]{10}$/
+        if (!phoneRegex.test(phone.replace(/\D/g, ""))) {
+          errors.phone = "Please provide a valid 10-digit phone number"
+        }
+      }
+
+       if (Object.keys(errors).length > 0) {
+          return res.status(400).json({ errors })
+        }
+
+        const existing = await User.findOne({ $or: [{ email }, { phone }] })
+    if (existing) {
+      return res.status(409).json({
+        errors: {
+          general: existing.email === email ? "Email already exists" : "Phone number already exists",
+        },
+      })
+    }
+
+      const userImage = req.file ? req.file.filename : userData.userImage?.[0];
+  
+      const emailChanged = email !== userData.email;
+  
+      if (emailChanged) {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = Date.now() + 5 * 60 * 1000; 
+        console.log('otp for edit email in user profile:',otp);
+        await User.findByIdAndUpdate(userId, {
+          name,
+          phone,
+          userImage: [userImage],
+          otp,
+          otpExpires
+        });
+  
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: process.env.NODEMAILER_EMAIL,
+            pass: process.env.NODEMAILER_PASSWORD
+          }
+        });
+  
+        await transporter.sendMail({
+          from: `"Bookly Support" <${process.env.NODEMAILER_EMAIL}>`,
+          to: email,
+          subject: 'Email Verification OTP - Bookly',
+          text: `Your OTP for email verification is ${otp}. It expires in 5 minutes.`
+        });
+  
+        req.session.newEmail = email;
+        return res.redirect('/user/profile/verify-otp');
+      }
+  
+      await User.findByIdAndUpdate(userId, {
+        name,
+        email,
+        phone,
+        userImage: [userImage]
+      });
+  
+      res.redirect('/user/profile');
+    } catch (err) {
+      next(err);
+    }
+};
 
 router.get('/profile/verify-otp',profileControllers.getVerifyOtp);
 router.post('/profile/verify-otp',profileControllers.postVerifyOtp);
@@ -58,8 +149,6 @@ router.post('/profile/orders/:id/cancel',userAuth,profileControllers.cancelOrder
 router.post('/profile/orders/:id/return', userAuth, profileControllers.returnOrder);
 router.post('/profile/orders/cancel-item/:orderId/:productId', userAuth, profileControllers.cancelOrderItem);
 router.get('/profile/orders/:id/invoice',userAuth,profileControllers.downloadInvoice);
-
-
 
 router.get('/cart',userAuth,cartControllers.getCartPage);
 router.post('/cart/add/:productId',userAuth,cartControllers.addToCart);

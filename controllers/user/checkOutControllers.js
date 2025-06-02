@@ -52,9 +52,8 @@ const getCheckoutPage = async (req, res) => {
       validCoupons,
     });
 
-  } catch (error) {
-    console.error('Error loading checkout page:', error);
-    res.status(500).render('error', { message: 'Something went wrong at checkout' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -114,9 +113,46 @@ const placeOrder = async (req, res) => {
 
     const finalAmount = cartTotalDiscounted - couponDiscount;
 
-    if (paymentMethod === 'Online' && (!razorpay_payment_id || !razorpay_order_id)) {
-      return res.status(400).render('error', { message: 'Payment verification failed!' });
+    if (
+      paymentMethod === 'Online' &&
+      (!razorpay_payment_id || !razorpay_order_id || req.body.status === 'Failed')
+    ) {
+      let failedItems = [];
+      for (let cartItem of user.cart) {
+        const product = cartItem.product;
+        if (product) {
+          failedItems.push({
+            product: product._id,
+            quantity: cartItem.quantity,
+            status: 'Failed',
+            originalPrice: product.price,
+            discountedPrice: product.discountedPrice,
+            productName: product.name,
+            productImage: Array.isArray(product.productImage) ? product.productImage[0] : product.productImage || 'default.jpg'
+
+          });
+        }
+      }
+
+      const failedOrder = new Order({
+        orderId: 'BOOKLY-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+        user: userId,
+        items: failedItems,
+        address: selectedAddress,
+        paymentMethod: 'Online',
+        paymentStatus: 'Failed',
+        status: 'Failed',
+        totalAmount: finalAmount,
+        couponApplied: couponCode,
+        couponDiscount,
+        productDiscount: cartTotalOriginal - cartTotalDiscounted,
+        discountAmount: cartTotalOriginal - finalAmount,
+      });
+
+      await failedOrder.save();
+      return res.redirect('/user/order-failure');
     }
+
 
     const generateOrderId = () => {
       return 'BOOKLY-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
@@ -162,11 +198,10 @@ const placeOrder = async (req, res) => {
     delete req.session.coupon;
 
     res.redirect('/user/order-success');
-  } catch (error) {
-    console.error('Place order error:', error);
-    res.status(500).render('error', { message: 'Something went wrong while placing the order' });
+  }catch (err) {
+    next(err);
   }
-};
+}
 
 
 const createRazorpayOrder = async (req, res) => {
@@ -182,8 +217,7 @@ const createRazorpayOrder = async (req, res) => {
     const order = await razorpay.orders.create(options);
     res.json({ success: true, order });
   } catch (err) {
-    console.error('Razorpay order error:', err);
-    res.status(500).json({ success: false, message: 'Failed to create Razorpay order' });
+    next(err);
   }
 };
 
@@ -194,8 +228,7 @@ const getOrderSuccessPage = async (req, res) => {
       userData: req.session.user
     });
   } catch (error) {
-    console.error('Error loading success page:', error);
-    res.status(500).render('error', { message: 'Failed to load order success page' });
+    next(err);
   }
 };
 
@@ -206,8 +239,7 @@ const getOrderFailurePage = async (req, res) => {
       userData: req.session.user
     });
   } catch (error) {
-    console.error('Error loading failure page:', error);
-    res.status(500).render('error', { message: 'Failed to load payment failure page.' });
+    next(err);
   }
 };
 

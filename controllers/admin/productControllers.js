@@ -7,8 +7,7 @@ const productInfo = async (req, res) => {
         res.render('layout', {body:'products',products});
 
     } catch (error) {
-        console.error("Error in productInfo:", error);
-        res.status(500).render('pageerror', { message: "Failed to load product data" });
+       next(err);
     }
 };
 
@@ -22,7 +21,7 @@ const toggleBlockStatusProduct = async (req, res) => {
   
       res.json({ success: true, isBlocked: product.isBlocked });
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Server error' });
+      next(err);
     }
 };
 
@@ -34,9 +33,7 @@ const searchProducts = async(req,res)=>{
       }).sort({createdAt:-1}).populate('category');
       res.json({products});
     }catch(error){
-      console.error('Search error:',error);
-      res.status(500).json({error:'Internal server Error'});
-
+      next(err);
     }
 };
 
@@ -62,8 +59,7 @@ const getPaginatedProducts = async (req, res) => {
   
       res.json({ products, totalPages, currentPage: page });
     } catch (error) {
-      console.error('Pagination error:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      next(err);
     }
   };
 
@@ -72,8 +68,7 @@ const getAddProduct = async (req, res) => {
     const categories = await Category.find({ isListed: true });
     res.render('product-add', { categories });
   } catch (err) {
-    console.error('Error loading add product page:', err);
-    res.status(500).send('Server Error');
+    next(err);
   }
 };
 
@@ -128,8 +123,7 @@ const addProduct = async (req, res) => {
     return res.json({ success: true, redirectTo: "/admin/products" });
 
   } catch (err) {
-    console.error("Error saving product:", err);
-    res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 };
   
@@ -139,9 +133,8 @@ const getEditProduct = async(req,res)=>{
     const categories = await Category.find({isListed:true});
     if(!product) return res.status(404).send('product not found');
     res.render('product-edit',{product,categories});
-  }catch(error){
-    console.error('Error loading edit product page:',error);
-    res.status(500).send('Server Error');
+  }catch(err){
+    next(err);
   }
 };
 
@@ -170,9 +163,8 @@ const updateProduct = async(req,res)=>{
 
     await Product.findByIdAndUpdate(req.params.id,updatedProduct);
     res.json({success:true, redirectTo:'/admin/products'});
-  }catch(error){
-    console.error('Error updating product:',error);
-    res.status(500).send('Server Error');
+  }catch(err){
+    next(err);
   }
 };
 

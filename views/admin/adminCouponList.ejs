@@ -56,6 +56,7 @@
             <td class="px-4 py-2"><%= coupon.usageLimit %></td>
             <td class="px-4 py-2">
                 <button onclick="confirmDeleteCoupon('<%= coupon._id %>')" class="text-red-600 hover:underline">Delete</button>
+                <a href="/admin/coupons/edit/<%= coupon._id %>" class="text-blue-600 hover:underline mr-2">Edit</a>
             </td>
           </tr>
         <% }) %>

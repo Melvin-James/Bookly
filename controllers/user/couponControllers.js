@@ -69,9 +69,8 @@ const applyCoupon = async(req,res)=>{
             discount,
             finalTotal
         });
-    }catch(error){
-        console.error('Apply coupon error:',error);
-        res.status(500).json({success:false,message:'Server error!'});
+    }catch(err){
+        next(err);
     }
 }
 
@@ -79,9 +78,8 @@ const removeCoupon = (req,res)=>{
     try{
         delete req.session.coupon;
         res.status(200).json({success:true,message:'Coupon removed successfully.'});
-    }catch(error){
-        console.error('Remove coupon error:',error);
-        res.status(500).json({success:false,message:'Server error!'});
+    }catch(err){
+        next(err);
     }
 };
 

@@ -29,12 +29,10 @@ const getCartPage = async(req, res) => {
       cartSavings,
     });
 
-  } catch (error) {
-    console.error('Error loading cart:', error);
-    res.status(500).render('error', { message: 'Unable to load cart' });
+  } catch (err) {
+    next(err)
   }
 };
-
 
 const addToCart = async (req, res) => {
     try {
@@ -57,12 +55,10 @@ const addToCart = async (req, res) => {
         return res.json({ success: true, added: true });
       }
     } catch (error) {
-      console.error('Add to cart error:', error);
-      res.status(500).json({ success: false, message: 'Failed to add item to cart' });
+     next(err);
     }
 };
-  
-  
+    
 const updateCartQuantity = async (req, res) => {
     try {
       const userId = req.session.user._id;
@@ -91,10 +87,9 @@ const updateCartQuantity = async (req, res) => {
       await user.save();
       res.json({ success: true, newQuantity: item.quantity });
     } catch (error) {
-      console.error('Error updating quantity:', error);
-      res.status(500).json({ success: false });
+      next(err);
     }
-  };
+};
   
 const removeFromCart = async (req, res) => {
     try {
@@ -107,12 +102,10 @@ const removeFromCart = async (req, res) => {
 
         res.json({ success: true });
     } catch (error) {
-        console.error('Error removing from cart:', error);
-        res.status(500).json({ success: false });
+        next(err);
     }
 };
   
-
 const getItemsInCartCount = async (req,res)=>{
     const userId = req.session.user._id;
     let value =0
@@ -121,7 +114,6 @@ const getItemsInCartCount = async (req,res)=>{
     value  = userCart.cart.length
     return res.status(200).json({success:true,value})
 }
-
 
 module.exports ={
     getCartPage,

@@ -22,9 +22,8 @@ const getInventoryPage = async (req, res) => {
       currentPage: page,
       totalPages
     });
-  } catch (error) {
-    console.error('Error loading inventory:', error);
-    res.status(500).render('error', { message: 'Failed to load inventory' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -37,9 +36,8 @@ const searchStock = async (req, res) => {
     }).populate('category');
 
     res.json({ success: true, products });
-  } catch (error) {
-    console.error('Search error:', error);
-    res.status(500).json({ success: false, message: 'Failed to search products' });
+  } catch (err) {
+    next(err)
   }
 };
 
@@ -69,9 +67,8 @@ const getPaginatedStock = async (req, res) => {
       currentPage: page,
       totalPages
     });
-  } catch (error) {
-    console.error('Pagination error:', error);
-    res.status(500).json({ success: false, message: 'Failed to paginate products' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -87,9 +84,8 @@ const updateStock = async(req,res)=>{
           status,
         });
         res.json({ success: true });
-    }catch(error){
-        console.error('Stock update error:',error);
-        res.status(500).json('error',{message:'Failed to update product stock'});
+    }catch(err){
+        next(err);
     }
 }
 
@@ -106,8 +102,7 @@ const updateProductStatus = async (req, res) => {
       await Product.findByIdAndUpdate(productId, { status });
       res.json({ success: true });
     } catch (error) {
-      console.error('Error updating product status:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
+      next(err);
     }
   };
 

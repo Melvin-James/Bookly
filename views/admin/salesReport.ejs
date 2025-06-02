@@ -18,6 +18,25 @@
   </div>
   <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-[#005f66] transition">Apply Filter</button>
 </form>
+<div class="flex flex-wrap gap-4 mb-6">
+  <form action="/admin/sales-report/download/pdf" method="GET">
+    <input type="hidden" name="filter" value="<%= filter %>">
+    <input type="hidden" name="from" value="<%= from %>">
+    <input type="hidden" name="to" value="<%= to %>">
+    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
+      Download PDF
+    </button>
+  </form>
+
+  <form action="/admin/sales-report/download/excel" method="GET">
+    <input type="hidden" name="filter" value="<%= filter %>">
+    <input type="hidden" name="from" value="<%= from %>">
+    <input type="hidden" name="to" value="<%= to %>">
+    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+      Download Excel
+    </button>
+  </form>
+</div>
 
 
 

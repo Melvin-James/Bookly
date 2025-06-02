@@ -471,8 +471,8 @@
                 $.ajax({
                 url: '/user/signup',
                 method: 'POST',
-                contentType: 'application/json',  // Send as JSON
-                data: JSON.stringify(formData),   // Convert JS object to JSON string
+                contentType: 'application/json',  
+                data: JSON.stringify(formData),
                 success: function (res) {
                     showToast('OTP sent to your email successfully!', 'success');
                     goToStep(1);

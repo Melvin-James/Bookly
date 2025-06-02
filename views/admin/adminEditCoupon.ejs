@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Coupon</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 40px;">
+
+  <div style="max-width: 700px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Edit Coupon</h1>
+
+    <form id="editCouponForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+      <div style="display: flex; flex-direction: column;">
+        <label for="code" style="margin-bottom: 6px;">Coupon Code</label>
+        <input type="text" id="code" name="code" value="<%= coupon.code %>" required
+          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <label for="discountType" style="margin-bottom: 6px;">Discount Type</label>
+        <select id="discountType" name="discountType" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+          <option value="Flat" <%= coupon.discountType === 'Flat' ? 'selected' : '' %>>Flat</option>
+          <option value="Percentage" <%= coupon.discountType === 'Percentage' ? 'selected' : '' %>>Percentage</option>
+        </select>
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <label for="discountAmount" style="margin-bottom: 6px;">Discount Amount</label>
+        <input type="number" id="discountAmount" step="0.01" name="discountAmount" value="<%= coupon.discountAmount %>" required
+          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <label for="maxDiscount" style="margin-bottom: 6px;">Max Discount (for % type)</label>
+        <input type="number" id="maxDiscount" step="0.01" name="maxDiscount" value="<%= coupon.maxDiscount || '' %>"
+          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <label for="minCartAmount" style="margin-bottom: 6px;">Minimum Cart Amount</label>
+        <input type="number" id="minCartAmount" step="0.01" name="minCartAmount" value="<%= coupon.minCartAmount %>"
+          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <label for="usageLimit" style="margin-bottom: 6px;">Usage Limit</label>
+        <input type="number" id="usageLimit" name="usageLimit" value="<%= coupon.usageLimit %>" min="1"
+          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <label for="expiresAt" style="margin-bottom: 6px;">Expiry Date</label>
+        <input type="date" id="expiresAt" name="expiresAt" value="<%= coupon.expiresAt.toISOString().split('T')[0] %>" required
+          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+      </div>
+
+      <div style="grid-column: span 2;">
+        <button type="submit"
+          style="width: 100%; background-color: #007D8B; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+          Update Coupon
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('editCouponForm');
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch(`/admin/coupons/update/<%= coupon._id %>`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          Swal.fire({
+            toast: true,
+            icon: 'success',
+            title: 'Coupon updated!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        } else if (result.errors) {
+          let errorList = Object.values(result.errors).join('\n');
+          Swal.fire({ icon: 'error', title: 'Validation Error', text: errorList });
+        } else {
+          throw new Error(result.message || 'Unknown error');
+        }
+
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Error', text: err.message });
+      }
+    });
+  </script>
+</body>
+</html>

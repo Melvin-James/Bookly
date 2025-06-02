@@ -16,9 +16,11 @@
       <h2 class="text-2xl sm:text-3xl font-extrabold theme mb-2">Hello, <%= userData.name %></h2>
       <div class="text-gray-700 space-y-2 text-sm sm:text-base">
         <p class="flex items-center gap-2">
+          
           <span><strong>Email:</strong> <%= userData.email %></span>
       </p>
       <p class="flex items-center gap-2">
+        
         <span><strong>Phone:</strong> <%= userData.phone %></span>
     </p>
       </div>
@@ -28,6 +30,7 @@
   <!-- Address Section -->
   <div class="border-t border-gray-200 pt-6">
     <h3 class="text-xl font-semibold theme mb-4 flex items-center gap-2">
+      
       Saved Addresses
    </h3>
 
@@ -38,6 +41,7 @@
             <p class="font-semibold text-primary mb-2"><%= addr.addressType %> Address</p>
             <div class="text-gray-700 text-sm space-y-2">
               <p class="flex items-center gap-2">
+                
                 <%= addr.name %>
               </p>
 
@@ -84,14 +88,14 @@
 
 <div class="form-group">
   <label class="text-[#007D8B] font-bold">Wallet Balance</label>
-   <div style="display: flex; align-items: center;"></div>
-      <input 
-        type="text" 
-        value="₹ <%= userData.wallet.toFixed(2) %>" 
-        readonly 
-        class="form-control border-2 border-[#007D8B] text-[#007D8B] font-medium px-3 py-2 rounded-md"
-      >
-    </div>
+  <div style="display: flex; align-items: center;">
+    <input 
+    type="text" 
+    value="₹ <%= userData.wallet.toFixed(2) %>" 
+    readonly 
+    class="form-control border-2 border-[#007D8B] text-[#007D8B] font-medium px-3 py-2 rounded-md"
+    >
+  </div>
 </div>
 
 </div>

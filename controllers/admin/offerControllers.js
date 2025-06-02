@@ -15,8 +15,7 @@ const getOfferPage = async (req, res) => {
       categories,
     });
   } catch (err) {
-    console.error('Error loading offer page:', err);
-    res.status(500).render('error', { message: 'Failed to load offer management page' });
+    next(err);
   }
 };
 
@@ -52,11 +51,7 @@ const applyProductOffer = async (req, res) => {
       product: updatedProduct
     });
   } catch (err) {
-    console.error('Error applying product offer:', err);
-    res.status(400).json({
-      success: false,
-      message: err.message || 'Failed to apply product offer'
-    });
+    next(err);
   }
 };
 
@@ -81,11 +76,7 @@ const applyCategoryOffer = async (req, res) => {
       category: updatedCategory
     });
   } catch (err) {
-    console.error('Error applying category offer:', err);
-    res.status(400).json({
-      success: false,
-      message: err.message || 'Failed to apply category offer'
-    });
+    next(err);
   }
 };
 
@@ -107,11 +98,7 @@ const removeProductOffer = async (req, res) => {
       productId: updatedProduct._id
     });
   } catch (err) {
-    console.error('Error removing product offer:', err);
-    res.status(400).json({
-      success: false,
-      message: err.message || 'Failed to remove product offer'
-    });
+    next(err);
   }
 };
 
@@ -133,11 +120,7 @@ const removeCategoryOffer = async (req, res) => {
       categoryId: updatedCategory._id
     });
   } catch (err) {
-    console.error('Error removing category offer:', err);
-    res.status(400).json({
-      success: false,
-      message: err.message || 'Failed to remove category offer'
-    });
+    next(err);
   }
 };
 

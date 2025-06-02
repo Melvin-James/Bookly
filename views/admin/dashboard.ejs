@@ -1,1 +1,151 @@
-<h2>Hello admin, welcome to the dashboard</h2>
+<div class="space-y-6">
+    <!-- Welcome Section -->
+    <div class="bg-gradient-to-r from-primary to-primary-hover rounded-xl p-6 text-white">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold mb-2">Welcome back, Admin!</h1>
+                <p class="text-white/80">Here's what's happening with your store today.</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <div class="bg-white/20 rounded-lg p-3 text-center">
+                    <p class="text-sm opacity-80">Today's Date</p>
+                    <p class="font-semibold" id="currentDate"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Customers</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">1,234</p>
+                    <p class="text-green-600 text-sm mt-1">
+                        <i class="ri-arrow-up-line"></i> +12% from last month
+                    </p>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="ri-user-line text-2xl text-blue-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Products</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">567</p>
+                    <p class="text-green-600 text-sm mt-1">
+                        <i class="ri-arrow-up-line"></i> +8% from last month
+                    </p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-lg">
+                    <i class="ri-book-2-line text-2xl text-green-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Orders</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">890</p>
+                    <p class="text-red-600 text-sm mt-1">
+                        <i class="ri-arrow-down-line"></i> -3% from last month
+                    </p>
+                </div>
+                <div class="bg-orange-100 p-3 rounded-lg">
+                    <i class="ri-shopping-cart-line text-2xl text-orange-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Revenue</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">₹45,678</p>
+                    <p class="text-green-600 text-sm mt-1">
+                        <i class="ri-arrow-up-line"></i> +15% from last month
+                    </p>
+                </div>
+                <div class="bg-purple-100 p-3 rounded-lg">
+                    <i class="ri-money-dollar-circle-line text-2xl text-purple-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <a href="/admin/products" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="ri-add-line text-xl text-primary"></i>
+                    <span class="font-medium">Add Product</span>
+                </a>
+                <a href="/admin/category" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="ri-folder-add-line text-xl text-primary"></i>
+                    <span class="font-medium">Add Category</span>
+                </a>
+                <a href="/admin/orders" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="ri-eye-line text-xl text-primary"></i>
+                    <span class="font-medium">View Orders</span>
+                </a>
+                <a href="/admin/sales-report" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="ri-bar-chart-line text-xl text-primary"></i>
+                    <span class="font-medium">Sales Report</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div class="bg-green-100 p-2 rounded-full">
+                        <i class="ri-shopping-bag-line text-green-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-sm">New order received</p>
+                        <p class="text-gray-500 text-xs">Order #12345 - ₹1,299</p>
+                    </div>
+                    <span class="text-xs text-gray-400">2 min ago</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div class="bg-blue-100 p-2 rounded-full">
+                        <i class="ri-user-add-line text-blue-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-sm">New customer registered</p>
+                        <p class="text-gray-500 text-xs">John Doe joined</p>
+                    </div>
+                    <span class="text-xs text-gray-400">5 min ago</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div class="bg-orange-100 p-2 rounded-full">
+                        <i class="ri-alert-line text-orange-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-sm">Low stock alert</p>
+                        <p class="text-gray-500 text-xs">Product ABC running low</p>
+                    </div>
+                    <span class="text-xs text-gray-400">10 min ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set current date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+</script>

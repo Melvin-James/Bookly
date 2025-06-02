@@ -1,5 +1,52 @@
 const Coupon = require('../../models/couponSchema');
 
+const loadEditCoupon = async (req,res)=>{
+    try{
+        const coupon = await Coupon.findById(req.params.id);
+        if(!coupon) return res.redirect('/admin/coupons');
+
+        res.render('adminEditCoupon',{coupon, errors:{}});
+    }catch(err){
+        next(err)
+    }
+};
+
+const updateCoupon = async(req,res)=>{
+    try{
+
+        const id = req.params.id;
+        if (!id) throw new Error('Coupon ID is missing from request params');
+
+        const {code, discountType, discountAmount, minCartAmount, maxDiscount, expiresAt, usageLimit} = req.body;
+        const errors = {};
+
+        if(!code?.trim()) errors.code ='Code is required';
+        if(!discountType || !['Flat', 'Percentage'].includes(discountType)) errors.discountType = 'Invalid discount type';
+        if(!discountAmount || discountAmount <= 0) errors.discountAmount = 'Discount must be greater than 0';
+        if(!expiresAt || new Date(expiresAt) < new Date()) errors.expiresAt = 'Expiry must be in the future';
+
+        if(discountType === 'Percentage' && (!maxDiscount || maxDiscount <=0)){
+            errors.maxDiscount = 'Max discount is required for percentage type';
+        }
+
+        if(Object.keys(errors).length > 0) return res.status(400).json({success: false, errors});
+
+        await Coupon.findByIdAndUpdate(req.params.id,{
+            code:code.trim().toUpperCase(),
+            discountType,
+            discountAmount,
+            minCartAmount,
+            maxDiscount:discountType === 'Percentage' ? maxDiscount : undefined,
+            expiresAt,
+            usageLimit,
+        });
+
+        res.json({success:true});
+    }catch(err){
+        next(err);
+    }
+};
+
 const getCouponPage = async (req,res)=>{
     try{
         const coupons = await Coupon.find().sort({createdAt:-1});
@@ -10,8 +57,7 @@ const getCouponPage = async (req,res)=>{
             req,
         });
     }catch(err){
-        console.error('Failed to load coupons:',err);
-        res.status(500).render('error',{message : 'Failed to load coupon list'});
+        next(err);
     };
 }
 
@@ -45,8 +91,7 @@ const createCoupon = async (req,res)=>{
         await coupon.save();
         res.redirect('/admin/coupons?created=true');
     }catch(error){
-        console.error('Error creating coupon:',error);
-        res.status(500).render('error',{message:'Failed to create coupon'});
+        next(err);
     }
 };
 
@@ -61,8 +106,19 @@ const deleteCoupon = async(req,res)=>{
         res.json({success:true});
     }
     catch(error){
-        console.error('Failed to delete coupon:','error');
-        res.status(500).json({success:false,message:'Error deleting coupon'});
+        next(err);
+    }
+};
+
+const editCoupon = async(req,res)=>{
+    try{
+        const {id} = req.params;
+        const updateFields = req.body;
+
+        await Coupon.findByIdAndUpdate(id,updateFields,{runValidators:true});
+        res.redirect('/admin/coupons?updated=true');
+    }catch(error){
+        next(err);
     }
 };
 
@@ -70,4 +126,7 @@ module.exports ={
     getCouponPage,
     createCoupon,
     deleteCoupon,
+    loadEditCoupon,
+    updateCoupon,
+    editCoupon,
 }

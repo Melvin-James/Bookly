@@ -6,8 +6,7 @@ const customerInfo = async (req, res) => {
         res.render('layout', {body:'customers',users});
 
     } catch (error) {
-        console.error("Error in customerInfo:", error);
-        res.status(500).render('error', { message: "Failed to load customer data" });
+        next(err);
     }
 };
 
@@ -21,7 +20,7 @@ const toggleBlockStatusCustomer = async (req, res) => {
   
       res.json({ success: true, isBlocked: user.isBlocked });
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Server error' });
+      next(err);
     }
 };
 
@@ -35,10 +34,8 @@ const searchCustomers = async(req,res)=>{
         ]
       }).sort({createdAt:-1});
       res.json({users});
-    }catch(error){
-      console.error('Search error:',error);
-      res.status(500).json({error:'Internal server Error'});
-
+    }catch(err){
+      next(err);
     }
 };
 
@@ -69,9 +66,8 @@ const getPaginatedUsers = async (req, res) => {
     const totalPages = Math.ceil(totalUsers / limit);
 
     res.json({ users, totalPages, currentPage: page });
-  } catch (error) {
-    console.error('Pagination error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+  } catch (err) {
+    next(err);
   }
 };
 

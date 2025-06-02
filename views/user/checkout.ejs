@@ -293,8 +293,20 @@
           },
           modal: {
             ondismiss: function () {
-              window.location.href = '/user/order-failure'; 
-          }
+              fetch('/user/place-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  paymentMethod: 'Online',
+                  status: 'Failed',
+                  addressId: document.querySelector('input[name="addressId"]').value
+                })
+              }).then(() => {
+                window.location.href = '/user/order-failure';
+              }).catch(() => {
+                alert('Failed to log failed order.');
+              });
+            }
           }
         }
         const rzp = new Razorpay(razorpayOptions);

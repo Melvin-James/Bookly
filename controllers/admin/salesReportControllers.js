@@ -47,9 +47,8 @@ const getSalesReport = async(req,res)=>{
             from,
             to
         });
-    }catch(error){
-        console.error('Error generating filtered sales report:',error);
-        res.status(500).render('error',{message:'Failed to filter sales report.'});
+    }catch(err){
+        next(err);
     }
 };
 
@@ -77,9 +76,8 @@ const downloadSalesReportPDF = async(req,res)=>{
         });
 
         doc.end();
-    }catch(error){
-        console.error('PDF error:',error);
-        res.status(500).render('error',{message:'Failed to generate PDF'});
+    }catch(err){
+        next(err)
     }
 }
 
@@ -115,8 +113,7 @@ const downloadSalesReportExcel = async(req,res)=>{
         await workbook.xlsx.write(res);
         res.end();
     }catch(error){
-        console.error('Excel error:',error);
-        res.status(500).render('error',{message:'Failed to generate Excel Report'})
+        next(err);
     }
 }
 

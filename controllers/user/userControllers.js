@@ -7,7 +7,6 @@ const bcrypt = require("bcrypt")
 const crypto = require("crypto")
 const generateReferralCode = require('../../utils/generateReferralCode');
 
-
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -23,9 +22,8 @@ const loadSignup = (req, res) => {
     path: "/signup",
     googleClientId: process.env.GOOGLE_CLIENT_ID
   });
-  } catch (error) {
-    console.error("Error loading signup page:", error)
-    res.status(500).render("error", { message: "Failed to load signup page" })
+  } catch (err) {
+    next(err);
   }
 }
 
@@ -117,8 +115,7 @@ const signupStep1 = async (req, res) => {
     await transporter.sendMail(mailOptions)
     return res.json({ success: true })
   } catch (err) {
-    console.error("Signup error:", err)
-    return res.status(500).json({ errors: { general: "Failed to process signup. Try again later." } })
+    next(err);
   }
 }
 
@@ -165,9 +162,8 @@ const googleSignIn = async (req, res) => {
 
       return res.json({ success: true, message: "Account created successfully", redirect: "/user/home" })
     }
-  } catch (error) {
-    console.error("Google Sign-In Error:", error)
-    return res.status(500).json({ error: "Failed to process Google sign-in. Please try again." })
+  } catch (err) {
+    next(err);
   }
 }
 
@@ -175,7 +171,6 @@ const verifyOtp = async (req, res) => {
   const { otp } = req.body
   const { tempUser } = req.session
 
-  // Validate OTP
   if (!otp) {
     return res.status(400).json({ error: "OTP is required." })
   }
@@ -201,14 +196,14 @@ const verifyOtp = async (req, res) => {
       phone: tempUser.phone,
       password: tempUser.password,
       referredBy,
-      referralCode: generateReferralCode(tempUser.name), // helper function
-      wallet: referredBy ? 50 : 0 // ₹50 for new user if referred
+      referralCode: generateReferralCode(tempUser.name), 
+      wallet: referredBy ? 50 : 0 
     })
 
     if (referredBy) {
       const referrer = await User.findById(referredBy);
       if (referrer) {
-        referrer.wallet += 100; // ₹100 for referrer
+        referrer.wallet += 100;
         await referrer.save();
       }
     }
@@ -216,8 +211,7 @@ const verifyOtp = async (req, res) => {
     req.session.tempUser = null
     return res.json({ success: true, referralRewarded: true });
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: "Signup failed." })
+    next(err);
   }
 }
 
@@ -231,12 +225,11 @@ const resendOtp = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
-    const otpExpires = Date.now() + 3 * 60 * 1000 // 5 minutes
+    const otpExpires = Date.now() + 3 * 60 * 1000
     console.log('resend otp for signup:',otp);
     req.session.tempUser.otp = otp
     req.session.tempUser.otpExpires = otpExpires
 
-    // Send verification email
     const mailOptions = {
       from: process.env.NODEMAILER_EMAIL,
       to: tempUser.email,
@@ -250,11 +243,8 @@ const resendOtp = async (req, res) => {
       success: true,
       message: "New OTP sent to your email",
     })
-  } catch (error) {
-    console.error("Resend OTP error:", error)
-    res.status(500).json({
-      error: "Failed to resend OTP. Please try again.",
-    })
+  } catch (err) {
+    next(err);
   }
 }
 
@@ -302,8 +292,7 @@ const homePage = async (req, res) => {
 
     res.render("homePage", { products, userData: user })
   } catch (err) {
-    console.error(err)
-    res.status(500).render("error", { message: "Server Error" })
+    next(err);
   }
 }
 
@@ -314,9 +303,8 @@ const loadLogin = async (req, res) => {
     } else {
       return res.redirect("/user/home")
     }
-  } catch (error) {
-    console.error("Login Page Error:", error)
-    return res.redirect("/pageNotFound")
+  } catch (err) {
+    next(err);
   }
 }
 
@@ -334,6 +322,7 @@ const login = async (req, res) => {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    
     if (email && !emailRegex.test(email)) {
       errors.email = { msg: "Invalid email format" }
     }
@@ -375,12 +364,8 @@ const login = async (req, res) => {
     }
 
     return res.redirect("/user/home")
-  } catch (error) {
-    console.error("Login Error:", error)
-    return res.render("login", {
-      errors: { login: { msg: "Something went wrong, try again!" } },
-      formData: { email: req.body.email },
-    })
+  } catch (err) {
+    next(err);
   }
 }
 
@@ -413,12 +398,10 @@ const forgotPassword = async (req, res) => {
 
     const resetToken = crypto.randomBytes(32).toString("hex")
 
-    // Store token in session (instead of database)
     req.session.resetToken = resetToken
     req.session.resetEmail = email
-    req.session.resetTokenExpiration = Date.now() + 3600000 // Token valid for 1 hour
+    req.session.resetTokenExpiration = Date.now() + 3600000 
 
-    // Send reset email
     const resetLink = `http://localhost:3000/user/reset-password?token=${resetToken}`
     const mailOptions = {
       from: process.env.NODEMAILER_EMAIL,
@@ -432,9 +415,8 @@ const forgotPassword = async (req, res) => {
     await transporter.sendMail(mailOptions)
 
     return res.json({ success: true, redirectTo: "/user/forgot-password" })
-  } catch (error) {
-    console.error("forgot-password error:", error)
-    res.status(500).json({ error: "An error occured. please try again." })
+  } catch (err) {
+    next(err)
   }
 }
 
@@ -455,14 +437,12 @@ const resetPassword = async (req, res) => {
     const { newPassword, confirmPassword } = req.body
     const errors = {}
 
-    // Validate session
     if (!req.session.resetEmail) {
       return res.redirect("/user/forgot-password")
     }
 
     const email = req.session.resetEmail
 
-    // Validate passwords
     if (!newPassword || newPassword.length < 6) {
       errors.newPassword = "Password must be at least 6 characters"
     }
@@ -475,7 +455,6 @@ const resetPassword = async (req, res) => {
       return res.render("reset-password", { errors, email })
     }
 
-    // Find user and update password
     const user = await User.findOne({ email })
     if (!user) {
       return res.render("reset-password", {
@@ -487,18 +466,13 @@ const resetPassword = async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10)
     await user.save()
 
-    // Clear session data after successful password reset
     req.session.resetToken = undefined
     req.session.resetEmail = undefined
     req.session.resetTokenExpiration = undefined
 
     res.redirect("/user/login")
-  } catch (error) {
-    console.error("Reset Password Error:", error)
-    res.render("reset-password", {
-      errors: { newPassword: "Something went wrong, try again!" },
-      email: "",
-    })
+  } catch (err) {
+    next(err)
   }
 }
 

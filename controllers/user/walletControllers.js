@@ -11,9 +11,8 @@ const getWalletPage = async(req,res)=>{
             walletBalance:user.wallet || 0,
             walletTransactions : user.walletTransactions,
         });
-    }catch(error){
-        console.error('Failed to load wallet page:',error);
-        res.status(500).render('error:',{message:'Cannot load wallet at the moment'});
+    }catch(err){
+        next(err);
     }
 }
 

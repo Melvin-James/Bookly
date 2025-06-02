@@ -1,34 +1,90 @@
-<aside class="bg-[#007D8B] text-white w-55 min-h-screen p-4">
-    <h2 class="text-xl font-bold mb-6">Bookly Admin</h2>
+<aside id="sidebar" class="bg-primary text-white w-64 min-h-screen fixed md:static z-30 -translate-x-full md:translate-x-0 sidebar-transition">
+    <div class="flex items-center justify-between p-4 border-b border-white/10">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+            <i class="ri-book-open-line text-2xl"></i>
+            Bookly Admin
+        </h2>
+        <button id="close-sidebar" class="md:hidden text-white">
+            <i class="ri-close-line text-2xl"></i>
+        </button>
+    </div>
 
-    <nav>
-        <ul class="space-y-4">
+    <div class="p-4">
+        <div class="bg-white/10 rounded-lg p-3 mb-6 flex items-center gap-3">
+            <div class="bg-white/20 rounded-full p-2">
+                <i class="ri-user-line text-xl"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium">Melvin</p>
+                <p class="text-xs opacity-70">Administrator</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="px-2">
+        <p class="text-xs uppercase text-white/50 px-3 mb-2 mt-2">Main Menu</p>
+        <ul class="space-y-1">
             <li>
-                <a href="/admin/dashboard" class="block p-2 rounded hover:bg-blue-700">Dashboard</a>
+                <a href="/admin/dashboard" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-dashboard-line text-lg"></i>
+                    <span>Dashboard</span>
+                </a>
             </li>
             <li>
-                <a href="/admin/users" class="block p-2 rounded hover:bg-blue-700">Customers</a>
+                <a href="/admin/users" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-user-line text-lg"></i>
+                    <span>Customers</span>
+                </a>
             </li>
             <li>
-                <a href="/admin/products" class="block p-2 rounded hover:bg-blue-700">Products</a>
+                <a href="/admin/products" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-book-2-line text-lg"></i>
+                    <span>Products</span>
+                </a>
             </li>
             <li>
-                <a href="/admin/category" class="block p-2 rounded hover:bg-blue-700">Categories</a>
+                <a href="/admin/category" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-folder-line text-lg"></i>
+                    <span>Categories</span>
+                </a>
             </li>
             <li>
-                <a href="/admin/orders" class="block p-2 rounded hover:bg-blue-700">Orders</a>
+                <a href="/admin/orders" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-shopping-cart-line text-lg"></i>
+                    <span>Orders</span>
+                </a>
             </li>
             <li>
-                <a href="/admin/inventory" class="block p-2 rounded hover:bg-blue-700">Stock</a>
+                <a href="/admin/inventory" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-stack-line text-lg"></i>
+                    <span>Stock</span>
+                </a>
+            </li>
+        </ul>
+
+        <p class="text-xs uppercase text-white/50 px-3 mb-2 mt-6">Marketing</p>
+        <ul class="space-y-1">
+            <li>
+                <a href="/admin/coupons" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-coupon-line text-lg"></i>
+                    <span>Coupons</span>
+                </a>
             </li>
             <li>
-                <a href="/admin/coupons" class="block p-2 rounded hover:bg-blue-700">Coupons</a>
+                <a href="/admin/offers" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-gift-line text-lg"></i>
+                    <span>Offers</span>
+                </a>
             </li>
+        </ul>
+
+        <p class="text-xs uppercase text-white/50 px-3 mb-2 mt-6">Reports</p>
+        <ul class="space-y-1">
             <li>
-                <a href="/admin/offers" class="block p-2 rounded hover:bg-blue-700">offers</a>
-            </li>
-            <li>
-                <a href="/admin/sales-report" class="block p-2 rounded hover:bg-blue-700">Sales Report</a>
+                <a href="/admin/sales-report" class="nav-item flex items-center gap-3 p-3 rounded-md hover:bg-white/10 transition-all">
+                    <i class="ri-line-chart-line text-lg"></i>
+                    <span>Sales Report</span>
+                </a>
             </li>
         </ul>
     </nav>

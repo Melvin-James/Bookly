@@ -1,4 +1,5 @@
 require('dotenv').config();
+const morgan = require('morgan');
 const express = require("express");
 const session = require('express-session');
 const db = require('./config/db');
@@ -6,7 +7,8 @@ const app = express();
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const path = require('path');
-const flash = require('connect-flash'); 
+const flash = require('connect-flash');
+const errorHandler = require('./middlewares/ErrorHandler'); 
 
 db();
 
@@ -25,7 +27,11 @@ app.use(session({
     }
 }));
 
+app.use(errorHandler);
+
 app.use(flash());
+
+app.use(morgan('dev'));
 
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');

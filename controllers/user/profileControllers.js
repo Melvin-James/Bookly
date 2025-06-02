@@ -93,9 +93,8 @@ const downloadInvoice = async (req, res) => {
 
     doc.end();
 
-  } catch (error) {
-    console.error('Invoice Download Error:', error);
-    res.status(500).render('error', { message: 'Failed to generate invoice' });
+  } catch (err) {
+    next(err)
   }
 };
 
@@ -109,9 +108,8 @@ const getAllAddresses = async(req,res)=>{
             userData:req.session.user,
             addressData:userAddresses?.address || []
         });
-    }catch(error){
-        console.error('Error loading addresses:',error);
-        res.status(500).render('error',{message:'Failed to load addresses'});
+    }catch(err){
+       next(err)
     }
 };
 
@@ -124,8 +122,7 @@ const getAddAddressPage = (req,res)=>{
             formAction:'/user/profile/addresses/add'
         });
     }catch(error){
-        console.error('Error loading add address page:',error);
-        res.status(500).render('error',{message:'Add address page failed'});
+        next(err);
     }
 };
 
@@ -164,8 +161,7 @@ const postAddAddress = async(req,res)=>{
 
     res.redirect('/user/profile/addresses');
 }catch(error){
-    console.error('Error adding address:',error);
-    res.render(500).render('error',{message:'Failed to add address'});
+    next(err);
 }
 };
 
@@ -185,9 +181,8 @@ const getEditAddressPage = async (req,res)=>{
             address:addressToEdit,
             formAction:`/user/profile/addresses/edit/${addressId}`
         });
-    }catch(error){
-        console.error('Error loading address for edit:',error);
-        res.status(500).render('error',{message:'failed to load address for editing'});
+    }catch(err){
+       next(err)
     }
 };
 
@@ -211,9 +206,8 @@ const postEditAddress = async(req,res)=>{
 
         await userAddresses.save();
         res.redirect('/user/profile/addresses');
-    }catch(error){
-        console.error('Error updating address:',error);
-        res.status(500).render('error',{message:'Failed to update address'});
+    }catch(err){
+        next(err);
     }
 };
 
@@ -230,9 +224,8 @@ const deleteAddress = async(req,res)=>{
 
         await userAddresses.save();
         res.redirect('/user/profile/addresses');
-    }catch(error){
-        console.error('Error deleting address:',error);
-        res.status(500).render('error',{message:'Failed to delete address'});
+    }catch(err){
+        next(err);
     }
 };
 
@@ -245,9 +238,8 @@ const getProfilePage = async(req,res)=>{
             userData,
             addressData: addressData?.address || []
         })
-    }catch(error){
-        console.error(error);
-        res.status(500).render('error', { message: "can't get user profile" });
+    }catch(err){
+        next(err);
     }
 }
 
@@ -256,9 +248,8 @@ const getEditProfile = async(req,res)=>{
         const user = req.session.user;
         const userData = await User.findById(user._id)
         res.render('userLayout',{body:'editProfile',userData});
-    }catch(error){
-        console.error(error);
-        res.status(500).render('error',{message:"Can't load edit profile page"});
+    }catch(err){
+        next(err);
     }
 }
 
@@ -311,9 +302,8 @@ const postEditProfile = async (req, res) => {
       });
   
       res.redirect('/user/profile');
-    } catch (error) {
-      console.error("Edit profile error:", error);
-      res.status(500).render("error", { message: "Error updating profile." });
+    } catch (err) {
+      next(err);
     }
 };
 
@@ -349,9 +339,8 @@ const postVerifyOtp = async (req, res) => {
         userData,
         error: "Invalid or expired OTP. Please try again."
       });
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      res.status(500).render("error", { message: "OTP verification failed." });
+    } catch (err) {
+      next(err);
     }
 };
 
@@ -393,9 +382,8 @@ const postChangePassword = async(req,res)=>{
             userData,
             success:'Password changed successfully',
         });
-    }catch(error){
-        console.error('Password change error:',error);
-        res.status(500).render('error',{message:'Password update failed'});
+    }catch(err){
+        next(err);
     }
 };
 
@@ -420,9 +408,8 @@ const getOrdersPage = async(req,res)=>{
             userData:req.session.user,
             orders
           });
-    }catch(error){
-        console.error('Failed to load orders:',error);
-        res.status(500).render('error',{message:'could not load order history.'});
+    }catch(err){
+        next(err);
     }
 };
 
@@ -443,9 +430,8 @@ const getOrderDetails = async(req,res)=>{
             userData:req.session.user,
             order
         });
-    }catch(error){
-        console.error('Error loading order details:',error);
-        res.status(500).render('error',{message:'Failed to load order details'});
+    }catch(err){
+        next(err);
     }
 };
 
@@ -496,9 +482,8 @@ const cancelOrder = async (req, res) => {
     }
 
     return res.status(200).json({ success: true, message: 'Order cancelled and amount refunded (if applicable)' });
-  } catch (error) {
-    console.error('Cancel order error:', error);
-    return res.status(500).json({ success: false, message: 'Server error' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -522,8 +507,7 @@ const returnOrder = async (req, res) => {
       res.json({ success: true, message: 'Return request submitted successfully' });
   
     } catch (error) {
-      console.error('Return order error:', error);
-      res.status(500).json({ success: false, message: 'Failed to submit return request' });
+      next(err);
     }
 };
   
@@ -578,8 +562,7 @@ const cancelOrderItem = async (req, res) => {
     return res.json({ success: true, message: 'Product cancelled successfully.' });
 
   } catch (error) {
-    console.error("Cancel Item Error:", error);
-    return res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(err);
   }
 };
 

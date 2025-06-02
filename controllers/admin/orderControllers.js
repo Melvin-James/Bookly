@@ -1,6 +1,7 @@
 const User = require('../../models/userSchema');
 const Order = require('../../models/orderSchema');
 const Product = require('../../models/productSchema');
+
 const getAdminOrders = async (req, res) => {
   try {
     const orders = await Order.find()
@@ -12,12 +13,10 @@ const getAdminOrders = async (req, res) => {
       orders,
       adminData: req.session.admin
     });
-  } catch (error) {
-    console.error('Admin Orders Fetch Error:', error);
-    res.status(500).render('error', { message: 'Failed to load admin orders' });
+  } catch (err) {
+    next(err);
   }
 };
-
 
 const getAdminOrderDetails = async (req, res) => {
   try {
@@ -39,9 +38,8 @@ const getAdminOrderDetails = async (req, res) => {
       returnStatus,
     });
 
-  } catch (error) {
-    console.error('Error loading Admin Order Details:', error);
-    res.status(500).render('error', { message: 'Failed to load order details.' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -64,7 +62,7 @@ const updateOrderStatus = async (req, res) => {
       return res.status(404).render('error', { message: 'Order not found.' });
     }
 
-   if (order.status === 'Delivered' || order.status === 'Returned' || order.status === 'Cancelled'){
+   if (order.status === 'Delivered' || order.status === 'Returned' || order.status === 'Cancelled' || order.status === 'Failed'){
     return res.status(400).render('error', { message: `Cannot modify an order that is already ${order.status}.` });
    }
 
@@ -73,12 +71,10 @@ const updateOrderStatus = async (req, res) => {
 
     res.redirect(`/admin/orders/${orderId}?statusUpdated=true`);
     
-  } catch (error) {
-    console.error('Error updating order status:', error);
-    res.status(500).render('error', { message: 'Failed to update order status.' });
+  } catch (err) {
+    next(err);
   }
 };
-
 
 const approveReturnRequest = async (req, res) => {
   try {
@@ -116,9 +112,8 @@ const approveReturnRequest = async (req, res) => {
 
     res.redirect(`/admin/orders/${orderId}?returnStatus=approved`);
     
-  } catch (error) {
-    console.error('Error approving return request:', error);
-    res.status(500).render('error', { message: 'Failed to approve return request.' });
+  } catch (err) {
+    next(err)
   }
 };
 
@@ -138,11 +133,9 @@ const rejectReturnRequest = async (req, res) => {
 
     res.redirect(`/admin/orders/${orderId}?returnStatus=rejected`);
   } catch (error) {
-    console.error('Error rejecting return request:', error);
-    res.status(500).render('error', { message: 'Failed to reject return request.' });
+    next(err);
   }
 };
-
 
 module.exports = {
   getAdminOrders,

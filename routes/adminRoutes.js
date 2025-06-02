@@ -58,6 +58,8 @@ router.post('/inventory/update-status/:productId', adminAuth, inventoryControlle
 router.get('/coupons',adminAuth,couponControllers.getCouponPage);
 router.post('/coupons/create',adminAuth,couponControllers.createCoupon);
 router.post('/coupons/delete/:id',adminAuth,couponControllers.deleteCoupon);
+router.get('/coupons/edit/:id',adminAuth,couponControllers.loadEditCoupon);
+router.post('/coupons/update/:id',adminAuth,couponControllers.updateCoupon);
 
 
 router.get('/offers', adminAuth, offerControllers.getOfferPage);

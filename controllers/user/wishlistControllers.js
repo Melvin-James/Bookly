@@ -11,9 +11,8 @@ const getWishlistPage = async(req,res)=>{
             userData:req.session.user,
             wishlistItems:user.wishlist
         });
-    }catch(error){
-        console.error('Error loading wishlist:',error);
-        res.status(500).render('error',{message:'Failed to load wishlist.'});
+    }catch(err){
+       next(err)
     }
 };
 
@@ -37,9 +36,8 @@ const toggleWishlist = async(req,res)=>{
             await user.save();
             return res.json({success:true, message:'Added to wishlist'});
         }
-    }catch(error){
-        console.error('Wishlist toggle error:',error);
-        res.status(500).json({success:false, message:'Server error'});
+    }catch(err){
+        next(err);
     }
 };
 
@@ -66,9 +64,8 @@ const moveToCart = async (req, res) => {
   
       res.json({ success: true, message: 'Moved to cart' });
   
-    } catch (error) {
-      console.error('Error moving to cart:', error);
-      res.status(500).json({ success: false, message: 'Server error' });
+    } catch (err) {
+      next(err);
     }
   };
 

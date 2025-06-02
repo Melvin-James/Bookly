@@ -29,6 +29,7 @@
                   <% } else if (order.status === 'Shipped') { %> bg-blue-400
                   <% } else if (order.status === 'Out for Delivery') { %> bg-green-600
                   <% } else if (order.status === 'Delivered') { %> bg-lime-400
+                  <% } else if (order.status === 'Failed') { %> bg-gray-400
                   <% } else if (order.status === 'Returned') { %> bg-orange-500
                   <% } else if (order.status === 'Cancelled') { %> bg-red-500 <% } %>">
                   <%= order.status %>

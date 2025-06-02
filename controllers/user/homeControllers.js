@@ -150,11 +150,8 @@ const getShopProducts = async function(req, res) {
       }
     });
     
-  } catch (error) {
-    console.error('Error in shop controller:', error);
-    res.status(500).render('error', { 
-      message: 'Something went wrong. Please try again later.' 
-    });
+  } catch (err) {
+    next(err);
   }
 }
 
@@ -182,11 +179,8 @@ const account = async(req,res)=>{
     const {email} = req.body;
     const customer = await Customers.find({email});
     res.render('account',{customer})
-  }catch(error){
-    console.error('Error in shop controller',error);
-    res.status(500).render('error',{
-      message: 'error loading user details'
-    });
+  }catch(err){
+    next(err)
   }
 }
 

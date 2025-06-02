@@ -1,6 +1,7 @@
 const User = require('../../models/userSchema');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const { createStructParentTreeNextKey } = require('pdfkit');
 
 const pageerror = async(req,res)=>{
     res.render('pageerror');
@@ -9,13 +10,12 @@ const pageerror = async(req,res)=>{
 const loadLogin = (req,res)=>{
     try {
         if (!req.session.admin) {
-            return res.render('admin-login', { errors: {}, formData: {} }); // Pass empty errors initially
+            return res.render('admin-login', { errors: {}, formData: {} });
         } else {
             return res.redirect('/admin/dashboard'); 
         }
-    }catch (error) {
-        console.error("adminLogin Page Error:", error);
-        return res.redirect('/pageNotFound');
+    }catch (err) {
+        next(err)
     }
 }
 
@@ -57,9 +57,8 @@ const login = async (req, res) => {
         return res.json({success:true, redirectTo:"/admin/dashboard"});
 
 
-    }catch(error){
-        console.error("Login error:", error);
-        res.status(500).json({ error:"An error occured. please try again." });
+    }catch(err){
+        next(err);
     }
 }
 
@@ -69,11 +68,10 @@ const loadDashboard = async (req, res) => {
     }
     try {
         res.render('layout',{body:'dashboard'});
-    } catch (error) {
-        res.redirect('/pageerror');
+    } catch (err) {
+        next(err);
     }
 };
-
 
 const logout = async(req,res)=>{
     try{
@@ -84,9 +82,8 @@ const logout = async(req,res)=>{
             }
             res.redirect('/admin/login');
         })
-    }catch(error){
-        console.log('unexpected error during logout');
-        res.redirect('/pageerror')
+    }catch(err){
+        next(err);
     }
 }
 

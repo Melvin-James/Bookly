@@ -5,21 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookly - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#007D8B',
+                            hover: '#006B78',
+                            light: '#e6f3f5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-transition {
+            transition: transform 0.3s ease, width 0.3s ease;
+        }
+        .active-nav-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid white;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex">
+<body class="bg-gray-50 flex flex-col md:flex-row min-h-screen">
+
+    <!-- Mobile Sidebar Toggle Button -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-20 hidden"></div>
 
     <!-- Sidebar -->
     <%- include("../partials/sidebar") %>
 
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col w-full">
         <!-- Header -->
         <%- include("../partials/header") %>
 
         <!-- Dynamic Content -->
-        <div class="p-6">
+        <div class="p-4 md:p-6 flex-grow">
             <%- include(body) %>
         </div>
+        
+        <!-- Footer -->
+        <footer class="bg-white p-4 text-center text-gray-500 text-sm border-t">
+            &copy; <%= new Date().getFullYear() %> Bookly Admin Dashboard. All rights reserved.
+        </footer>
     </div>
 
+    <script>
+        // Handle sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            
+            function toggleSidebar() {
+                sidebar.classList.toggle('translate-x-0');
+                sidebar.classList.toggle('-translate-x-full');
+                sidebarOverlay.classList.toggle('hidden');
+            }
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', toggleSidebar);
+            }
+            
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', toggleSidebar);
+            }
+            
+            // Highlight active nav item
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.getAttribute('href') === currentPath) {
+                    item.classList.add('active-nav-item');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

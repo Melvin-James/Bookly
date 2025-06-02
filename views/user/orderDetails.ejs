@@ -18,6 +18,9 @@
       Placed on: <%= new Date(order.createdAt).toLocaleString() %><br />
       Payment Method: <strong><%= order.paymentMethod %></strong><br />
       Total Amount: ₹<%= order.totalAmount.toFixed(2) %>
+      <% if (order.status === 'Failed') { %>
+        <p class="text-red-600 mt-2 font-semibold">⚠️ This order failed due to an online payment issue. Please try again.</p>
+      <% } %>
     </p>
   </div>
 

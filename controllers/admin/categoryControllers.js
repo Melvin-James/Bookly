@@ -4,9 +4,8 @@ const categoryInfo = async (req, res) => {
   try {
     const categories = await Category.find().sort({ createdAt: -1 });
     res.render('layout',{ body:'category',categories });
-  } catch (error) {
-    console.error("Error in categoryInfo:", error);
-    res.status(500).render('pageerror', { message: "Failed to load categories" });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -20,7 +19,7 @@ const toggleBlockStatusCategory = async (req, res) => {
 
     res.json({ success: true, isListed: category.isListed });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    next(err);
   }
 };
 
@@ -31,9 +30,8 @@ const searchCategory = async (req, res) => {
       name: { $regex: query, $options: 'i' }
     }).sort({ createdAt: -1 });
     res.json({ categories });
-  } catch (error) {
-    console.error('Search error:', error);
-    res.status(500).json({ error: 'Internal server Error' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -58,9 +56,8 @@ const getPaginatedCategory = async (req, res) => {
     const totalPages = Math.ceil(totalCategory / limit);
 
     res.json({ categories, totalPages, currentPage: page });
-  } catch (error) {
-    console.error('Pagination error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -71,9 +68,8 @@ const getEditCategory = async(req,res)=>{
       return res.status(404).send('Category not found');
     }
     res.render('category-edit',{category});
-  }catch(error){
-    console.error('Error loading edit page:',error);
-    res.status(500).send('Internal Server Error');
+  }catch(err){
+    next(err);
   }
 }
 
@@ -89,9 +85,8 @@ const updateCategory = async(req,res)=>{
     category.description=description;
     await category.save();
     res.redirect('/admin/category');
-  }catch(error){
-    console.error('Error updating category:',error);
-    res.status(500).send('Failed to update category');
+  }catch(err){
+    next(err);
   }
 };
 
@@ -113,9 +108,8 @@ const addCategory = async (req,res)=>{
     });
     await newCategory.save();
     res.redirect('/admin/category');
-  }catch(error){
-    console.error('Error adding category:',error);
-    res.status(500).send('Internal Server Error');
+  }catch(err){
+    next(err);
   }
 };
 
