@@ -7,7 +7,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const PDFDocument = require('pdfkit');
 
-const downloadInvoice = async (req, res) => {
+const downloadInvoice = async (req, res,next) => {
   try {
     const userId = req.session.user._id;
     const orderId = req.params.id;
@@ -98,7 +98,7 @@ const downloadInvoice = async (req, res) => {
   }
 };
 
-const getAllAddresses = async(req,res)=>{
+const getAllAddresses = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const userAddresses = await Address.findOne({userId});
@@ -113,7 +113,7 @@ const getAllAddresses = async(req,res)=>{
     }
 };
 
-const getAddAddressPage = (req,res)=>{
+const getAddAddressPage = (req,res,next)=>{
     try{
         res.render('userLayout',{
             body:'addAddress',
@@ -126,7 +126,7 @@ const getAddAddressPage = (req,res)=>{
     }
 };
 
-const postAddAddress = async(req,res)=>{
+const postAddAddress = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const{
@@ -165,7 +165,7 @@ const postAddAddress = async(req,res)=>{
 }
 };
 
-const getEditAddressPage = async (req,res)=>{
+const getEditAddressPage = async (req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const addressId = req.params.addressId;
@@ -186,7 +186,7 @@ const getEditAddressPage = async (req,res)=>{
     }
 };
 
-const postEditAddress = async(req,res)=>{
+const postEditAddress = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const addressId = req.params.addressId;
@@ -211,7 +211,7 @@ const postEditAddress = async(req,res)=>{
     }
 };
 
-const deleteAddress = async(req,res)=>{
+const deleteAddress = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const addressId =req.params.addressId;
@@ -229,7 +229,7 @@ const deleteAddress = async(req,res)=>{
     }
 };
 
-const getProfilePage = async(req,res)=>{
+const getProfilePage = async(req,res,next)=>{
     try{
         const user = req.session.user;
         const userData = await User.findById(user._id);
@@ -243,7 +243,7 @@ const getProfilePage = async(req,res)=>{
     }
 }
 
-const getEditProfile = async(req,res)=>{
+const getEditProfile = async(req,res,next)=>{
     try{
         const user = req.session.user;
         const userData = await User.findById(user._id)
@@ -253,7 +253,7 @@ const getEditProfile = async(req,res)=>{
     }
 }
 
-const postEditProfile = async (req, res) => {
+const postEditProfile = async (req, res,next) => {
     try {
       const userId = req.session.user._id;
       const userData = await User.findById(userId);
@@ -314,7 +314,7 @@ res.render("userLayout", {
 });
 };
   
-const postVerifyOtp = async (req, res) => {
+const postVerifyOtp = async (req, res, next) => {
     try {
       const userId = req.session.user._id;
       const userData = await User.findById(userId);
@@ -351,7 +351,7 @@ const getChangePassword = (req,res)=>{
     });
 };
 
-const postChangePassword = async(req,res)=>{
+const postChangePassword = async(req,res,next)=>{
     try{
         const {currentPassword, newPassword, confirmPassword}=req.body;
         const userId = req.session.user._id;
@@ -387,7 +387,7 @@ const postChangePassword = async(req,res)=>{
     }
 };
 
-const getOrdersPage = async(req,res)=>{
+const getOrdersPage = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const searchQuery = req.query.search || '';
@@ -413,7 +413,7 @@ const getOrdersPage = async(req,res)=>{
     }
 };
 
-const getOrderDetails = async(req,res)=>{
+const getOrderDetails = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const orderId = req.params.id;
@@ -425,17 +425,20 @@ const getOrderDetails = async(req,res)=>{
             return res.status(404).render('error',{message:'Order not found'});
         }
 
+        const canDownloadInvoice = !['Cancelled','Failed'].includes(order.status);
+
         res.render('userLayout',{
             body:'orderDetails',
             userData:req.session.user,
-            order
+            order,
+            canDownloadInvoice,
         });
     }catch(err){
         next(err);
     }
 };
 
-const cancelOrder = async (req, res) => {
+const cancelOrder = async (req, res,next) => {
   try {
     const orderId = req.params.id;
     const userId = req.session.user._id;
@@ -487,7 +490,7 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-const returnOrder = async (req, res) => {
+const returnOrder = async (req, res,next) => {
     try {
       const userId = req.session.user._id;
       const orderId = req.params.id;
@@ -511,7 +514,7 @@ const returnOrder = async (req, res) => {
     }
 };
   
-const cancelOrderItem = async (req, res) => {
+const cancelOrderItem = async (req, res, next) => {
   try {
     const { orderId, productId } = req.params;
     const userId = req.session.user._id;

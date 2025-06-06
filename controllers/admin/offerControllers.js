@@ -1,7 +1,7 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 
-const getOfferPage = async (req, res) => {
+const getOfferPage = async (req, res,next) => {
   try {
     const [products, categories] = await Promise.all([
       Product.find().sort({ name: 1 }).lean(),
@@ -55,7 +55,7 @@ const applyProductOffer = async (req, res) => {
   }
 };
 
-const applyCategoryOffer = async (req, res) => {
+const applyCategoryOffer = async (req, res,next) => {
   try {
     const { categoryId, offer } = req.body;
     
@@ -80,7 +80,7 @@ const applyCategoryOffer = async (req, res) => {
   }
 };
 
-const removeProductOffer = async (req, res) => {
+const removeProductOffer = async (req, res,next) => {
   try {
     const { productId } = req.params;
 
@@ -102,7 +102,7 @@ const removeProductOffer = async (req, res) => {
   }
 };
 
-const removeCategoryOffer = async (req, res) => {
+const removeCategoryOffer = async (req, res,next) => {
   try {
     const { categoryId } = req.params;
 

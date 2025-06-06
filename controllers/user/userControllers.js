@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-const loadSignup = (req, res) => {
+const loadSignup = (req, res, next) => {
   try {
     res.render("signup",{
     pageTitle: "Sign Up",
@@ -27,7 +27,7 @@ const loadSignup = (req, res) => {
   }
 }
 
-const signupStep1 = async (req, res) => {
+const signupStep1 = async (req, res, next) => {
   const { name, email, phone, password, confirmPassword, referralCode } = req.body
   const errors = {}
 
@@ -119,7 +119,7 @@ const signupStep1 = async (req, res) => {
   }
 }
 
-const googleSignIn = async (req, res) => {
+const googleSignIn = async (req, res, next) => {
   try {
     const { name, email, picture } = req.body
 
@@ -167,7 +167,7 @@ const googleSignIn = async (req, res) => {
   }
 }
 
-const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res, next) => {
   const { otp } = req.body
   const { tempUser } = req.session
 
@@ -215,7 +215,7 @@ const verifyOtp = async (req, res) => {
   }
 }
 
-const resendOtp = async (req, res) => {
+const resendOtp = async (req, res, next) => {
   try {
     const tempUser = req.session.tempUser
     if (!tempUser) {
@@ -248,7 +248,7 @@ const resendOtp = async (req, res) => {
   }
 }
 
-const pageNotFound = async (req, res) => {
+const pageNotFound = async (req, res, next) => {
   try {
     res.render("pageNotFound")
   } catch (error) {
@@ -256,7 +256,7 @@ const pageNotFound = async (req, res) => {
   }
 }
 
-const homePage = async (req, res) => {
+const homePage = async (req, res, next) => {
   try {
     const products = await Product.find({ isBlocked: false })
     .populate('category')
@@ -296,7 +296,7 @@ const homePage = async (req, res) => {
   }
 }
 
-const loadLogin = async (req, res) => {
+const loadLogin = async (req, res, next) => {
   try {
     if (!req.session.user) {
       return res.render("login", { errors: {}, formData: {} })
@@ -308,7 +308,7 @@ const loadLogin = async (req, res) => {
   }
 }
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
     const errors = {}
@@ -373,7 +373,7 @@ const loadForgotPassword = async (req, res) => {
   res.render("forgot-password", { errors: {} })
 }
 
-const forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body
     const errors = {}
@@ -432,7 +432,7 @@ const loadResetPassword = async (req, res) => {
   res.render("reset-password", { errors: {}, email: req.session.resetEmail })
 }
 
-const resetPassword = async (req, res) => {
+const resetPassword = async (req, res, next) => {
   try {
     const { newPassword, confirmPassword } = req.body
     const errors = {}

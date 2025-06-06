@@ -6,8 +6,10 @@ const razorpay = require('../../utils/razorpay');
 const Coupon = require('../../models/couponSchema');
 const crypto = require('crypto');
 
-const getCheckoutPage = async (req, res) => {
+const getCheckoutPage = async (req, res,next) => {
   try {
+    const codLimitError = req.session.codLimitError;
+    delete req.session.codLimitError;
     const userId = req.session.user._id;
 
     const addressDoc = await Address.findOne({ userId });
@@ -50,6 +52,7 @@ const getCheckoutPage = async (req, res) => {
       cartTotal,
       couponData,
       validCoupons,
+      codLimitError,
     });
 
   } catch (err) {
@@ -58,7 +61,7 @@ const getCheckoutPage = async (req, res) => {
 };
 
 
-const placeOrder = async (req, res) => {
+const placeOrder = async (req, res,next) => {
   try {
     const userId = req.session.user._id;
     const { addressId, paymentMethod, razorpay_payment_id, razorpay_order_id } = req.body;
@@ -158,6 +161,12 @@ const placeOrder = async (req, res) => {
       return 'BOOKLY-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
     };
 
+    if (paymentMethod === 'COD' && finalAmount > 1000) {
+      req.session.codLimitError = 'Orders above ₹1000 are not allowed for Cash on Delivery.';
+      return res.redirect('/user/checkout');
+    }
+
+
     const newOrder = new Order({
       orderId: generateOrderId(),
       user: userId,
@@ -204,7 +213,7 @@ const placeOrder = async (req, res) => {
 }
 
 
-const createRazorpayOrder = async (req, res) => {
+const createRazorpayOrder = async (req, res,next) => {
   try {
     const amount = req.body.amount;
 
@@ -222,7 +231,7 @@ const createRazorpayOrder = async (req, res) => {
 };
 
 
-const getOrderSuccessPage = async (req, res) => {
+const getOrderSuccessPage = async (req, res,next) => {
   try {
     res.render('order-success', {
       userData: req.session.user
@@ -232,7 +241,7 @@ const getOrderSuccessPage = async (req, res) => {
   }
 };
 
-const getOrderFailurePage = async (req, res) => {
+const getOrderFailurePage = async (req, res,next) => {
   try {
     
     res.render('order-failure', {
@@ -242,7 +251,6 @@ const getOrderFailurePage = async (req, res) => {
     next(err);
   }
 };
-
 
 module.exports={
     getCheckoutPage,

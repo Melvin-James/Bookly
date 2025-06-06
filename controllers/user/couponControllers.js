@@ -3,7 +3,7 @@ const cart = require('../../models/productSchema');
 const Product = require('../../models/productSchema');
 const User = require('../../models/userSchema');
 
-const applyCoupon = async(req,res)=>{
+const applyCoupon = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const {couponCode} = req.body;
@@ -74,7 +74,7 @@ const applyCoupon = async(req,res)=>{
     }
 }
 
-const removeCoupon = (req,res)=>{
+const removeCoupon = (req,res,next)=>{
     try{
         delete req.session.coupon;
         res.status(200).json({success:true,message:'Coupon removed successfully.'});

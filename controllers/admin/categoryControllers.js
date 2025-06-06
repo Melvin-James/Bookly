@@ -1,6 +1,6 @@
 const Category = require('../../models/categorySchema');
 
-const categoryInfo = async (req, res) => {
+const categoryInfo = async (req, res,next) => {
   try {
     const categories = await Category.find().sort({ createdAt: -1 });
     res.render('layout',{ body:'category',categories });
@@ -9,7 +9,7 @@ const categoryInfo = async (req, res) => {
   }
 };
 
-const toggleBlockStatusCategory = async (req, res) => {
+const toggleBlockStatusCategory = async (req, res,next) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ success: false });
@@ -23,7 +23,7 @@ const toggleBlockStatusCategory = async (req, res) => {
   }
 };
 
-const searchCategory = async (req, res) => {
+const searchCategory = async (req, res,next) => {
   try {
     const query = req.query.query || '';
     const categories = await Category.find({
@@ -35,7 +35,7 @@ const searchCategory = async (req, res) => {
   }
 };
 
-const getPaginatedCategory = async (req, res) => {
+const getPaginatedCategory = async (req, res,next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 3;
@@ -61,7 +61,7 @@ const getPaginatedCategory = async (req, res) => {
   }
 };
 
-const getEditCategory = async(req,res)=>{
+const getEditCategory = async(req,res,next)=>{
   try{
     const category = await Category.findById(req.params.id);
     if(!category){
@@ -73,7 +73,7 @@ const getEditCategory = async(req,res)=>{
   }
 }
 
-const updateCategory = async(req,res)=>{
+const updateCategory = async(req,res,next)=>{
   const {name,description}=req.body;
 
   try{
@@ -90,14 +90,14 @@ const updateCategory = async(req,res)=>{
   }
 };
 
-const getAddCategory = async (req,res)=>{
+const getAddCategory = async (req,res,next)=>{
   res.render('category-add',{
     category:{},
     isEdit:false,
   });
 }
 
-const addCategory = async (req,res)=>{
+const addCategory = async (req,res,next)=>{
   try{
     const{name,description}=req.body;
 

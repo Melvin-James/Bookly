@@ -1,7 +1,7 @@
 const User = require('../../models/userSchema');
 const Product = require('../../models/productSchema');
 
-const getWishlistPage = async(req,res)=>{
+const getWishlistPage = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
 
@@ -16,7 +16,7 @@ const getWishlistPage = async(req,res)=>{
     }
 };
 
-const toggleWishlist = async(req,res)=>{
+const toggleWishlist = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const productId = req.params.productId;
@@ -41,7 +41,7 @@ const toggleWishlist = async(req,res)=>{
     }
 };
 
-const moveToCart = async (req, res) => {
+const moveToCart = async (req, res,next) => {
     try {
       const userId = req.session.user._id;
       const productId = req.params.productId;

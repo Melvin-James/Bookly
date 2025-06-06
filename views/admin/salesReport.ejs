@@ -1,23 +1,37 @@
-<form action="/admin/sales-report" method="GET" class="mb-6 flex flex-wrap gap-4 items-end">
-  <div>
-    <label class="block text-sm font-semibold text-gray-700">Filter Type</label>
-    <select name="filter" class="border rounded px-3 py-2">
-      <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Today</option>
-      <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>This Week</option>
-      <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>This Month</option>
-      <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom</option>
-    </select>
+<form action="/admin/sales-report" method="GET" class="mb-6 space-y-4">
+  <div class="flex flex-wrap items-end gap-4">
+
+    <!-- Filter Type -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1">Filter Type</label>
+      <select name="filter" class="border rounded px-3 py-2 w-48">
+        <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Today</option>
+        <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>This Week</option>
+        <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>This Month</option>
+        <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom</option>
+      </select>
+    </div>
+
+    <!-- Date From -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1">From</label>
+      <input type="date" name="from" class="border rounded px-3 py-2" value="<%= from || '' %>">
+    </div>
+
+    <!-- Date To -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1">To</label>
+      <input type="date" name="to" class="border rounded px-3 py-2" value="<%= to || '' %>">
+    </div>
+
+    <!-- Apply Filter -->
+    <div class="mt-6">
+      <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-[#005f66] transition">Apply Filter</button>
+    </div>
   </div>
-  <div>
-    <label class="block text-sm font-semibold text-gray-700">From</label>
-    <input type="date" name="from" class="border rounded px-3 py-2" value="<%= from || '' %>">
-  </div>
-  <div>
-    <label class="block text-sm font-semibold text-gray-700">To</label>
-    <input type="date" name="to" class="border rounded px-3 py-2" value="<%= to || '' %>">
-  </div>
-  <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-[#005f66] transition">Apply Filter</button>
 </form>
+
+<!-- Download Buttons -->
 <div class="flex flex-wrap gap-4 mb-6">
   <form action="/admin/sales-report/download/pdf" method="GET">
     <input type="hidden" name="filter" value="<%= filter %>">
@@ -38,8 +52,7 @@
   </form>
 </div>
 
-
-
+<!-- Sales Report Summary -->
 <div class="p-6">
   <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
 
@@ -58,29 +71,103 @@
     </div>
   </div>
 
+  <!-- Sales Table -->
   <table class="w-full bg-white rounded shadow">
     <thead class="bg-gray-100">
       <tr>
-        <th class="px-4 py-2 text-left">Date</th>
-        <th class="px-4 py-2 text-left">Order ID</th>
-        <th class="px-4 py-2 text-left">Amount</th>
-        <th class="px-4 py-2 text-left">Discount</th>
-        <th class="px-4 py-2 text-left">Coupon</th>
-        <th class="px-4 py-2 text-left">Status</th>
+        <th class="px-4 py-3 text-left">Date</th>
+        <th class="px-4 py-3 text-left">Order ID</th>
+        <th class="px-4 py-3 text-left">Amount</th>
+        <th class="px-4 py-3 text-left">Discount</th>
+        <th class="px-4 py-3 text-left">Coupon</th>
+        <th class="px-4 py-3 text-left">Status</th>
       </tr>
     </thead>
-    <tbody>
-      <% orders.forEach(order => { %>
-        <tr class="border-t">
-          <td class="px-4 py-2"><%= new Date(order.createdAt).toLocaleDateString() %></td>
-          <td class="px-4 py-2"><%= order.orderId %></td>
-          <td class="px-4 py-2">₹<%= order.totalAmount.toFixed(2) %></td>
-          <td class="px-4 py-2">₹<%= order.discountAmount.toFixed(2) %></td>
-          <td class="px-4 py-2"><%= order.couponApplied || '—' %></td>
-          <td class="px-4 py-2"><%= order.status %></td>
-        </tr>
-      <% }) %>
+    <tbody id="salesBody">
+      <% if (orders && orders.length > 0) { %>
+        <% orders.forEach(order => { %>
+          <tr class="border-t">
+            <td class="px-4 py-2"><%= new Date(order.createdAt).toLocaleDateString() %></td>
+            <td class="px-4 py-2"><%= order.orderId %></td>
+            <td class="px-4 py-2">₹<%= order.totalAmount.toFixed(2) %></td>
+            <td class="px-4 py-2">₹<%= order.discountAmount?.toFixed(2) || '0.00' %></td>
+            <td class="px-4 py-2"><%= order.couponApplied || '—' %></td>
+            <td class="px-4 py-2"><%= order.status %></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="6" class="text-center py-4">No data available</td></tr>
+      <% } %>
     </tbody>
   </table>
+
+  <!-- Pagination Controls -->
+  <div class="flex justify-center items-center mt-6 gap-2" id="paginationControls">
+    <!-- Pagination buttons will be inserted here -->
+  </div>
 </div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  async function performPagination(page = 1, filter = '', from = '', to = '') {
+    const query = document.getElementById('searchInput').value;
+    const filter = document.querySelector('select[name="filter"]').value;
+    const from = document.querySelector('input[name="from"]').value;
+    const to = document.querySelector('input[name="to"]').value;
+
+     const params = new URLSearchParams({
+      page,
+      filter,
+      from,
+      to
+    });
+
+    const response = await fetch(`/admin/sale-pagination?${params.toString()}`);
+    const data = await response.json();
+
+    if (data.success) {
+      const tbody = document.getElementById('salesBody');
+      tbody.innerHTML = '';
+
+      data.orders.forEach(order => {
+        const date = new Date(order.createdAt).toLocaleDateString();
+        const coupon = order.couponApplied || '—';
+        const discount = order.discountAmount?.toFixed(2) || '0.00';
+
+        tbody.innerHTML += `
+          <tr class="border-t">
+            <td class="px-4 py-2">${date}</td>
+            <td class="px-4 py-2">${order.orderId}</td>
+            <td class="px-4 py-2">₹${order.totalAmount.toFixed(2)}</td>
+            <td class="px-4 py-2">₹${discount}</td>
+            <td class="px-4 py-2">${coupon}</td>
+            <td class="px-4 py-2">${order.status}</td>
+          </tr>
+        `;
+      });
+
+      const paginationControls = document.getElementById('paginationControls');
+      paginationControls.innerHTML = '';
+
+      for (let i = 1; i <= data.totalPages; i++) {
+        paginationControls.innerHTML += `
+          <button onclick="performPagination(${i})"
+            class="px-3 py-1 rounded ${i === data.currentPage ? 'bg-[#007D8B] text-white' : 'bg-white border text-[#007D8B] hover:bg-[#007D8B] hover:text-white'}">
+            ${i}
+          </button>
+        `;
+      }
+    }
+  }
+
+window.onload = () => {
+  const filter = document.querySelector('select[name="filter"]').value;
+  const from = document.querySelector('input[name="from"]').value;
+  const to = document.querySelector('input[name="to"]').value;
+  performPagination(1, filter, from, to);
+};
+
+
+</script>
 

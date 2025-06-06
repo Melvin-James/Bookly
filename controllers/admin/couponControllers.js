@@ -1,6 +1,6 @@
 const Coupon = require('../../models/couponSchema');
 
-const loadEditCoupon = async (req,res)=>{
+const loadEditCoupon = async (req,res,next)=>{
     try{
         const coupon = await Coupon.findById(req.params.id);
         if(!coupon) return res.redirect('/admin/coupons');
@@ -11,7 +11,7 @@ const loadEditCoupon = async (req,res)=>{
     }
 };
 
-const updateCoupon = async(req,res)=>{
+const updateCoupon = async(req,res,next)=>{
     try{
 
         const id = req.params.id;
@@ -47,7 +47,7 @@ const updateCoupon = async(req,res)=>{
     }
 };
 
-const getCouponPage = async (req,res)=>{
+const getCouponPage = async (req,res,next)=>{
     try{
         const coupons = await Coupon.find().sort({createdAt:-1});
         res.render('layout',{
@@ -61,7 +61,7 @@ const getCouponPage = async (req,res)=>{
     };
 }
 
-const createCoupon = async (req,res)=>{
+const createCoupon = async (req,res,next)=>{
     try{
         const{
             code,
@@ -95,7 +95,7 @@ const createCoupon = async (req,res)=>{
     }
 };
 
-const deleteCoupon = async(req,res)=>{
+const deleteCoupon = async(req,res,next)=>{
     try{
         const couponId = req.params.id;
         const deleted = await Coupon.findByIdAndDelete(couponId);
@@ -110,7 +110,7 @@ const deleteCoupon = async(req,res)=>{
     }
 };
 
-const editCoupon = async(req,res)=>{
+const editCoupon = async(req,res,next)=>{
     try{
         const {id} = req.params;
         const updateFields = req.body;

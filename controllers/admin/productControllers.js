@@ -1,7 +1,7 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 
-const productInfo = async (req, res) => {
+const productInfo = async (req, res,next) => {
     try{
         const products = await Product.find().sort({createdAt:-1}).populate('category');
         res.render('layout', {body:'products',products});
@@ -11,7 +11,7 @@ const productInfo = async (req, res) => {
     }
 };
 
-const toggleBlockStatusProduct = async (req, res) => {
+const toggleBlockStatusProduct = async (req, res,next) => {
     try {
       const product = await Product.findById(req.params.id);
       if (!product) return res.status(404).json({ success: false });
@@ -25,7 +25,7 @@ const toggleBlockStatusProduct = async (req, res) => {
     }
 };
 
-const searchProducts = async(req,res)=>{
+const searchProducts = async(req,res,next)=>{
     try{
       const query = req.query.query || '';
       const products = await Product.find({
@@ -37,7 +37,7 @@ const searchProducts = async(req,res)=>{
     }
 };
 
-const getPaginatedProducts = async (req, res) => {
+const getPaginatedProducts = async (req, res,next) => {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = 4;
@@ -63,7 +63,7 @@ const getPaginatedProducts = async (req, res) => {
     }
   };
 
-const getAddProduct = async (req, res) => {
+const getAddProduct = async (req, res,next) => {
   try {
     const categories = await Category.find({ isListed: true });
     res.render('product-add', { categories });
@@ -72,7 +72,7 @@ const getAddProduct = async (req, res) => {
   }
 };
 
-const addProduct = async (req, res) => {
+const addProduct = async (req, res,next) => {
   try {
     const {
       name, description, publisher, category,
@@ -127,7 +127,7 @@ const addProduct = async (req, res) => {
   }
 };
   
-const getEditProduct = async(req,res)=>{
+const getEditProduct = async(req,res,next)=>{
   try{
     const product = await Product.findById(req.params.id);
     const categories = await Category.find({isListed:true});
@@ -138,7 +138,7 @@ const getEditProduct = async(req,res)=>{
   }
 };
 
-const updateProduct = async(req,res)=>{
+const updateProduct = async(req,res,next)=>{
   try{
     const updatedProduct = {
       name:req.body.name,

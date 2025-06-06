@@ -1,6 +1,6 @@
 const User = require('../../models/userSchema');
 
-const customerInfo = async (req, res) => {
+const customerInfo = async (req, res,next) => {
     try{
         const users = await User.find().sort({createdAt:-1});
         res.render('layout', {body:'customers',users});
@@ -10,7 +10,7 @@ const customerInfo = async (req, res) => {
     }
 };
 
-const toggleBlockStatusCustomer = async (req, res) => {
+const toggleBlockStatusCustomer = async (req, res,next) => {
     try {
       const user = await User.findById(req.params.id);
       if (!user) return res.status(404).json({ success: false });
@@ -24,7 +24,7 @@ const toggleBlockStatusCustomer = async (req, res) => {
     }
 };
 
-const searchCustomers = async(req,res)=>{
+const searchCustomers = async(req,res,next)=>{
     try{
       const query = req.query.query || '';
       const users = await User.find({
@@ -39,7 +39,7 @@ const searchCustomers = async(req,res)=>{
     }
 };
 
-const getPaginatedUsers = async (req, res) => {
+const getPaginatedUsers = async (req, res,next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 5;

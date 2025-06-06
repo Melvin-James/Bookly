@@ -1,6 +1,6 @@
 const User = require("../../models/userSchema");
 
-const getWalletPage = async(req,res)=>{
+const getWalletPage = async(req,res,next)=>{
     try{
         const userId = req.session.user._id;
         const user = await User.findById(userId);

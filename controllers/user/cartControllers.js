@@ -1,7 +1,7 @@
 const User = require('../../models/userSchema');
 const Product = require('../../models/productSchema');
 
-const getCartPage = async(req, res) => {
+const getCartPage = async(req, res, next) => {
   try {
     const userId = req.session.user._id;
     const user = await User.findById(userId).populate('cart.product');
@@ -34,7 +34,7 @@ const getCartPage = async(req, res) => {
   }
 };
 
-const addToCart = async (req, res) => {
+const addToCart = async (req, res, next) => {
     try {
       const userId = req.session.user._id;
       const productId = req.params.productId;
@@ -59,7 +59,7 @@ const addToCart = async (req, res) => {
     }
 };
     
-const updateCartQuantity = async (req, res) => {
+const updateCartQuantity = async (req, res, next) => {
     try {
       const userId = req.session.user._id;
       const productId = req.params.productId;
@@ -91,7 +91,7 @@ const updateCartQuantity = async (req, res) => {
     }
 };
   
-const removeFromCart = async (req, res) => {
+const removeFromCart = async (req, res, next) => {
     try {
         const userId = req.session.user._id;
         const productId = req.params.productId;
@@ -106,7 +106,7 @@ const removeFromCart = async (req, res) => {
     }
 };
   
-const getItemsInCartCount = async (req,res)=>{
+const getItemsInCartCount = async (req,res, next)=>{
     const userId = req.session.user._id;
     let value =0
     if(!userId)  return res.status(404).json({success:false,value})

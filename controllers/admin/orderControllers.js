@@ -2,7 +2,7 @@ const User = require('../../models/userSchema');
 const Order = require('../../models/orderSchema');
 const Product = require('../../models/productSchema');
 
-const getAdminOrders = async (req, res) => {
+const getAdminOrders = async (req, res,next) => {
   try {
     const orders = await Order.find()
       .sort({ createdAt: -1 }) 
@@ -18,7 +18,51 @@ const getAdminOrders = async (req, res) => {
   }
 };
 
-const getAdminOrderDetails = async (req, res) => {
+const searchOrder = async (req,res,next)=>{
+  try{
+    const query = req.query.query;
+    const orders = await Order.find({
+      orderId : {$regex:query, $options:'i'}
+    })
+
+    res.json({success:true, orders});
+  }catch(err){
+    next(err)
+  }
+}
+
+const getPaginatedOrder = async (req,res,next)=>{
+  try{
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page-1) * limit;
+    const query = req.query.query || '';
+
+    const filter = query
+      ?{orderId : {$regex : query, $options: 'i'}}
+      :{};
+
+    const orders = await Order.find(filter)
+      .populate('user')
+      .sort({createdAt:-1})
+      .skip(skip)
+      .limit(limit);
+    
+    const totalOrders = await Order.countDocuments(filter);
+    const totalPages = Math.ceil(totalOrders/limit);
+
+    res.json({
+      success: true,
+      orders,
+      currentPage: page,
+      totalPages
+    });
+  }catch(err){
+    next(err);
+  }
+};
+
+const getAdminOrderDetails = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const order = await Order.findById(orderId).populate('items.product').populate('user');
@@ -43,40 +87,40 @@ const getAdminOrderDetails = async (req, res) => {
   }
 };
 
-const updateOrderStatus = async (req, res) => {
+const updateOrderStatus = async (req, res, next) => {
   try {
     const orderId = req.params.orderId;
     const { status } = req.body;
 
     const allowedStatuses = ['Placed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'];
     if (!allowedStatuses.includes(status)) {
-      return res.status(400).render('error', { message: 'Invalid order status selected.' });
+      return res.status(400).json({ message: 'Invalid order status selected.' });
     }
 
     const order = await Order.findById(orderId);
-
-    for(let item of order.items){
-      item.status=status;
-    }
     if (!order) {
-      return res.status(404).render('error', { message: 'Order not found.' });
+      return res.status(404).json({ message: 'Order not found.' });
     }
 
-   if (order.status === 'Delivered' || order.status === 'Returned' || order.status === 'Cancelled' || order.status === 'Failed'){
-    return res.status(400).render('error', { message: `Cannot modify an order that is already ${order.status}.` });
-   }
+    if (['Delivered', 'Returned', 'Cancelled', 'Failed'].includes(order.status)) {
+      return res.status(400).json({ message: `Cannot modify an order that is already ${order.status}.` });
+    }
+
+    for (let item of order.items) {
+      item.status = status;
+    }
 
     order.status = status;
     await order.save();
 
-    res.redirect(`/admin/orders/${orderId}?statusUpdated=true`);
-    
+    return res.status(200).json({ message: 'Order status updated.' });
+
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-const approveReturnRequest = async (req, res) => {
+const approveReturnRequest = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const order = await Order.findById(orderId);
@@ -117,8 +161,7 @@ const approveReturnRequest = async (req, res) => {
   }
 };
 
-
-const rejectReturnRequest = async (req, res) => {
+const rejectReturnRequest = async (req, res,next) => {
   try {
     const orderId = req.params.id;
     const order = await Order.findById(orderId);
@@ -143,4 +186,6 @@ module.exports = {
   updateOrderStatus,
   approveReturnRequest,
   rejectReturnRequest,
+  getPaginatedOrder,
+  searchOrder,
 };

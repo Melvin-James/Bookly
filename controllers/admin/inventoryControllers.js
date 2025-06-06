@@ -1,6 +1,6 @@
 const Product = require('../../models/productSchema');
 
-const getInventoryPage = async (req, res) => {
+const getInventoryPage = async (req, res,next) => {
   try {
     const page = 1;
     const limit = 5;
@@ -27,8 +27,7 @@ const getInventoryPage = async (req, res) => {
   }
 };
 
-
-const searchStock = async (req, res) => {
+const searchStock = async (req, res,next) => {
   try {
     const query = req.query.query;
     const products = await Product.find({
@@ -72,9 +71,7 @@ const getPaginatedStock = async (req, res) => {
   }
 };
 
-
-
-const updateStock = async(req,res)=>{
+const updateStock = async(req,res,next)=>{
     try {
         const productId = req.params.productId;
         const { quantity, status } = req.body;
@@ -89,7 +86,7 @@ const updateStock = async(req,res)=>{
     }
 }
 
-const updateProductStatus = async (req, res) => {
+const updateProductStatus = async (req, res,next) => {
     try {
       const { productId } = req.params;
       const { status } = req.body;
@@ -104,7 +101,7 @@ const updateProductStatus = async (req, res) => {
     } catch (error) {
       next(err);
     }
-  };
+};
 
 module.exports = {
     getInventoryPage,

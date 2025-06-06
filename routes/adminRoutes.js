@@ -9,6 +9,7 @@ const inventoryControllers = require('../controllers/admin/inventoryControllers'
 const couponControllers = require('../controllers/admin/couponControllers');
 const offerControllers = require('../controllers/admin/offerControllers');
 const salesReportControllers = require('../controllers/admin/salesReportControllers');
+const dashboardControllers = require('../controllers/admin/dashboardControllers');
 const {userAuth,adminAuth}=require('../middlewares/auth');
 const uploadTo = require('../middlewares/multer');
 const uploadProductImage = uploadTo('product-images');
@@ -44,6 +45,8 @@ router.patch('/product-edit/:id',adminAuth,uploadProductImage.array('productImag
 
 
 router.get('/orders',adminAuth,orderControllers.getAdminOrders);
+router.get('/search-order', adminAuth, orderControllers.searchOrder);
+router.get('/order-pagination', adminAuth,orderControllers.getPaginatedOrder);
 router.get('/orders/:id', adminAuth, orderControllers.getAdminOrderDetails);
 router.post('/orders/:orderId/status', adminAuth, orderControllers.updateOrderStatus);
 router.post('/orders/:id/approve-return', adminAuth, orderControllers.approveReturnRequest);
@@ -71,6 +74,13 @@ router.post('/offers/category/delete/:categoryId', adminAuth, offerControllers.r
 
 
 router.get('/sales-report',adminAuth,salesReportControllers.getSalesReport);
+router.get('/sale-pagination', adminAuth, salesReportControllers.getPaginatedSale);
 router.get('/sales-report/download/pdf',salesReportControllers.downloadSalesReportPDF);
 router.get('/sales-report/download/excel',salesReportControllers.downloadSalesReportExcel);
+
+router.get('/dashboard/stats', adminAuth, dashboardControllers.getDashboardStas);
+router.get('/top-products', adminAuth, dashboardControllers.getTopProducts);
+router.get('/top-categories', adminAuth, dashboardControllers.getTopCategories);
+router.get('/sales-chart', adminAuth, dashboardControllers.getSalesChart);
+
 module.exports=router;

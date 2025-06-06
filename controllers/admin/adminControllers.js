@@ -7,7 +7,7 @@ const pageerror = async(req,res)=>{
     res.render('pageerror');
 }
 
-const loadLogin = (req,res)=>{
+const loadLogin = (req,res,next)=>{
     try {
         if (!req.session.admin) {
             return res.render('admin-login', { errors: {}, formData: {} });
@@ -19,7 +19,7 @@ const loadLogin = (req,res)=>{
     }
 }
 
-const login = async (req, res) => {
+const login = async (req, res,next) => {
     try {
         const {email,password} = req.body;
         let errors = {};
@@ -62,7 +62,7 @@ const login = async (req, res) => {
     }
 }
 
-const loadDashboard = async (req, res) => {
+const loadDashboard = async (req, res,next) => {
     if (!req.session.admin) {
         return res.redirect('/admin/login');
     }
@@ -73,7 +73,7 @@ const loadDashboard = async (req, res) => {
     }
 };
 
-const logout = async(req,res)=>{
+const logout = async(req,res,next)=>{
     try{
         req.session.destroy(err=>{
             if(err){

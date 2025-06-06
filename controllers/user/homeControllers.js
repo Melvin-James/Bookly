@@ -3,7 +3,7 @@ const Category = require('../../models/categorySchema');
 const Customers = require('../../models/userSchema');
 const category = require('../../models/categorySchema');
 
-const getShopProducts = async function(req, res) {
+const getShopProducts = async function(req, res,next) {
   try {
     const user = await Customers.findById(req.session.user._id);
     const { search, sort, category, priceRange, page = 1 } = req.query;
@@ -174,7 +174,7 @@ const getProductDetails = async (req, res) => {
     });
 };
 
-const account = async(req,res)=>{
+const account = async(req,res,next)=>{
   try{
     const {email} = req.body;
     const customer = await Customers.find({email});

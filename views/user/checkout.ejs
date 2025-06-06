@@ -326,4 +326,13 @@
     }
   }
 </script>
-
+<% if (typeof codLimitError !== 'undefined') { %>
+<script>
+  Swal.fire({
+    icon: 'warning',
+    title: 'COD Not Allowed',
+    text: '<%= codLimitError %>',
+    confirmButtonColor: '#007D8B',
+  });
+</script>
+<% } %>
