@@ -1,0 +1,108 @@
+<!-- Sidebar for desktop -->
+<aside class="w-full sm:w-64 bg-white shadow-custom rounded-xl p-6 hidden sm:block h-fit">
+  <h2 class="text-lg font-bold theme mb-6">My Account</h2>
+  <ul class="space-y-1">
+    <li>
+      <a href="/user/profile" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+        <i class="fas fa-user mr-2"></i>
+        Profile
+      </a>
+    </li>
+    <li>
+      <a href="/user/profile/edit" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+        <i class="fas fa-edit mr-2"></i>
+        Edit Profile
+      </a>
+    </li>
+    <li>
+      <a href="/user/profile/change-password" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+        <i class="fas fa-lock mr-2"></i>
+        Change Password
+      </a>
+    </li>
+    <li>
+      <a href="/user/profile/addresses" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+        <i class="fas fa-map-marker-alt mr-2"></i>
+        Addresses
+      </a>
+    </li>
+    <li>
+      <a href="/user/profile/orders" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+        <i class="fas fa-shopping-bag mr-2"></i>
+        Orders
+      </a>
+    </li>
+    <li>
+      <a href="/user/wallet" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+        <i class="fas fa-wallet mr-2"></i>
+        Wallet
+      </a>
+    </li>
+  </ul>
+</aside>
+
+<!-- Mobile Sidebar Toggle -->
+<div class="sm:hidden mb-4">
+  <button id="mobile-sidebar-toggle" class="w-full bg-white text-primary border border-primary py-2.5 px-4 rounded-lg flex items-center justify-between">
+    <span class="font-medium">Account Menu</span>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  
+  <!-- Mobile Sidebar Menu -->
+  <div id="mobile-sidebar-menu" class="hidden bg-white shadow-custom rounded-xl mt-2 p-4">
+    <ul class="space-y-1">
+      <li>
+        <a href="/user/profile" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+          <i class="fas fa-user mr-2"></i>
+          Profile
+        </a>
+      </li>
+      <li>
+        <a href="/user/profile/edit" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+          <i class="fas fa-edit mr-2"></i>
+          Edit Profile
+        </a>
+      </li>
+      <li>
+        <a href="/user/profile/change-password" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+          <i class="fas fa-lock mr-2"></i>
+          Change Password
+        </a>
+      </li>
+      <li>
+        <a href="/user/profile/addresses" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+          <i class="fas fa-map-marker-alt mr-2"></i>
+          Addresses
+        </a>
+      </li>
+      <li>
+        <a href="/user/profile/orders" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+          <i class="fas fa-shopping-bag mr-2"></i>
+          Orders
+        </a>
+      </li>
+      <li>
+        <a href="/user/wallet" class="block py-2.5 px-4 rounded-lg hover:bg-primary hover:text-white transition-all-200">
+          <i class="fas fa-wallet mr-2"></i>
+          Wallet
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Mobile sidebar toggle
+    const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+    const mobileSidebarMenu = document.getElementById('mobile-sidebar-menu');
+    
+    if (mobileSidebarToggle && mobileSidebarMenu) {
+      mobileSidebarToggle.addEventListener('click', function() {
+        mobileSidebarMenu.classList.toggle('hidden');
+      });
+    }
+  });
+</script>

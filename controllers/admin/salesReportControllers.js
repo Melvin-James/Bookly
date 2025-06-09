@@ -52,7 +52,6 @@ const getSalesReport = async(req,res,next)=>{
     }
 };
 
-
 const getPaginatedSale = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -104,35 +103,65 @@ const getPaginatedSale = async (req, res, next) => {
   }
 };
 
+const downloadSalesReportPDF = async (req, res, next) => {
+  try {
+    const { filter, from, to } = req.query;
+    const query = getFilterQuery(filter, from, to);
+    const orders = await Order.find(query).populate('user');
 
-const downloadSalesReportPDF = async(req,res,next)=>{
-    try{
-        const {filter,from,to} = req.query;
-        const query = getFilterQuery(filter,from,to);
-        const orders = await Order.find(query).populate('user');
+    const doc = new PDFDocument({ margin: 30 });
+    res.setHeader('Content-Disposition', 'attachment; filename="sales-report.pdf"');
+    res.setHeader('Content-Type', 'application/pdf');
+    doc.pipe(res);
 
-        const doc = new PDFDocument();
-        res.setHeader('Content-Disposition', 'attachment; filename="sales-report.pdf"');
-        res.setHeader('Content-Type','application/pdf');
-        doc.pipe(res);
+    doc.fontSize(18).text('Bookly - Sales Report', { align: 'center' });
+    doc.moveDown();
 
-        doc.fontSize(20).text('Bookly-Sales Report', {align:'center'});
-        doc.moveDown();
+ 
+    const tableTop = 100;
+    const itemHeight = 25;
+    const colWidths = [40, 120, 100, 80, 80, 100];
+    const colX = [30, 70, 190, 290, 370, 450];    
 
-        orders.forEach((order,i)=>{
-            doc.fontSize(12).text(`${i+1}. Order ID: ${order.orderId}`);
-            doc.text(`User:${order.user?.name || 'N/A'}`);
-            doc.text(`Amount: ₹${order.totalAmount}`);
-            doc.text(`Discount: ₹${order.discountAmount || 0}`);
-            doc.text(`Date: ${order.createdAt.toDateString()}`);
-            doc.moveDown();
-        });
 
-        doc.end();
-    }catch(err){
-        next(err)
-    }
-}
+    doc.font('Helvetica-Bold').fontSize(12);
+    const headers = ['#', 'Order ID', 'Customer', 'Amount', 'Discount', 'Date'];
+    headers.forEach((header, i) => {
+      doc.rect(colX[i], tableTop, colWidths[i], itemHeight).stroke();
+      doc.text(header, colX[i] + 5, tableTop + 7, { width: colWidths[i] - 10 });
+    });
+
+    let y = tableTop + itemHeight;
+    doc.font('Helvetica').fontSize(10);
+
+    orders.forEach((order, i) => {
+      const values = [
+        i + 1,
+        order.orderId || 'N/A',
+        order.user?.name || 'N/A',
+        `₹${order.totalAmount}`,
+        `₹${order.discountAmount || 0}`,
+        order.createdAt.toDateString()
+      ];
+
+      values.forEach((text, j) => {
+        doc.rect(colX[j], y, colWidths[j], itemHeight).stroke();
+        doc.text(String(text), colX[j] + 5, y + 7, { width: colWidths[j] - 10 });
+      });
+
+      y += itemHeight;
+
+      if (y > doc.page.height - 50) {
+        doc.addPage();
+        y = tableTop;
+      }
+    });
+
+    doc.end();
+  } catch (err) {
+    next(err);
+  }
+};
 
 const downloadSalesReportExcel = async(req,res,next)=>{
     try{

@@ -37,6 +37,7 @@ router.get('/product-details/:id',userAuth,homeControllers.getProductDetails);
 
 router.get('/profile',userAuth,profileControllers.getProfilePage);
 router.get('/profile/edit',userAuth,profileControllers.getEditProfile);
+router.post('/profile/edit',userAuth,uploadProfileImage.single('userImage'),profileControllers.postEditProfile);
 
 router.get('/profile/verify-otp',profileControllers.getVerifyOtp);
 router.post('/profile/verify-otp',profileControllers.postVerifyOtp);

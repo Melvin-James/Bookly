@@ -106,14 +106,37 @@ const updateOrderStatus = async (req, res, next) => {
       return res.status(400).json({ message: `Cannot modify an order that is already ${order.status}.` });
     }
 
-    for (let item of order.items) {
-      item.status = status;
-    }
+      for(let item of order.items){
+        if(item.status === 'Cancelled'){
+          item.status = 'Cancelled';
+        }
+        else{
+          item.status = status
+        }
+      }
+      
+      const statusCount = {};
 
-    order.status = status;
-    await order.save();
+      order.items.forEach(item => {
+        const status = item.status;
+        statusCount[status] = (statusCount[status] || 0) + 1;
+      });
 
-    return res.status(200).json({ message: 'Order status updated.' });
+      let mostFrequentStatus = '';
+      let maxCount = 0;
+
+      for (const status in statusCount) {
+        if (statusCount[status] > maxCount) {
+          mostFrequentStatus = status;
+          maxCount = statusCount[status];
+        }
+      }
+
+      order.status = mostFrequentStatus;
+      await order.save();
+
+      return res.status(200).json({ message: 'Order status updated.' });
+
 
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -131,7 +154,12 @@ const approveReturnRequest = async (req, res, next) => {
 
     const user = await User.findById(order.user);
 
-    const refundAmount = order.totalAmount;
+    let refundAmount = 0;
+    for (const item of order.items) {
+      if (item.status !== 'Cancelled') {
+        refundAmount += item.discountedPrice * item.quantity;
+      }
+    }
     user.wallet = (user.wallet || 0) + refundAmount;
 
 
@@ -146,8 +174,13 @@ const approveReturnRequest = async (req, res, next) => {
     await user.save();
 
     for (let item of order.items) {
-      await Product.findByIdAndUpdate(item.product, { $inc: { quantity: item.quantity } });
-      item.status = 'Returned';
+      if(item.status === 'Cancelled'){
+        item.status = 'Cancelled';
+      }
+      else{
+        item.status = 'Returned'
+        await Product.findByIdAndUpdate(item.product, { $inc: { quantity: item.quantity } });
+      }
     }
 
     order.isReturnApproved = true;

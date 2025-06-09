@@ -453,22 +453,24 @@ const cancelOrder = async (req, res,next) => {
       return res.status(400).json({ success: false, message: 'Cannot cancel this order' });
     }
 
-    order.status = 'Cancelled';
-    for (let item of order.items) {
-      item.status = 'Cancelled';
-    }
-
-    await order.save();
 
     for (let item of order.items) {
-      await Product.findByIdAndUpdate(item.product._id, {
-        $inc: { quantity: item.quantity },
-      });
+      if(item.status !=='Cancelled'){
+        await Product.findByIdAndUpdate(item.product._id, {
+          $inc: { quantity: item.quantity },
+        });
+      }
     }
 
     if (order.paymentMethod === 'Online') {
       const user = await User.findById(userId);
-      const refundAmount = order.totalAmount;
+      
+      let refundAmount = 0;
+      for (const item of order.items) {
+        if (item.status !== 'Cancelled') {
+          refundAmount += item.discountedPrice * item.quantity;
+        }
+      }
 
       user.wallet = (user.wallet || 0) + refundAmount;
 
@@ -482,8 +484,14 @@ const cancelOrder = async (req, res,next) => {
       user.walletTransactions.push(walletTransaction);
 
       await user.save();
-    }
 
+      order.status = 'Cancelled';
+      for (let item of order.items) {
+        item.status = 'Cancelled';
+      }
+
+      await order.save();
+    }
     return res.status(200).json({ success: true, message: 'Order cancelled and amount refunded (if applicable)' });
   } catch (err) {
     next(err);

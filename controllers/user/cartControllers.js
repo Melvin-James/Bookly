@@ -111,7 +111,7 @@ const getItemsInCartCount = async (req,res, next)=>{
     let value =0
     if(!userId)  return res.status(404).json({success:false,value})
     const userCart = await User.findById(userId).select('cart -_id')
-    value  = userCart.cart.length
+    value  = userCart.cart.length;
     return res.status(200).json({success:true,value})
 }
 
