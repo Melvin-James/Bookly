@@ -1,35 +1,324 @@
-<div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6 mt-6">
-    <h2 class="text-2xl font-semibold theme mb-4">Edit Profile</h2>
-    
-    <form action="/user/profile/edit" method="POST" enctype="multipart/form-data" class="space-y-4">
-      
-      <!-- Name -->
-      <div>
-        <label class="block font-medium mb-1">Name</label>
-        <input type="text" name="name" value="<%= userData.name %>" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-theme" />
-      </div>
-  
-      <!-- Email -->
-      <div>
-        <label class="block font-medium mb-1">Email</label>
-        <input type="email" name="email" value="<%= userData.email %>" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-theme" />
-      </div>
-  
-      <!-- Phone -->
-      <div>
-        <label class="block font-medium mb-1">Phone</label>
-        <input type="text" name="phone" value="<%= userData.phone %>" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-theme" />
-      </div>
-  
-      <!-- Profile Image Upload -->
-      <div>
-        <label class="block font-medium mb-1">Profile Image</label>
-        <input type="file" name="userImage" accept="image/*" class="w-full" />
-      </div>
-  
-      <div class="pt-4">
-        <button type="submit" class="bg-theme text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition">Update Profile</button>
-      </div>
-    </form>
+<div class="w-full bg-white shadow-custom rounded-xl p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">Edit Profile</h2>
+    <span class="text-sm text-gray-500">Update your personal information</span>
   </div>
   
+  <% if (typeof message !== 'undefined' && message) { %>
+    <div class="mb-6 p-4 rounded-lg <%= message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' %>">
+      <%= message.text %>
+    </div>
+  <% } %>
+  
+  <form id="profileEditForm" action="/user/profile/edit" method="POST" enctype="multipart/form-data" class="space-y-6">
+    
+    <!-- Current Profile Image (if exists) -->
+    <% if (userData.userImage) { %>
+      <div class="flex flex-col items-center sm:flex-row sm:items-start gap-4 p-4 bg-gray-50 rounded-lg">
+        <div class="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary">
+          <img src="/uploads/ProfileImages/<%= userData.userImage %>" alt="Profile" class="w-full h-full object-cover" />
+        </div>
+        <div class="flex-1">
+          <h3 class="font-medium text-gray-900 mb-1">Current Profile Picture</h3>
+          <p class="text-sm text-gray-500 mb-2">Upload a new image to change your profile picture</p>
+        </div>
+      </div>
+    <% } %>
+    
+    <!-- Name -->
+    <div class="form-group">
+      <label for="name" class="block font-medium text-gray-700 mb-1">Full Name</label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-user text-gray-400"></i>
+        </div>
+        <input 
+          type="text" 
+          id="name" 
+          name="name" 
+          value="<%= userData.name %>" 
+          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+          placeholder="Enter your full name"
+        />
+      </div>
+      <div id="nameError" class="text-primary text-sm mt-1 hidden"></div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email" class="block font-medium text-gray-700 mb-1">Email Address</label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-envelope text-gray-400"></i>
+        </div>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          value="<%= userData.email %>" 
+          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+          placeholder="Enter your email address"
+        />
+      </div>
+      <div id="emailError" class="text-primary text-sm mt-1 hidden"></div>
+    </div>
+
+    <!-- Phone -->
+    <div class="form-group">
+      <label for="phone" class="block font-medium text-gray-700 mb-1">Phone Number</label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-phone text-gray-400"></i>
+        </div>
+        <input 
+          type="text" 
+          id="phone" 
+          name="phone" 
+          value="<%= userData.phone %>" 
+          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+          placeholder="Enter your phone number"
+        />
+      </div>
+      <div id="phoneError" class="text-primary text-sm mt-1 hidden"></div>
+    </div>
+
+    <!-- Profile Image Upload -->
+    <div class="form-group">
+      <label for="userImage" class="block font-medium text-gray-700 mb-1">Profile Image</label>
+      <div class="mt-1 flex items-center">
+        <div class="relative w-full">
+          <div class="w-full flex items-center justify-center px-6 py-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-all cursor-pointer" id="dropzone">
+            <div class="space-y-1 text-center">
+              <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+              <div class="flex text-sm text-gray-600">
+                <label for="userImage" class="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-dark focus-within:outline-none">
+                  <span>Upload a file</span>
+                  <input id="userImage" name="userImage" type="file" accept="image/*" class="sr-only">
+                </label>
+                <p class="pl-1">or drag and drop</p>
+              </div>
+              <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
+            </div>
+          </div>
+          <div id="preview" class="mt-2 hidden">
+            <div class="flex items-center">
+              <div class="w-16 h-16 rounded-full overflow-hidden border border-gray-200">
+                <img id="imagePreview" src="#" alt="Preview" class="w-full h-full object-cover">
+              </div>
+              <button type="button" id="removeImage" class="ml-3 text-sm text-red-500 hover:text-red-700">
+                <i class="fas fa-times mr-1"></i> Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="imageError" class="text-primary text-sm mt-1 hidden"></div>
+    </div>
+
+    <div class="pt-4 flex items-center justify-between">
+      <button type="button" class="text-gray-600 hover:text-gray-800 transition-colors" onclick="window.history.back()">
+        <i class="fas fa-arrow-left mr-1"></i> Cancel
+      </button>
+      <button 
+        type="submit" 
+        id="submitBtn"
+        class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg transition-all flex items-center justify-center"
+      >
+        <i class="fas fa-save mr-2"></i> Update Profile
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('profileEditForm');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const imageInput = document.getElementById('userImage');
+    const dropzone = document.getElementById('dropzone');
+    const preview = document.getElementById('preview');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeImageBtn = document.getElementById('removeImage');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Error elements
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const phoneError = document.getElementById('phoneError');
+    const imageError = document.getElementById('imageError');
+    
+    // Validation patterns
+    const namePattern = /^[a-zA-Z\s]{2,50}$/;
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    const phonePattern = /^[0-9]{10}$/;
+    
+    // Validation functions
+    function validateName() {
+      if (!nameInput.value.trim()) {
+        showError(nameError, 'Name is required');
+        return false;
+      } else if (!namePattern.test(nameInput.value.trim())) {
+        showError(nameError, 'Please enter a valid name (2-50 characters, letters only)');
+        return false;
+      } else {
+        hideError(nameError);
+        return true;
+      }
+    }
+    
+    function validateEmail() {
+      if (!emailInput.value.trim()) {
+        showError(emailError, 'Email is required');
+        return false;
+      } else if (!emailPattern.test(emailInput.value.trim())) {
+        showError(emailError, 'Please enter a valid email address');
+        return false;
+      } else {
+        hideError(emailError);
+        return true;
+      }
+    }
+    
+    function validatePhone() {
+      if (!phoneInput.value.trim()) {
+        showError(phoneError, 'Phone number is required');
+        return false;
+      } else if (!phonePattern.test(phoneInput.value.trim())) {
+        showError(phoneError, 'Please enter a valid 10-digit phone number');
+        return false;
+      } else {
+        hideError(phoneError);
+        return true;
+      }
+    }
+    
+    function validateImage() {
+      if (imageInput.files.length > 0) {
+        const file = imageInput.files[0];
+        const fileType = file.type;
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        
+        if (!validImageTypes.includes(fileType)) {
+          showError(imageError, 'Please select a valid image file (JPEG, PNG, GIF)');
+          return false;
+        } else if (file.size > 2 * 1024 * 1024) { // 2MB
+          showError(imageError, 'Image size should be less than 2MB');
+          return false;
+        } else {
+          hideError(imageError);
+          return true;
+        }
+      }
+      
+      // No file selected is valid (not required)
+      hideError(imageError);
+      return true;
+    }
+    
+    // Helper functions
+    function showError(element, message) {
+      element.textContent = message;
+      element.classList.remove('hidden');
+      element.parentElement.querySelector('input')?.classList.add('border-primary');
+    }
+    
+    function hideError(element) {
+      element.textContent = '';
+      element.classList.add('hidden');
+      element.parentElement.querySelector('input')?.classList.remove('border-primary');
+    }
+    
+    // Event listeners
+    nameInput.addEventListener('blur', validateName);
+    emailInput.addEventListener('blur', validateEmail);
+    phoneInput.addEventListener('blur', validatePhone);
+    imageInput.addEventListener('change', function(e) {
+      validateImage();
+      
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          imagePreview.src = e.target.result;
+          preview.classList.remove('hidden');
+        };
+        
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // Remove image button
+    removeImageBtn.addEventListener('click', function() {
+      imageInput.value = '';
+      preview.classList.add('hidden');
+      hideError(imageError);
+    });
+    
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+      dropzone.classList.add('border-primary', 'bg-primary-light', 'bg-opacity-10');
+    }
+    
+    function unhighlight() {
+      dropzone.classList.remove('border-primary', 'bg-primary-light', 'bg-opacity-10');
+    }
+    
+    dropzone.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length > 0) {
+        imageInput.files = files;
+        const event = new Event('change', { bubbles: true });
+        imageInput.dispatchEvent(event);
+      }
+    }
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const isNameValid = validateName();
+      const isEmailValid = validateEmail();
+      const isPhoneValid = validatePhone();
+      const isImageValid = validateImage();
+      
+      if (isNameValid && isEmailValid && isPhoneValid && isImageValid) {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Updating...';
+        
+        // Submit the form
+        this.submit();
+      } else {
+        // Scroll to the first error
+        const firstError = document.querySelector('.text-primary:not(.hidden)');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
+  });
+</script>

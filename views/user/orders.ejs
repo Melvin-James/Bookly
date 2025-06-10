@@ -1,83 +1,237 @@
-<div class="max-w-5xl mx-auto p-6">
-    <h1 class="text-2xl font-bold theme mb-6">My Orders</h1>
-    <!-- Search Bar -->
-    <form action="/user/profile/orders" method="GET" class="flex mb-6">
-      <input 
-        type="text" 
-        name="search" 
-        placeholder="Search orders by ID..." 
-        class="flex-1 border px-4 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary"
-      >
-      <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded-r-md hover:bg-opacity-90 transition">
-        Search
+<div class="w-full">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-1">My Orders</h1>
+      <p class="text-gray-600 text-sm">Track and manage your order history</p>
+    </div>
+    
+    <!-- Filter Dropdown -->
+    <div class="mt-4 sm:mt-0">
+      <select id="statusFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        <option value="all">All Orders</option>
+        <option value="Placed">Placed</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Out for Delivery">Out for Delivery</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Cancelled">Cancelled</option>
+        <option value="Returned">Returned</option>
+        <option value="Failed">Failed</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <form action="/user/profile/orders" method="GET" class="relative mb-6">
+    <div class="flex">
+      <div class="relative flex-grow">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-search text-gray-400"></i>
+        </div>
+        <input 
+          type="text" 
+          name="search" 
+          id="searchInput"
+          placeholder="Search orders by ID..." 
+          value="<%= typeof search !== 'undefined' ? search : '' %>"
+          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+        >
+        <% if (typeof search !== 'undefined' && search) { %>
+          <button type="button" id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+            <i class="fas fa-times-circle text-gray-400 hover:text-gray-600"></i>
+          </button>
+        <% } %>
+      </div>
+      <button type="submit" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-r-lg transition-all flex items-center justify-center">
+        <span>Search</span>
       </button>
-      
-    </form>
+    </div>
+  </form>
 
-    <% if (orders.length > 0) { %>
-      <div class="space-y-6">
-        <% orders.forEach(order => { %>
-          <div class="bg-white shadow rounded-lg p-5 border border-gray-100 hover:shadow-md transition">
-            <div class="flex justify-between items-center mb-3">
-              <h2 class="text-lg font-semibold">Order ID: <%= order.orderId %></h2>
-              <% 
-                let statusColors = {
-                  'Placed': 'bg-yellow-300',
-                  'Shipped': 'bg-blue-400',
-                  'Out for Delivery': 'bg-green-600',
-                  'Delivered': 'bg-lime-400',
-                  'Cancelled': 'bg-red-500',
-                  'Returned': 'bg-orange-500',
-               };
-               let statusClass = statusColors[order.status] || 'bg-gray-500'; 
-              %>
-             <span class="text-sm text-white <%= statusClass %> px-3 py-1 rounded-full"><%= order.status %></span>
-
-            </div>
-            
-            <div class="text-sm text-gray-700 mb-4">
-              <div class="grid grid-cols-2 gap-2">
-                <div><strong>Placed on:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></div>
-                <div><strong>Total Paid:</strong> ₹<%= order.totalAmount.toFixed(2) %></div>
-            
-                <% if (order.couponDiscount && order.couponDiscount > 0) { %>
-                  <div><strong>Coupon (<%= order.couponApplied %>) Discount:</strong> - ₹<%= order.couponDiscount.toFixed(2) %></div>
-                <% } %>
-                <% if (order.productDiscount && order.productDiscount > 0) { %>
-                  <div><strong>Product Offer Discount:</strong> - ₹<%= order.productDiscount.toFixed(2) %></div>
-                <% } %>
+  <% if (orders.length > 0) { %>
+    <div class="space-y-6" id="ordersList">
+      <% orders.forEach(order => { %>
+        <div class="bg-white shadow-custom rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-all order-item" data-status="<%= order.status %>">
+          <!-- Order Header -->
+          <div class="p-5 border-b border-gray-100">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg font-semibold text-gray-900">Order #<%= order.orderId %></h2>
+                  <% 
+                    let statusColors = {
+                      'Placed': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                      'Shipped': 'bg-blue-100 text-blue-800 border-blue-200',
+                      'Out for Delivery': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                      'Delivered': 'bg-green-100 text-green-800 border-green-200',
+                      'Cancelled': 'bg-red-100 text-red-800 border-red-200',
+                      'Returned': 'bg-orange-100 text-orange-800 border-orange-200',
+                      'Failed': 'bg-gray-100 text-gray-800 border-gray-200'
+                    };
+                    let statusClass = statusColors[order.status] || 'bg-gray-100 text-gray-800 border-gray-200'; 
+                  %>
+                  <span class="text-xs font-medium px-2.5 py-1 rounded-full border <%= statusClass %>">
+                    <%= order.status %>
+                  </span>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">
+                  Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+                </p>
+              </div>
+              <div class="text-right">
+                <div class="text-lg font-bold text-primary">₹<%= order.totalAmount.toFixed(2) %></div>
+                <div class="text-xs text-gray-500"><%= order.items.length %> item<%= order.items.length > 1 ? 's' : '' %></div>
               </div>
             </div>
-            
-            <div class="mb-4">
-              <h3 class="font-medium text-gray-800 mb-2">Items</h3>
-              <ul class="list-inside space-y-1">
-                <% order.items.forEach(item => { %>
-                  <li class="flex justify-between">
-                    <span><%= item.product.name %> x <%= item.quantity %></span>
-                      <span>₹<%= (item.product.discountedPrice * item.quantity).toFixed(2) %></span>
-                  </li>
-                <% }) %>
-              </ul>
-            </div>
-            
-            
-            <div class="flex justify-end mt-4">
-              <a href="/user/profile/orders/<%= order._id %>"  
-                style="background-color: #007D8B; color: white; padding: 8px 16px; border-radius: 6px; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.3s ease;">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                         d="M12 4.5C7.305 4.5 3.295 7.395 1.5 12c1.795 4.605 5.805 7.5 10.5 7.5s8.705-2.895 10.5-7.5c-1.795-4.605-5.805-7.5-10.5-7.5zM12 15a3 3 0 100-6 3 3 0 000 6z" />
-                </svg>
-                View Details
-             </a>
+          </div>
+
+          <!-- Order Items Preview -->
+          <div class="px-5 py-4 bg-gray-50">
+            <div class="flex flex-wrap gap-3">
+              <% order.items.slice(0, 3).forEach(item => { %>
+                <div class="relative w-12 h-12 rounded-md overflow-hidden border border-gray-200">
+                  <img 
+                    src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                    alt="<%= item.product.name %>"
+                    class="w-full h-full object-cover"
+                  >
+                </div>
+              <% }) %>
+              <% if (order.items.length > 3) { %>
+                <div class="relative w-12 h-12 rounded-md overflow-hidden bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                  +<%= order.items.length - 3 %>
+                </div>
+              <% } %>
             </div>
           </div>
-        <% }) %>
+
+          <!-- Order Summary -->
+          <div class="p-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
+              <div>
+                <span class="text-gray-600">Payment Method:</span>
+                <span class="font-medium text-gray-900 ml-1"><%= order.paymentMethod || 'N/A' %></span>
+              </div>
+              
+              <div>
+                <span class="text-gray-600">Total Paid:</span>
+                <span class="font-medium text-gray-900 ml-1">₹<%= order.totalAmount.toFixed(2) %></span>
+              </div>
+              
+              <% if (order.couponDiscount && order.couponDiscount > 0) { %>
+                <div>
+                  <span class="text-gray-600">Coupon Discount:</span>
+                  <span class="font-medium text-green-600 ml-1">-₹<%= order.couponDiscount.toFixed(2) %> (<%= order.couponApplied %>)</span>
+                </div>
+              <% } %>
+              
+              <% if (order.productDiscount && order.productDiscount > 0) { %>
+                <div>
+                  <span class="text-gray-600">Product Offer Discount:</span>
+                  <span class="font-medium text-green-600 ml-1">-₹<%= order.productDiscount.toFixed(2) %></span>
+                </div>
+              <% } %>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-3 pt-3 border-t border-gray-100">
+              <a href="/user/profile/orders/<%= order._id %>" class="flex items-center px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-all">
+                <i class="fas fa-eye mr-2"></i>
+                View Details
+              </a>
+              
+              <% if (order.status === 'Failed') { %>
+                <a href="/user/checkout" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-all">
+                  <i class="fas fa-redo mr-2"></i>
+                  Retry Payment
+                </a>
+              <% } %>
+              
+              <% if (order.status === 'Delivered') { %>
+                <a href="/user/profile/orders/<%= order._id %>/invoice" class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+                  <i class="fas fa-file-invoice mr-2"></i>
+                  Download Invoice
+                </a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    
+    <!-- No Results Message (Hidden by default) -->
+    <div id="noResults" class="hidden bg-white shadow-custom rounded-lg p-8 text-center">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-search text-gray-400 text-xl"></i>
       </div>
-    <% } else { %>
-      <div class="bg-white shadow rounded-lg p-8 text-center">
-        <p class="text-gray-500">You have no past orders.</p>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+      <p class="text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
+    </div>
+    
+  <% } else { %>
+    <div class="bg-white shadow-custom rounded-lg p-8 text-center">
+      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-shopping-bag text-gray-400 text-2xl"></i>
       </div>
-    <% } %>
-  </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+      <p class="text-gray-500 mb-6">You haven't placed any orders yet.</p>
+      <a href="/user/shop" class="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all">
+        <i class="fas fa-shopping-cart mr-2"></i>
+        Start Shopping
+      </a>
+    </div>
+  <% } %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Status filter functionality
+  const statusFilter = document.getElementById('statusFilter');
+  const orderItems = document.querySelectorAll('.order-item');
+  const noResults = document.getElementById('noResults');
+  const ordersList = document.getElementById('ordersList');
+  
+  if (statusFilter) {
+    statusFilter.addEventListener('change', function() {
+      const selectedStatus = this.value;
+      let visibleCount = 0;
+      
+      orderItems.forEach(item => {
+        const itemStatus = item.getAttribute('data-status');
+        
+        if (selectedStatus === 'all' || selectedStatus === itemStatus) {
+          item.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+      
+      // Show/hide no results message
+      if (visibleCount === 0 && orderItems.length > 0) {
+        noResults.classList.remove('hidden');
+        ordersList.classList.add('hidden');
+      } else {
+        noResults.classList.add('hidden');
+        ordersList.classList.remove('hidden');
+      }
+    });
+  }
+  
+  // Clear search functionality
+  const clearSearchBtn = document.getElementById('clearSearch');
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', function() {
+      window.location.href = '/user/profile/orders';
+    });
+  }
+  
+  // URL params for filter
+  const urlParams = new URLSearchParams(window.location.search);
+  const statusParam = urlParams.get('status');
+  
+  if (statusParam && statusFilter) {
+    statusFilter.value = statusParam;
+    statusFilter.dispatchEvent(new Event('change'));
+  }
+});
+</script>

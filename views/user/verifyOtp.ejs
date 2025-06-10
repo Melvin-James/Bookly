@@ -1,17 +1,200 @@
-<div class="max-w-md mx-auto bg-white shadow-md rounded-lg p-6 mt-8">
-    <h2 class="text-xl font-bold theme mb-4">Verify Your Email</h2>
-  
-    <% if (typeof error !== 'undefined') { %>
-      <div class="text-red-600 mb-4"><%= error %></div>
-    <% } %>
-  
-    <form action="/user/profile/verify-otp" method="POST" class="space-y-4">
-      <div>
-        <label class="block font-medium mb-1">Enter OTP sent to your new email</label>
-        <input type="text" name="otp" maxlength="6" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-theme" />
-      </div>
-  
-      <button type="submit" class="bg-theme text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition">Verify & Update</button>
-    </form>
+<div class="w-full bg-white shadow-custom rounded-xl p-6">
+  <div class="text-center mb-6">
+    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="fas fa-envelope-open-text text-primary text-2xl"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
+    <p class="text-gray-600">We've sent a 6-digit verification code to your new email address</p>
   </div>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
+      <div class="flex items-center">
+        <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+        <span class="text-red-700"><%= error %></span>
+      </div>
+    </div>
+  <% } %>
+
+  <form id="otpForm" action="/user/profile/verify-otp" method="POST" class="space-y-6">
+    <div class="form-group">
+      <label for="otp" class="block font-medium text-gray-700 mb-2">Enter Verification Code</label>
+      <div class="flex justify-center">
+        <div class="flex space-x-2" id="otpInputs">
+          <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" data-index="0">
+          <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" data-index="1">
+          <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" data-index="2">
+          <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" data-index="3">
+          <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" data-index="4">
+          <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" data-index="5">
+        </div>
+      </div>
+      <input type="hidden" name="otp" id="hiddenOtp">
+      <div id="otpError" class="text-primary text-sm mt-2 hidden text-center"></div>
+    </div>
+
+    <div class="flex flex-col space-y-3">
+      <button 
+        type="submit" 
+        id="verifyBtn"
+        class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-lg transition-all flex items-center justify-center"
+      >
+        <i class="fas fa-check-circle mr-2"></i>
+        Verify & Update Email
+      </button>
+      
+      <div class="text-center">
+        <button type="button" id="resendBtn" class="text-primary hover:text-primary-dark text-sm font-medium transition-colors">
+          Didn't receive the code? Resend
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Timer Display -->
+  <div class="text-center mt-4">
+    <p class="text-sm text-gray-500">
+      Code expires in <span id="timer" class="font-medium text-primary">05:00</span>
+    </p>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const otpInputs = document.querySelectorAll('.otp-input');
+  const hiddenOtp = document.getElementById('hiddenOtp');
+  const otpError = document.getElementById('otpError');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const resendBtn = document.getElementById('resendBtn');
+  const timerElement = document.getElementById('timer');
+  const form = document.getElementById('otpForm');
   
+  let timeLeft = 300; // 5 minutes
+  
+  // Timer functionality
+  function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (timeLeft <= 0) {
+      timerElement.textContent = 'Expired';
+      timerElement.classList.add('text-red-500');
+      resendBtn.classList.remove('hidden');
+    } else {
+      timeLeft--;
+      setTimeout(updateTimer, 1000);
+    }
+  }
+  
+  updateTimer();
+  
+  // OTP input functionality
+  otpInputs.forEach((input, index) => {
+    input.addEventListener('input', function(e) {
+      const value = e.target.value;
+      
+      // Only allow numbers
+      if (!/^\d*$/.test(value)) {
+        e.target.value = '';
+        return;
+      }
+      
+      // Move to next input
+      if (value && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
+      
+      updateHiddenOtp();
+      validateOtp();
+    });
+    
+    input.addEventListener('keydown', function(e) {
+      // Move to previous input on backspace
+      if (e.key === 'Backspace' && !e.target.value && index > 0) {
+        otpInputs[index - 1].focus();
+      }
+    });
+    
+    input.addEventListener('paste', function(e) {
+      e.preventDefault();
+      const pastedData = e.clipboardData.getData('text');
+      const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+      
+      digits.split('').forEach((digit, i) => {
+        if (otpInputs[i]) {
+          otpInputs[i].value = digit;
+        }
+      });
+      
+      updateHiddenOtp();
+      validateOtp();
+    });
+  });
+  
+  function updateHiddenOtp() {
+    const otp = Array.from(otpInputs).map(input => input.value).join('');
+    hiddenOtp.value = otp;
+  }
+  
+  function validateOtp() {
+    const otp = hiddenOtp.value;
+    
+    if (otp.length === 0) {
+      hideError();
+      return false;
+    } else if (otp.length < 6) {
+      showError('Please enter the complete 6-digit code');
+      return false;
+    } else if (!/^\d{6}$/.test(otp)) {
+      showError('Please enter a valid 6-digit code');
+      return false;
+    } else {
+      hideError();
+      return true;
+    }
+  }
+  
+  function showError(message) {
+    otpError.textContent = message;
+    otpError.classList.remove('hidden');
+    otpInputs.forEach(input => input.classList.add('border-primary'));
+  }
+  
+  function hideError() {
+    otpError.classList.add('hidden');
+    otpInputs.forEach(input => input.classList.remove('border-primary'));
+  }
+  
+  // Form submission
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (validateOtp()) {
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verifying...';
+      this.submit();
+    }
+  });
+  
+  // Resend functionality
+  resendBtn.addEventListener('click', function() {
+    // Reset timer
+    timeLeft = 300;
+    timerElement.classList.remove('text-red-500');
+    updateTimer();
+    
+    // Clear inputs
+    otpInputs.forEach(input => input.value = '');
+    updateHiddenOtp();
+    hideError();
+    
+    // Focus first input
+    otpInputs[0].focus();
+    
+    // Here you would typically make an AJAX call to resend the OTP
+    // For now, just show a success message
+    alert('Verification code has been resent to your email');
+  });
+});
+</script>

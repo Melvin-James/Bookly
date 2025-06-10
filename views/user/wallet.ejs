@@ -1,40 +1,150 @@
-<div class="max-w-3xl mx-auto mt-8 px-4">
-  <div class="bg-white rounded-lg shadow p-6">
-
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-primary">My Wallet</h2>
+<!-- Enhanced Wallet Content -->
+<div class="flex-1 max-w-4xl">
+  <!-- Page Header -->
+  <div class="bg-white shadow-custom rounded-xl p-6 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold theme mb-2">My Wallet</h1>
+        <p class="text-gray-600">Manage your wallet balance and view transaction history</p>
+      </div>
       <a href="/user/profile" 
-        class="text-sm bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-[#006673] transition">
+         class="inline-flex items-center justify-center bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all-200 font-medium text-sm">
+        <i class="fas fa-arrow-left mr-2"></i>
         Back to Profile
       </a>
     </div>
+  </div>
 
-    <div class="bg-gray-50 p-6 rounded-lg text-center shadow-inner">
-      <p class="text-gray-700 text-lg mb-2">Your current wallet balance is</p>
-      <p class="text-3xl font-bold text-green-600">₹ <%= walletBalance.toFixed(2) %></p>
+  <!-- Wallet Balance Card -->
+  <div class="bg-gradient-to-br from-primary to-primary-dark shadow-custom rounded-xl p-8 mb-6 text-white">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div class="mb-4 sm:mb-0">
+        <div class="flex items-center mb-2">
+          <i class="fas fa-wallet text-2xl mr-3 opacity-80"></i>
+          <h2 class="text-lg font-medium opacity-90">Current Balance</h2>
+        </div>
+        <p class="text-4xl md:text-5xl font-bold">₹<%= walletBalance.toFixed(2) %></p>
+        <p class="text-sm opacity-75 mt-1">Available for purchases</p>
+      </div>
+      <div class="text-right">
+        <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
+          <i class="fas fa-chart-line text-3xl mb-2 opacity-80"></i>
+          <p class="text-sm opacity-90">Wallet Status</p>
+          <p class="font-semibold">Active</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  
+
+  <!-- Transaction History -->
+  <div class="bg-white shadow-custom rounded-xl p-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+      <div>
+        <h3 class="text-xl font-bold theme mb-1">Transaction History</h3>
+        <p class="text-gray-600 text-sm">Your recent wallet activities</p>
+      </div>
     </div>
 
-    <!-- Wallet transaction history -->
-    <div class="mt-8">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Wallet Transactions</h3>
-      <ul class="space-y-3">
-        <% if (walletTransactions && walletTransactions.length > 0) { %>
-          <% walletTransactions.forEach(transaction => { %>
-            <li class="flex justify-between text-sm">
-              <span>
-                <%= transaction.type === 'credit' ? 'Refund from Order' : 'Payment for Order' %>
-                <%= transaction.orderId %>
-              </span>
-              <span class="<%= transaction.type === 'credit' ? 'text-green-500' : 'text-red-500' %> font-medium">
-                <%= transaction.type === 'credit' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
-              </span>
-            </li>
-          <% }); %>
-        <% } else { %>
-          <li class="text-center text-gray-500">No transactions found.</li>
-        <% } %>
-      </ul>
-    </div>
+    <% if (walletTransactions && walletTransactions.length > 0) { %>
+      <div class="space-y-4">
+        <% walletTransactions.forEach((transaction, index) => { %>
+          <div class="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all-200">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center <%= transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100' %>">
+                  <i class="fas <%= transaction.type === 'credit' ? 'fa-arrow-down text-green-600' : 'fa-arrow-up text-red-600' %> text-lg"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-gray-800">
+                    <%= transaction.type === 'credit' ? 'Money Added' : 'Payment Made' %>
+                  </h4>
+                  <p class="text-sm text-gray-600">
+                    <%= transaction.type === 'credit' ? 'Refund from Order' : 'Payment for Order' %> 
+                    <span class="font-medium">#<%= transaction.orderId %></span>
+                  </p>
+                  <p class="text-xs text-gray-500 mt-1">
+                    <i class="fas fa-clock mr-1"></i>
+                    <% if (transaction.createdAt) { %>
+                      <%= new Date(transaction.createdAt).toLocaleDateString('en-IN', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) %>
+                    <% } else { %>
+                      Recent transaction
+                    <% } %>
+                  </p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-lg font-bold <%= transaction.type === 'credit' ? 'text-green-600' : 'text-red-600' %>">
+                  <%= transaction.type === 'credit' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
+                </p>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= transaction.type === 'credit' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <%= transaction.type === 'credit' ? 'Credit' : 'Debit' %>
+                </span>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
 
+      <!-- Pagination or Load More (if needed) -->
+      <% if (walletTransactions.length >= 10) { %>
+        <div class="text-center mt-6">
+          <button class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 transition-all-200 font-medium">
+            <i class="fas fa-chevron-down mr-2"></i>
+            Load More Transactions
+          </button>
+        </div>
+      <% } %>
+
+    <% } else { %>
+      <!-- Empty State -->
+      <div class="text-center py-12">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-receipt text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">No Transactions Yet</h3>
+        <p class="text-gray-600 mb-6">Your wallet transaction history will appear here once you start using your wallet.</p>
+        <a href="/user/shop" class="inline-flex items-center bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all-200 font-medium">
+          <i class="fas fa-shopping-bag mr-2"></i>
+          Start Shopping
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Wallet Info -->
+  <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mt-6">
+    <div class="flex items-start space-x-3">
+      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i class="fas fa-info text-blue-600 text-sm"></i>
+      </div>
+      <div>
+        <h4 class="font-semibold text-blue-800 mb-2">Wallet Information</h4>
+        <ul class="text-sm text-blue-700 space-y-1">
+          <li>• Wallet balance can be used for all purchases on Bookly</li>
+          <li>• Refunds are automatically credited to your wallet</li>
+          <li>• Transaction history is available for download</li>
+          <li>• Wallet balance never expires</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>
+
+<style>
+  .card-hover {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+</style>

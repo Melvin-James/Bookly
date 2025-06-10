@@ -1,50 +1,86 @@
-<div class="max-w-6xl mx-auto px-4 py-6">
-  <div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold theme">My Addresses</h2>
-    <a href="/user/profile/addresses/add" class="bg-theme text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
-      + Add Address
+<div class="w-full">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">My Addresses</h2>
+      <p class="text-gray-600 mt-1">Manage your delivery addresses</p>
+    </div>
+    <a href="/user/profile/addresses/add" class="mt-4 sm:mt-0 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-all flex items-center justify-center">
+      <i class="fas fa-plus mr-2"></i> Add New Address
     </a>
   </div>
 
   <% if (addressData.length) { %>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <% addressData.forEach((addr) => { %>
-        <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition relative border border-gray-100">
-
+        <div class="bg-white p-6 rounded-xl shadow-custom hover:shadow-lg transition-all border border-gray-100 relative">
           <!-- Default Badge -->
           <% if (addr.isDefault) { %>
-            <span class="absolute top-2 right-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">Default</span>
+            <div class="absolute top-4 right-4">
+              <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1 rounded-full flex items-center">
+                <i class="fas fa-star text-green-600 mr-1 text-xs"></i>
+                Default
+              </span>
+            </div>
           <% } %>
 
-          <h4 class="font-semibold text-lg mb-1"><%= addr.name %></h4>
-          <p class="text-gray-900 text-sm mb-1"><%= addr.addressType %> Address</p>
-          <p class="text-gray-900 text-sm flex items-center gap-2">
-            
-            <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %>
-          </p>
-          <p class="text-gray-900 text-sm flex items-center gap-2">
-            
-            Landmark: <%= addr.landmark %>
-          </p>
-          <p class="text-gray-900 text-sm flex items-center gap-2">
-            
-            <%= addr.phone %>
-          </p>
-          <p class="text-gray-900 text-sm flex items-center gap-2">
-            
-            Alt: <%= addr.altPhone %>
-          </p>
+          <!-- Address Type Icon -->
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
+                <% if (addr.addressType === 'Home') { %>
+                  <i class="fas fa-home text-primary"></i>
+                <% } else if (addr.addressType === 'Work') { %>
+                  <i class="fas fa-briefcase text-primary"></i>
+                <% } else { %>
+                  <i class="fas fa-map-marker-alt text-primary"></i>
+                <% } %>
+              </div>
+              <div>
+                <h4 class="font-semibold text-lg text-gray-900"><%= addr.name %></h4>
+                <p class="text-sm text-gray-500"><%= addr.addressType %> Address</p>
+              </div>
+            </div>
+          </div>
 
-          <div class="flex justify-end gap-3 mt-4">
-            <!-- Edit Icon -->
-            <a href="/user/profile/addresses/edit/<%= addr._id %>" class="text-theme hover:text-blue-700 transition" title="Edit">
+          <!-- Address Details -->
+          <div class="space-y-2 mb-4">
+            <div class="flex items-start">
+              <i class="fas fa-map-marker-alt text-gray-400 mt-1 mr-2 text-sm"></i>
+              <span class="text-gray-700 text-sm"><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></span>
+            </div>
+            
+            <div class="flex items-start">
+              <i class="fas fa-landmark text-gray-400 mt-1 mr-2 text-sm"></i>
+              <span class="text-gray-700 text-sm">Landmark: <%= addr.landmark %></span>
+            </div>
+            
+            <div class="flex items-start">
+              <i class="fas fa-phone text-gray-400 mt-1 mr-2 text-sm"></i>
+              <span class="text-gray-700 text-sm"><%= addr.phone %></span>
+            </div>
+            
+            <% if (addr.altPhone) { %>
+              <div class="flex items-start">
+                <i class="fas fa-phone-alt text-gray-400 mt-1 mr-2 text-sm"></i>
+                <span class="text-gray-700 text-sm">Alt: <%= addr.altPhone %></span>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div class="flex space-x-2">
+              <a href="/user/profile/addresses/edit/<%= addr._id %>" 
+                 class="flex items-center px-3 py-1.5 text-sm text-primary hover:bg-primary hover:text-white rounded-lg transition-all border border-primary">
+                <i class="fas fa-edit mr-1"></i> Edit
+              </a>
               
-            </a>
-
-            <!-- Delete Icon -->
-            <form action="/user/profile/addresses/delete/<%= addr._id %>" method="POST" onsubmit="return confirm('Are you sure?')">
-              <button type="submit" class="text-red-500 hover:text-red-700 transition" title="Delete">
-                
+            </div>
+            
+            <form action="/user/profile/addresses/delete/<%= addr._id %>" method="POST" class="inline">
+              <button type="button" onclick="confirmDelete(this)" 
+                      class="flex items-center px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-all border border-red-300">
+                <i class="fas fa-trash mr-1"></i> Delete
               </button>
             </form>
           </div>
@@ -52,6 +88,86 @@
       <% }) %>
     </div>
   <% } else { %>
-    <p class="text-gray-500">No addresses found.</p>
+    <div class="text-center py-12">
+      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-map-marker-alt text-gray-400 text-3xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No addresses found</h3>
+      <p class="text-gray-500 mb-6">Add your first delivery address to get started</p>
+      <a href="/user/profile/addresses/add" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg transition-all inline-flex items-center">
+        <i class="fas fa-plus mr-2"></i> Add Your First Address
+      </a>
+    </div>
   <% } %>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDelete(button) {
+  Swal.fire({
+    title: 'Delete Address?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      button.closest('form').submit();
+    }
+  });
+}
+
+function setAsDefault(addressId) {
+  Swal.fire({
+    title: 'Set as Default?',
+    text: 'This will be your primary delivery address.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#007D8B',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, set as default',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Make AJAX call to set as default
+      fetch(`/user/profile/addresses/set-default/${addressId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            title: 'Success!',
+            text: 'Default address updated successfully.',
+            icon: 'success',
+            confirmButtonColor: '#007D8B'
+          }).then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: 'Failed to update default address.',
+            icon: 'error',
+            confirmButtonColor: '#007D8B'
+          });
+        }
+      })
+      .catch(error => {
+        Swal.fire({
+          title: 'Error!',
+          text: 'Something went wrong.',
+          icon: 'error',
+          confirmButtonColor: '#007D8B'
+        });
+      });
+    }
+  });
+}
+</script>
