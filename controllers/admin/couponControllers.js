@@ -72,7 +72,7 @@ const createCoupon = async (req,res,next)=>{
             expiresAt,
             usageLimit
         }=req.body;
-
+        console.log(code);
         const existing = await Coupon.findOne({code:code.toUpperCase()});
         if(existing){
             return res.status(400).render('error',{message:'coupon code already exists!'});
@@ -90,7 +90,7 @@ const createCoupon = async (req,res,next)=>{
 
         await coupon.save();
         res.redirect('/admin/coupons?created=true');
-    }catch(error){
+    }catch(err){
         next(err);
     }
 };
@@ -105,7 +105,7 @@ const deleteCoupon = async(req,res,next)=>{
         }
         res.json({success:true});
     }
-    catch(error){
+    catch(err){
         next(err);
     }
 };
@@ -117,7 +117,7 @@ const editCoupon = async(req,res,next)=>{
 
         await Coupon.findByIdAndUpdate(id,updateFields,{runValidators:true});
         res.redirect('/admin/coupons?updated=true');
-    }catch(error){
+    }catch(err){
         next(err);
     }
 };

@@ -1,220 +1,340 @@
 <div class="space-y-6">
   <!-- Dashboard Header -->
-  <div class="bg-white rounded-lg shadow-sm p-6">
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-3">
-        <div class="bg-primary-light p-3 rounded-full">
-          <i class="ri-dashboard-line text-2xl text-primary"></i>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex items-start gap-4">
+          <div class="bg-gradient-to-br from-primary to-primary-hover p-4 rounded-xl shadow-lg">
+            <i class="ri-dashboard-line text-2xl text-white"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Admin Dashboard</h1>
+            <p class="text-gray-600 text-sm lg:text-base">Welcome back! Here's what's happening with your bookstore today.</p>
+            <div class="flex items-center gap-2 mt-2">
+              <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span class="text-xs text-gray-500">Live data</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-          <p class="text-gray-600">Welcome back! Here's what's happening with your bookstore.</p>
+        
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <select id="dashboardPeriod" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all bg-white text-sm">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month" selected>This Month</option>
+            <option value="year">This Year</option>
+          </select>
+          <button id="refreshDashboard" class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md text-sm font-medium">
+            <i class="ri-refresh-line"></i>
+            <span>Refresh</span>
+          </button>
         </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button id="refreshDashboard" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover flex items-center gap-2">
-          <i class="ri-refresh-line"></i>
-          <span>Refresh</span>
-        </button>
-        <select id="dashboardPeriod" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
-          <option value="today">Today</option>
-          <option value="week">This Week</option>
-          <option value="month" selected>This Month</option>
-          <option value="year">This Year</option>
-        </select>
       </div>
     </div>
   </div>
 
   <!-- Stats Overview Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-sm text-gray-500 font-medium">Total Revenue</p>
-          <h3 id="totalRevenue" class="text-2xl font-bold text-gray-800 mt-1">₹0</h3>
-          <p class="text-sm text-green-600 mt-1">
-            <span id="revenueChange">+0%</span> from last period
-          </p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+    <!-- Total Revenue Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300">
+      <div class="p-6">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+              <div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+            </div>
+            <h3 id="totalRevenue" class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">₹0</h3>
+            <div class="flex items-center gap-1">
+              <span id="revenueChange" class="text-sm font-medium text-green-600">+0%</span>
+              <span class="text-xs text-gray-500">from last period</span>
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+            <i class="ri-money-dollar-circle-line text-white text-xl"></i>
+          </div>
         </div>
-        <div class="bg-blue-100 p-3 rounded-full">
-          <i class="ri-money-dollar-circle-line text-blue-600 text-xl"></i>
-        </div>
-      </div>
-    </div>
-    
-    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-sm text-gray-500 font-medium">Total Orders</p>
-          <h3 id="totalOrders" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
-          <p class="text-sm text-green-600 mt-1">
-            <span id="ordersChange">+0%</span> from last period
-          </p>
-        </div>
-        <div class="bg-green-100 p-3 rounded-full">
-          <i class="ri-shopping-cart-line text-green-600 text-xl"></i>
+        <div class="w-full bg-gray-200 rounded-full h-1.5">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full transition-all duration-500" style="width: 75%"></div>
         </div>
       </div>
     </div>
     
-    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-500">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-sm text-gray-500 font-medium">Products Sold</p>
-          <h3 id="productsSold" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
-          <p class="text-sm text-green-600 mt-1">
-            <span id="productsChange">+0%</span> from last period
-          </p>
+    <!-- Total Orders Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300">
+      <div class="p-6">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="text-sm font-medium text-gray-600">Total Orders</p>
+              <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+            </div>
+            <h3 id="totalOrders" class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">0</h3>
+            <div class="flex items-center gap-1">
+              <span id="ordersChange" class="text-sm font-medium text-green-600">+0%</span>
+              <span class="text-xs text-gray-500">from last period</span>
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-xl shadow-lg">
+            <i class="ri-shopping-cart-line text-white text-xl"></i>
+          </div>
         </div>
-        <div class="bg-amber-100 p-3 rounded-full">
-          <i class="ri-book-2-line text-amber-600 text-xl"></i>
+        <div class="w-full bg-gray-200 rounded-full h-1.5">
+          <div class="bg-gradient-to-r from-green-500 to-green-600 h-1.5 rounded-full transition-all duration-500" style="width: 60%"></div>
         </div>
       </div>
     </div>
     
-    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-primary">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-sm text-gray-500 font-medium">New Customers</p>
-          <h3 id="newCustomers" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
-          <p class="text-sm text-green-600 mt-1">
-            <span id="customersChange">+0%</span> from last period
-          </p>
+    <!-- Products Sold Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 sm:col-span-2 lg:col-span-1">
+      <div class="p-6">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="text-sm font-medium text-gray-600">Products Sold</p>
+              <div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+            </div>
+            <h3 id="productsSold" class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">0</h3>
+            <div class="flex items-center gap-1">
+              <span id="productsChange" class="text-sm font-medium text-green-600">+0%</span>
+              <span class="text-xs text-gray-500">from last period</span>
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg">
+            <i class="ri-book-2-line text-white text-xl"></i>
+          </div>
         </div>
-        <div class="bg-primary-light p-3 rounded-full">
-          <i class="ri-user-add-line text-primary text-xl"></i>
+        <div class="w-full bg-gray-200 rounded-full h-1.5">
+          <div class="bg-gradient-to-r from-amber-500 to-amber-600 h-1.5 rounded-full transition-all duration-500" style="width: 85%"></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Sales Chart Section -->
-  <div class="bg-white rounded-lg shadow-sm p-6">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-      <div>
-        <h2 class="text-xl font-bold text-gray-800 mb-2">Sales Analytics</h2>
-        <p class="text-gray-600">Track your sales performance over time</p>
-      </div>
-      <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
-        <button class="chart-filter-btn active" data-period="7">7 Days</button>
-        <button class="chart-filter-btn" data-period="30">30 Days</button>
-        <button class="chart-filter-btn" data-period="90">3 Months</button>
-        <button class="chart-filter-btn" data-period="365">1 Year</button>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-6 border-b border-gray-100">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h2 class="text-xl lg:text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <i class="ri-line-chart-line text-primary"></i>
+            Sales Analytics
+          </h2>
+          <p class="text-gray-600 text-sm lg:text-base">Track your sales performance over time</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="chart-filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="7">7 Days</button>
+          <button class="chart-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="30">30 Days</button>
+          <button class="chart-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="90">3 Months</button>
+          <button class="chart-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="365">1 Year</button>
+        </div>
       </div>
     </div>
     
-    <div class="relative h-80">
-      <canvas id="salesChart"></canvas>
+    <div class="p-6">
+      <div class="relative h-80 lg:h-96">
+        <canvas id="salesChart"></canvas>
+      </div>
     </div>
   </div>
 
   <!-- Top Performance Section -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
     
     <!-- Best Selling Products -->
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <i class="ri-book-2-line text-primary"></i>
-          Top 10 Products
-        </h3>
-        <button class="text-primary hover:text-primary-hover text-sm font-medium">View All</button>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <i class="ri-book-2-line text-primary text-sm"></i>
+            </div>
+            Top Products
+          </h3>
+          <button class="text-primary hover:text-primary-hover text-sm font-medium transition-colors">View All</button>
+        </div>
       </div>
       
-      <div id="topProducts" class="space-y-3">
-        <!-- Loading skeleton -->
-        <div class="animate-pulse space-y-3">
-          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 bg-gray-200 rounded"></div>
-              <div class="space-y-1">
-                <div class="w-24 h-3 bg-gray-200 rounded"></div>
-                <div class="w-16 h-2 bg-gray-200 rounded"></div>
+      <div class="p-6">
+        <div id="topProducts" class="space-y-3">
+          <!-- Loading skeleton -->
+          <div class="animate-pulse space-y-3">
+            <% for(let i = 0; i < 5; i++) { %>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                  <div class="space-y-2">
+                    <div class="w-24 h-3 bg-gray-200 rounded"></div>
+                    <div class="w-16 h-2 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+                <div class="w-12 h-3 bg-gray-200 rounded"></div>
               </div>
-            </div>
-            <div class="w-12 h-3 bg-gray-200 rounded"></div>
+            <% } %>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Best Selling Categories -->
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <i class="ri-folder-line text-primary"></i>
-          Top 10 Categories
-        </h3>
-        <button class="text-primary hover:text-primary-hover text-sm font-medium">View All</button>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <i class="ri-folder-line text-primary text-sm"></i>
+            </div>
+            Top Categories
+          </h3>
+          <button class="text-primary hover:text-primary-hover text-sm font-medium transition-colors">View All</button>
+        </div>
       </div>
       
-      <div id="topCategories" class="space-y-3">
-        <!-- Loading skeleton -->
-        <div class="animate-pulse space-y-3">
-          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 bg-gray-200 rounded"></div>
-              <div class="space-y-1">
-                <div class="w-20 h-3 bg-gray-200 rounded"></div>
-                <div class="w-14 h-2 bg-gray-200 rounded"></div>
+      <div class="p-6">
+        <div id="topCategories" class="space-y-3">
+          <!-- Loading skeleton -->
+          <div class="animate-pulse space-y-3">
+            <% for(let i = 0; i < 5; i++) { %>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                  <div class="space-y-2">
+                    <div class="w-20 h-3 bg-gray-200 rounded"></div>
+                    <div class="w-14 h-2 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+                <div class="w-12 h-3 bg-gray-200 rounded"></div>
               </div>
-            </div>
-            <div class="w-12 h-3 bg-gray-200 rounded"></div>
+            <% } %>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Best Selling Publishers -->
-    <!-- <div class="bg-white rounded-lg shadow-sm p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <i class="ri-building-line text-primary"></i>
-          Top 10 Publishers
-        </h3>
-        <button class="text-primary hover:text-primary-hover text-sm font-medium">View All</button>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <i class="ri-building-line text-primary text-sm"></i>
+            </div>
+            Top Publishers
+          </h3>
+          <button class="text-primary hover:text-primary-hover text-sm font-medium transition-colors">View All</button>
+        </div>
       </div>
       
-      <div id="topPublishers" class="space-y-3">
-      
-        <div class="animate-pulse space-y-3">
-          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 bg-gray-200 rounded"></div>
-              <div class="space-y-1">
-                <div class="w-24 h-3 bg-gray-200 rounded"></div>
-                <div class="w-16 h-2 bg-gray-200 rounded"></div>
+      <div class="p-6">
+        <div id="topPublishers" class="space-y-3">
+          <!-- Loading skeleton -->
+          <div class="animate-pulse space-y-3">
+            <% for(let i = 0; i < 5; i++) { %>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                  <div class="space-y-2">
+                    <div class="w-24 h-3 bg-gray-200 rounded"></div>
+                    <div class="w-16 h-2 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+                <div class="w-12 h-3 bg-gray-200 rounded"></div>
               </div>
-            </div>
-            <div class="w-12 h-3 bg-gray-200 rounded"></div>
+            <% } %>
           </div>
         </div>
       </div>
-    </div> -->
+    </div>
   </div>
-
-  <!-- Recent Activity -->
-  <!-- <div class="bg-white rounded-lg shadow-sm p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-        <i class="ri-time-line text-primary"></i>
-        Recent Activity
-      </h3>
-      <button class="text-primary hover:text-primary-hover text-sm font-medium">View All</button>
-    </div>
-    
-    <div id="recentActivity" class="space-y-4">
-      
-    </div>
-  </div> -->
 </div>
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+.chart-filter-btn {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
 
+.chart-filter-btn:hover {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.chart-filter-btn.active {
+  background: #007D8B;
+  color: white;
+  border-color: #007D8B;
+  box-shadow: 0 1px 3px 0 rgba(0, 125, 139, 0.1);
+}
+
+.top-item {
+  display: flex;
+  align-items: center;
+  justify-content: between;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.top-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.rank-badge {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #007D8B, #006B78);
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 125, 139, 0.2);
+}
+
+@media (max-width: 640px) {
+  .chart-filter-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .top-item {
+    padding: 10px;
+  }
+  
+  .rank-badge {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+}
+
+/* Loading animation improvements */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.animate-pulse {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+}
 </style>
 
 <script>
@@ -223,6 +343,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   initializeDashboard();
 
+  // Chart filter buttons
   document.querySelectorAll('.chart-filter-btn').forEach(btn => {
     btn.addEventListener('click', function () {
       document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
@@ -231,18 +352,29 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Dashboard period selector
   document.getElementById('dashboardPeriod').addEventListener('change', function () {
     loadDashboardData(this.value);
   });
 
+  // Refresh button
   document.getElementById('refreshDashboard').addEventListener('click', function () {
     const btn = this;
+    const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Refreshing...';
     btn.disabled = true;
+    
     setTimeout(() => {
       loadDashboardData();
-      btn.innerHTML = '<i class="ri-refresh-line"></i> Refresh';
+      btn.innerHTML = originalContent;
       btn.disabled = false;
+      
+      // Show success feedback
+      btn.classList.add('bg-green-500');
+      setTimeout(() => {
+        btn.classList.remove('bg-green-500');
+        btn.classList.add('bg-primary');
+      }, 500);
     }, 1000);
   });
 
@@ -251,68 +383,120 @@ document.addEventListener('DOMContentLoaded', function () {
     loadDashboardData();
     loadTopProducts();
     loadTopCategories();
-    // loadTopPublishers();
-    // loadRecentActivity();
+    loadTopPublishers();
   }
 
   function initializeSalesChart() {
     const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    // Create gradient backgrounds
+    const revenueGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    revenueGradient.addColorStop(0, 'rgba(0, 125, 139, 0.2)');
+    revenueGradient.addColorStop(1, 'rgba(0, 125, 139, 0.02)');
+    
+    const ordersGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    ordersGradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+    ordersGradient.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
+    
     salesChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: [],
         datasets: [{
-          label: 'Revenue',
+          label: 'Revenue (₹)',
           data: [],
           borderColor: '#007D8B',
-          backgroundColor: 'rgba(0, 125, 139, 0.1)',
+          backgroundColor: revenueGradient,
           borderWidth: 3,
           fill: true,
           tension: 0.4,
           pointBackgroundColor: '#007D8B',
           pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
+          pointBorderWidth: 3,
           pointRadius: 6,
-          pointHoverRadius: 8
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: '#006B78',
+          pointHoverBorderWidth: 4
         }, {
           label: 'Orders',
           data: [],
           borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          backgroundColor: ordersGradient,
           borderWidth: 3,
           fill: true,
           tension: 0.4,
           pointBackgroundColor: '#10b981',
           pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
+          pointBorderWidth: 3,
           pointRadius: 6,
-          pointHoverRadius: 8
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: '#059669',
+          pointHoverBorderWidth: 4
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } },
+          legend: { 
+            position: 'top', 
+            labels: { 
+              usePointStyle: true, 
+              padding: 20,
+              font: {
+                size: 14,
+                weight: '500'
+              }
+            } 
+          },
           tooltip: {
             mode: 'index',
             intersect: false,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
             titleColor: '#ffffff',
             bodyColor: '#ffffff',
             borderColor: '#007D8B',
-            borderWidth: 1
+            borderWidth: 2,
+            cornerRadius: 8,
+            displayColors: true,
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.datasetIndex === 0) {
+                  label += '₹' + context.parsed.y.toLocaleString();
+                } else {
+                  label += context.parsed.y.toLocaleString();
+                }
+                return label;
+              }
+            }
           }
         },
         scales: {
           x: {
-            grid: { display: false },
-            ticks: { color: '#6b7280' }
+            grid: { 
+              display: false 
+            },
+            ticks: { 
+              color: '#6b7280',
+              font: {
+                size: 12
+              }
+            }
           },
           y: {
-            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+            grid: { 
+              color: 'rgba(0, 0, 0, 0.05)',
+              drawBorder: false
+            },
             ticks: {
               color: '#6b7280',
+              font: {
+                size: 12
+              },
               callback: function (value) {
                 return '₹' + value.toLocaleString();
               }
@@ -323,6 +507,11 @@ document.addEventListener('DOMContentLoaded', function () {
           mode: 'nearest',
           axis: 'x',
           intersect: false
+        },
+        elements: {
+          line: {
+            borderJoinStyle: 'round'
+          }
         }
       }
     });
@@ -348,14 +537,39 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updateStatsCards(data) {
-    document.getElementById('totalRevenue').textContent = '₹' + data.totalRevenue.toLocaleString();
-    document.getElementById('revenueChange').textContent = (data.revenueChange > 0 ? '+' : '') + data.revenueChange + '%';
+    // Animate number changes
+    animateValue('totalRevenue', 0, data.totalRevenue, 1000, '₹');
+    animateValue('totalOrders', 0, data.totalOrders, 1000);
+    animateValue('productsSold', 0, data.productsSold, 1000);
+    
+    // Update change percentages with colors
+    updateChangeIndicator('revenueChange', data.revenueChange);
+    updateChangeIndicator('ordersChange', data.ordersChange);
+    updateChangeIndicator('productsChange', data.productsChange);
+  }
 
-    document.getElementById('totalOrders').textContent = data.totalOrders.toLocaleString();
-    document.getElementById('ordersChange').textContent = (data.ordersChange > 0 ? '+' : '') + data.ordersChange + '%';
+  function animateValue(elementId, start, end, duration, prefix = '') {
+    const element = document.getElementById(elementId);
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= end) {
+        current = end;
+        clearInterval(timer);
+      }
+      element.textContent = prefix + Math.floor(current).toLocaleString();
+    }, 16);
+  }
 
-    document.getElementById('productsSold').textContent = data.productsSold.toLocaleString();
-    document.getElementById('productsChange').textContent = (data.productsChange > 0 ? '+' : '') + data.productsChange + '%';
+  function updateChangeIndicator(elementId, value) {
+    const element = document.getElementById(elementId);
+    element.textContent = (value > 0 ? '+' : '') + value + '%';
+    
+    // Update color based on value
+    element.className = value >= 0 ? 'text-sm font-medium text-green-600' : 'text-sm font-medium text-red-600';
   }
 
   function loadTopProducts() {
@@ -372,61 +586,47 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(console.error);
   }
 
-  // function loadTopPublishers() {
-  //   fetch('/admin/top-publishers')
-  //     .then(response => response.json())
-  //     .then(data => renderTopItems('topPublishers', data, 'publisher'))
-  //     .catch(console.error);
-  // }
+  function loadTopPublishers() {
+    fetch('/admin/top-publishers')
+      .then(response => response.json())
+      .then(data => renderTopItems('topPublishers', data, 'publisher'))
+      .catch(console.error);
+  }
 
   function renderTopItems(containerId, items, type) {
     const container = document.getElementById(containerId);
+    
+    if (!items || items.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-8">
+          <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <i class="ri-inbox-line text-gray-400 text-xl"></i>
+          </div>
+          <p class="text-gray-500 text-sm">No data available</p>
+        </div>
+      `;
+      return;
+    }
+    
     container.innerHTML = '';
     items.slice(0, 10).forEach((item, index) => {
       const itemElement = document.createElement('div');
       itemElement.className = 'top-item';
       itemElement.innerHTML = `
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-1">
           <div class="rank-badge">${index + 1}</div>
-          <div>
-            <p class="font-medium text-gray-800 text-sm">${item.name}</p>
+          <div class="min-w-0 flex-1">
+            <p class="font-medium text-gray-900 text-sm truncate">${item.name}</p>
             <p class="text-xs text-gray-500">${item.sales} sold</p>
           </div>
         </div>
-        <div class="text-right">
-          <p class="font-bold text-primary">₹${item.revenue.toLocaleString()}</p>
-        </div>`;
+        <div class="text-right ml-3">
+          <p class="font-bold text-primary text-sm">₹${item.revenue.toLocaleString()}</p>
+        </div>
+      `;
       container.appendChild(itemElement);
     });
   }
-
-  // function loadRecentActivity() {
-  //   fetch('/admin/recent-activity')
-  //     .then(response => response.json())
-  //     .then(renderRecentActivity)
-  //     .catch(console.error);
-  // }
-
-  // function renderRecentActivity(activities) {
-  //   const container = document.getElementById('recentActivity');
-  //   container.innerHTML = '';
-  //   activities.forEach(activity => {
-  //     const el = document.createElement('div');
-  //     el.className = 'flex items-center gap-4 p-3 bg-gray-50 rounded-lg';
-  //     el.innerHTML = `
-  //       <div class="flex-shrink-0">
-  //         <div class="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center">
-  //           <i class="${activity.icon} text-primary"></i>
-  //         </div>
-  //       </div>
-  //       <div class="flex-grow">
-  //         <p class="text-sm font-medium text-gray-800">${activity.title}</p>
-  //         <p class="text-xs text-gray-500">${activity.description}</p>
-  //       </div>
-  //       <div class="text-xs text-gray-400">${activity.time}</div>`;
-  //     container.appendChild(el);
-  //   });
-  // }
 
   // Initial chart load
   updateSalesChart('30');

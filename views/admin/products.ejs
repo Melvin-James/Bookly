@@ -1,209 +1,498 @@
-<div class="p-6">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-[#007D8B]">Product Management</h1>
-
-    <form id="searchForm" class="flex space-x-2" onsubmit="return false;">
-      <input
-        id="searchInput"
-        type="text"
-        placeholder="Search by product name"
-        class="px-4 py-2 border rounded-md"
-      />
-      <button class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]" onclick="performSearch()">Search</button>
-      <button type="button" onclick="clearSearch()" class="px-4 py-2 border rounded-md text-gray-600 hover:text-black">Clear</button>
-    </form>
-  </div>
-
-  <div class="overflow-x-auto bg-white rounded-lg shadow">
-    <table class="min-w-full table-auto">
-      <thead class="bg-[#007D8B] text-white">
-        <tr>
-          <th class="py-3 px-4 text-left">Product</th>
-          <th class="py-3 px-4 text-left">Category</th>
-          <th class="py-3 px-4 text-left">Price</th>
-          <th class="py-3 px-4 text-left">Status</th>
-          <th class="py-3 px-4 text-center">Edit</th>
-          <th class="py-3 px-4 text-center">Block/Unblock</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% products.forEach((product) => { %>
-          <tr class="border-b">
-            <td class="py-3 px-4"><%= product.name %></td>
-            <td class="py-3 px-4"><%= product.category?.name || 'N/A' %></td>
-            <td class="py-3 px-4"><%= product.price %></td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-1 text-sm rounded-md 
-                <%= product.isBlocked ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' %>">
-                <%= product.isBlocked ? 'Blocked' : 'Active' %>
-              </span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <a href="/admin/product-edit/<%= product._id %>" 
-                 class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
-                Edit
-              </a>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <button
-                class="toggle-block-btn text-sm px-4 py-2 rounded-md 
-                  <%= product.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600' %> text-white"
-                data-product-id="<%= product._id %>"
-                data-is-blocked="<%= product.isBlocked %>"
-                onclick="showConfirmation(this)">
-                <%= product.isBlocked ? 'Unblock' : 'Block' %>
+<div class="min-h-screen bg-gray-50">
+  <!-- Page Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg">
+              <i class="ri-book-2-line text-white text-xl"></i>
+            </div>
+            Product Management
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">Manage your product catalog and inventory</p>
+        </div>
+        
+        <!-- Search Form -->
+        <div class="flex-shrink-0">
+          <form id="searchForm" class="flex flex-col sm:flex-row gap-2" onsubmit="return false;">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="ri-search-line text-gray-400"></i>
+              </div>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search by product name"
+                class="w-full sm:w-64 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm bg-white"
+              />
+            </div>
+            <div class="flex gap-2">
+              <button 
+                type="button"
+                class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center gap-2" 
+                onclick="performSearch()">
+                <i class="ri-search-line text-sm"></i>
+                <span class="hidden sm:inline">Search</span>
               </button>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
-
-  <div id="pagination" class="mt-6 flex justify-center space-x-2"></div>
-
-  <a href="/admin/product-add"
-     class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm mt-4 inline-block">
-    Add Products
-  </a>
-
-  <!-- Confirmation Modal -->
-  <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-80">
-      <p id="modalMessage" class="mb-4 text-gray-700 text-center">Are you sure?</p>
-      <div class="flex justify-between">
-        <button onclick="confirmAction()" class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]">Confirm</button>
-        <button onclick="closeModal()" class="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400">Cancel</button>
+              <button 
+                type="button" 
+                onclick="clearSearch()" 
+                class="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-200 flex items-center gap-2">
+                <i class="ri-close-line text-sm"></i>
+                <span class="hidden sm:inline">Clear</span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script>
-    let selectedButton = null;
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 pb-8">
+    <!-- Stats Cards -->
+    <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="ri-book-2-line text-blue-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Products</p>
+            <p class="text-2xl font-bold text-gray-900" id="totalProducts">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="ri-check-line text-green-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Active Products</p>
+            <p class="text-2xl font-bold text-gray-900" id="activeProducts">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+            <i class="ri-close-line text-red-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Blocked Products</p>
+            <p class="text-2xl font-bold text-gray-900" id="blockedProducts">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <i class="ri-alert-line text-yellow-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Low Stock</p>
+            <p class="text-2xl font-bold text-gray-900" id="lowStock">-</p>
+          </div>
+        </div>
+      </div>
+    </div> -->
 
-    function showConfirmation(button) {
-      selectedButton = button;
-      const isBlocked = button.getAttribute('data-is-blocked') === 'true';
-      document.getElementById('modalMessage').textContent = `Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this product?`;
-      document.getElementById('confirmationModal').classList.remove('hidden');
-    }
+    <!-- Products Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="ri-table-line text-primary"></i>
+          Products List
+        </h3>
+        <a href="/admin/product-add"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30">
+          <i class="ri-add-line text-sm"></i>
+          Add Product
+        </a>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-book-line text-sm"></i>
+                  Product
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-folder-line text-sm"></i>
+                  Category
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-money-dollar-circle-line text-sm"></i>
+                  Price
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-shield-check-line text-sm"></i>
+                  Status
+                </div>
+              </th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center justify-center gap-2">
+                  <i class="ri-settings-line text-sm"></i>
+                  Actions
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="productTableBody" class="bg-white divide-y divide-gray-200">
+            <% products.forEach((product) => { %>
+              <tr class="hover:bg-gray-50 transition-colors duration-200">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
+                      <i class="ri-book-2-line text-white text-lg"></i>
+                    </div>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900"><%= product.name %></div>
+                      <div class="text-xs text-gray-500">Product ID: #<%= product._id.toString().slice(-6) %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= product.category?.name || 'N/A' %></div>
+                  <div class="text-xs text-gray-500">Category</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    ₹<%= product.price %> 
+                    <% if (product.appliedOffer) { %>
+                      <span class="text-sm text-gray-600">(<%= product.appliedOffer %>)%</span>
+                    <% } %>
+                  </div>
+                  <div class="text-xs text-gray-500">Base price</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if (product.isBlocked) { %>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                      <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                      Blocked
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                      <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      Active
+                    </span>
+                  <% } %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <a href="/admin/product-edit/<%= product._id %>" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                      <i class="ri-edit-line text-sm"></i>
+                      Edit
+                    </a>
+                    <button
+                      class="toggle-block-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2
+                      <%= product.isBlocked ? 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500' : 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500' %>"
+                      data-product-id="<%= product._id %>"
+                      data-is-blocked="<%= product.isBlocked %>"
+                      onclick="showConfirmation(this)">
+                      <i class="<%= product.isBlocked ? 'ri-check-line' : 'ri-close-line' %> text-sm"></i>
+                      <%= product.isBlocked ? 'Unblock' : 'Block' %>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="ri-book-2-line text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+        <p class="text-gray-500">Try adjusting your search criteria or add a new product</p>
+      </div>
+    </div>
 
-    function closeModal() {
-      document.getElementById('confirmationModal').classList.add('hidden');
-      selectedButton = null;
-    }
+    <!-- Pagination -->
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-500">
+      </div>
+      <div id="pagination" class="flex items-center gap-2"></div>
+    </div>
+  </div>
 
-    async function confirmAction() {
-      if (!selectedButton) return;
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all">
+      <div class="p-6">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <i class="ri-alert-line text-yellow-600 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Confirm Action</h3>
+            <p class="text-sm text-gray-500">This action cannot be undone</p>
+          </div>
+        </div>
+        <p id="modalMessage" class="text-gray-700 mb-6">Are you sure?</p>
+        <div class="flex gap-3">
+          <button 
+            onclick="confirmAction()" 
+            class="flex-1 bg-primary text-white px-4 py-2.5 rounded-lg hover:bg-primary-hover transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-primary/30">
+            Confirm
+          </button>
+          <button 
+            onclick="closeModal()" 
+            class="flex-1 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-gray-200">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-      const productId = selectedButton.getAttribute('data-user-id');
-      const isBlocked = selectedButton.getAttribute('data-is-blocked') === 'true';
+<!-- Scripts -->
+<script>
+  let selectedButton = null;
 
-      try {
-        const res = await fetch(`/admin/product/${productId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ isBlocked: !isBlocked }),
-        });
+  function showConfirmation(button) {
+    selectedButton = button;
+    const isBlocked = button.getAttribute('data-is-blocked') === 'true';
+    document.getElementById('modalMessage').textContent = `Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this product?`;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+  }
 
-        if (res.ok) {
-          const row = selectedButton.closest('tr');
-          const statusCell = row.querySelectorAll('td')[3];
-          const newStatus = isBlocked ? 'Active' : 'Blocked';
-          const newClass = isBlocked ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-          statusCell.innerHTML = `<span class="px-2 py-1 text-sm rounded-md ${newClass}">${newStatus}</span>`;
+  function closeModal() {
+    document.getElementById('confirmationModal').classList.add('hidden');
+    selectedButton = null;
+  }
 
-          selectedButton.innerText = isBlocked ? 'Block' : 'Unblock';
-          selectedButton.setAttribute('data-is-blocked', !isBlocked);
-          selectedButton.className = `toggle-block-btn text-sm px-4 py-2 rounded-md text-white ${
-            isBlocked ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-          }`;
-        } else {
-          alert("Failed to update product status.");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("An error occurred.");
-      } finally {
-        closeModal();
+  async function confirmAction() {
+    if (!selectedButton) return;
+
+    const productId = selectedButton.getAttribute('data-product-id');
+    const isBlocked = selectedButton.getAttribute('data-is-blocked') === 'true';
+
+    try {
+      const res = await fetch(`/admin/product/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isBlocked: !isBlocked }),
+      });
+
+      if (res.ok) {
+        const row = selectedButton.closest('tr');
+        const statusCell = row.querySelectorAll('td')[3];
+        const newStatus = isBlocked ? 'Active' : 'Blocked';
+        const newClass = isBlocked 
+          ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200'
+          : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200';
+        const dotColor = isBlocked ? 'bg-green-500' : 'bg-red-500';
+
+        statusCell.innerHTML = `<span class="${newClass}"><div class="w-1.5 h-1.5 ${dotColor} rounded-full"></div>${newStatus}</span>`;
+
+        selectedButton.innerHTML = `<i class="${isBlocked ? 'ri-close-line' : 'ri-check-line'} text-sm"></i>${isBlocked ? 'Block' : 'Unblock'}`;
+        selectedButton.setAttribute('data-is-blocked', !isBlocked);
+        selectedButton.className = `toggle-block-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+          isBlocked ? 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500' : 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500'
+        }`;
+        
+        updateStats();
+      } else {
+        alert("Failed to update product status.");
       }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred.");
+    } finally {
+      closeModal();
     }
+  }
 
-    function performSearch() {
-      const query = document.getElementById('searchInput').value;
-      fetch(`/admin/search-product?query=${encodeURIComponent(query)}`)
-        .then(res => res.json())
-        .then(data => {
-          renderProducts(data.products);
-        })
-        .catch(err => console.error("Search error:", err));
-    }
+  function performSearch() {
+    const query = document.getElementById('searchInput').value;
+    fetch(`/admin/search-product?query=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        renderProducts(data.products);
+        updatePaginationInfo(data.products.length, data.products.length, 1);
+      })
+      .catch(err => console.error("Search error:", err));
+  }
 
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      performPagination(1);
-    }
+  function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    performPagination(1);
+  }
 
-    let currentPage = 1;
+  let currentPage = 1;
 
-    function performPagination(page = 1) {
-      fetch(`/admin/product-pagination?page=${page}`)
-        .then(res => res.json())
-        .then(data => {
-          currentPage = data.currentPage;
-          renderProducts(data.products);
-          renderPagination(data.totalPages);
-        })
-        .catch(err => console.error("Pagination error:", err));
-    }
+  function performPagination(page = 1) {
+    fetch(`/admin/product-pagination?page=${page}`)
+      .then(res => res.json())
+      .then(data => {
+        currentPage = data.currentPage;
+        renderProducts(data.products);
+        renderPagination(data.totalPages);
+        updatePaginationInfo(data.products.length, data.totalProducts, data.currentPage);
+        updateStats();
+      })
+      .catch(err => console.error("Pagination error:", err));
+  }
 
-    function renderProducts(products) {
-      const tbody = document.querySelector('tbody');
+  function renderProducts(products) {
+    const tbody = document.querySelector('#productTableBody');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (products.length === 0) {
       tbody.innerHTML = '';
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    
+    emptyState.classList.add('hidden');
+    tbody.innerHTML = '';
 
-      products.forEach(product => {
-        const row = document.createElement('tr');
-        row.className = 'border-b';
-        row.innerHTML = `
-          <td class="py-3 px-4">${product.name}</td>
-          <td class="py-3 px-4">${product.category?.name || 'N/A'}</td>
-          <td class="py-3 px-4">${product.price}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-1 text-sm rounded-md ${product.isBlocked ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
-              ${product.isBlocked ? 'Blocked' : 'Active'}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-center">
-            <a href="/admin/product-edit/${product._id}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">🖋️</a>
-          </td>
-          <td class="py-3 px-4 text-center">
-            <button class="toggle-block-btn text-sm px-4 py-2 rounded-md 
-              ${product.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'} text-white"
-              data-user-id="${product._id}"
+    products.forEach(product => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-gray-50 transition-colors duration-200';
+      row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
+              <i class="ri-book-2-line text-white text-lg"></i>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-gray-900">${product.name}</div>
+              <div class="text-xs text-gray-500">Product ID: #${product._id.toString().slice(-6)}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm text-gray-900">${product.category?.name || 'N/A'}</div>
+          <div class="text-xs text-gray-500">Category</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-gray-900">
+            ₹${product.price}
+            ${product.appliedOffer ? `<span class="text-sm text-gray-600">(${product.appliedOffer}%)</span>` : ''}
+          </div>
+          <div class="text-xs text-gray-500">Base price</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${product.isBlocked ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-green-100 text-green-800 border border-green-200'}">
+            <div class="w-1.5 h-1.5 ${product.isBlocked ? 'bg-red-500' : 'bg-green-500'} rounded-full"></div>
+            ${product.isBlocked ? 'Blocked' : 'Active'}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">
+          <div class="flex items-center justify-center gap-2">
+            <a href="/admin/product-edit/${product._id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+              <i class="ri-edit-line text-sm"></i>
+              Edit
+            </a>
+            <button class="toggle-block-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 
+              ${product.isBlocked ? 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500' : 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500'}"
+              data-product-id="${product._id}"
               data-is-blocked="${product.isBlocked}"
               onclick="showConfirmation(this)">
+              <i class="${product.isBlocked ? 'ri-check-line' : 'ri-close-line'} text-sm"></i>
               ${product.isBlocked ? 'Unblock' : 'Block'}
             </button>
-          </td>`;
-        tbody.appendChild(row);
-      });
-    }
+          </div>
+        </td>`;
+      tbody.appendChild(row);
+    });
+  }
 
-    function renderPagination(totalPages) {
-      const container = document.querySelector('#pagination');
-      container.innerHTML = '';
-      for (let i = 1; i <= totalPages; i++) {
+  function renderPagination(totalPages) {
+    const container = document.querySelector('#pagination');
+    container.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    if (currentPage > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.innerHTML = '<i class="ri-arrow-left-s-line"></i>';
+      prevBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+      prevBtn.onclick = () => performPagination(currentPage - 1);
+      container.appendChild(prevBtn);
+    }
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
         const btn = document.createElement('button');
         btn.innerText = i;
-        btn.className = `px-4 py-2 rounded-md ${
-          i === currentPage ? 'bg-[#007D8B] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        btn.className = `px-4 py-2 rounded-lg transition-all duration-200 ${
+          i === currentPage 
+            ? 'bg-primary text-white shadow-sm' 
+            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
         }`;
         btn.onclick = () => performPagination(i);
         container.appendChild(btn);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        const dots = document.createElement('span');
+        dots.innerText = '...';
+        dots.className = 'px-2 py-2 text-gray-400';
+        container.appendChild(dots);
       }
     }
+    
+    // Next button
+    if (currentPage < totalPages) {
+      const nextBtn = document.createElement('button');
+      nextBtn.innerHTML = '<i class="ri-arrow-right-s-line"></i>';
+      nextBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+      nextBtn.onclick = () => performPagination(currentPage + 1);
+      container.appendChild(nextBtn);
+    }
+  }
 
-    window.onload = () => performPagination(1);
-  </script>
-</div>
+  function updatePaginationInfo(currentCount, totalCount, page) {
+    const itemsPerPage = 10;
+    const from = ((page - 1) * itemsPerPage) + 1;
+    const to = Math.min(page * itemsPerPage, totalCount);
+    
+    document.getElementById('showingFrom').textContent = from;
+    document.getElementById('showingTo').textContent = to;
+    document.getElementById('totalCount').textContent = totalCount;
+  }
+
+  function updateStats() {
+    const rows = document.querySelectorAll('#productTableBody tr');
+    let activeCount = 0;
+    let blockedCount = 0;
+    
+    rows.forEach(row => {
+      const statusSpan = row.querySelector('td:nth-child(4) span');
+      if (statusSpan.textContent.trim().includes('Active')) {
+        activeCount++;
+      } else {
+        blockedCount++;
+      }
+    });
+    
+    document.getElementById('totalProducts').textContent = rows.length;
+    document.getElementById('activeProducts').textContent = activeCount;
+    document.getElementById('blockedProducts').textContent = blockedCount;
+    document.getElementById('lowStock').textContent = '0'; // This would come from backend
+  }
+
+  window.onload = () => {
+    performPagination(1);
+    updateStats();
+  };
+</script>

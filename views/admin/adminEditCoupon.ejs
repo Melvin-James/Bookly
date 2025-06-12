@@ -2,105 +2,408 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Edit Coupon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Coupon - Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#007D8B',
+            'primary-hover': '#006a75',
+            'primary-dark': '#005a65'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 40px;">
+<body class="bg-gray-50 font-sans">
 
-  <div style="max-width: 700px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-    <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Edit Coupon</h1>
-
-    <form id="editCouponForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-
-      <div style="display: flex; flex-direction: column;">
-        <label for="code" style="margin-bottom: 6px;">Coupon Code</label>
-        <input type="text" id="code" name="code" value="<%= coupon.code %>" required
-          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+<div class="min-h-screen bg-gray-50">
+  <!-- Page Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg">
+              <i class="ri-coupon-line text-white text-xl"></i>
+            </div>
+            Edit Coupon
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">Update coupon details and settings</p>
+        </div>
+        <a href="/admin/coupons" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-medium">
+          <i class="ri-arrow-left-line text-sm"></i>
+          Back to Coupons
+        </a>
       </div>
-
-      <div style="display: flex; flex-direction: column;">
-        <label for="discountType" style="margin-bottom: 6px;">Discount Type</label>
-        <select id="discountType" name="discountType" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-          <option value="Flat" <%= coupon.discountType === 'Flat' ? 'selected' : '' %>>Flat</option>
-          <option value="Percentage" <%= coupon.discountType === 'Percentage' ? 'selected' : '' %>>Percentage</option>
-        </select>
-      </div>
-
-      <div style="display: flex; flex-direction: column;">
-        <label for="discountAmount" style="margin-bottom: 6px;">Discount Amount</label>
-        <input type="number" id="discountAmount" step="0.01" name="discountAmount" value="<%= coupon.discountAmount %>" required
-          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-      </div>
-
-      <div style="display: flex; flex-direction: column;">
-        <label for="maxDiscount" style="margin-bottom: 6px;">Max Discount (for % type)</label>
-        <input type="number" id="maxDiscount" step="0.01" name="maxDiscount" value="<%= coupon.maxDiscount || '' %>"
-          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-      </div>
-
-      <div style="display: flex; flex-direction: column;">
-        <label for="minCartAmount" style="margin-bottom: 6px;">Minimum Cart Amount</label>
-        <input type="number" id="minCartAmount" step="0.01" name="minCartAmount" value="<%= coupon.minCartAmount %>"
-          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-      </div>
-
-      <div style="display: flex; flex-direction: column;">
-        <label for="usageLimit" style="margin-bottom: 6px;">Usage Limit</label>
-        <input type="number" id="usageLimit" name="usageLimit" value="<%= coupon.usageLimit %>" min="1"
-          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-      </div>
-
-      <div style="display: flex; flex-direction: column;">
-        <label for="expiresAt" style="margin-bottom: 6px;">Expiry Date</label>
-        <input type="date" id="expiresAt" name="expiresAt" value="<%= coupon.expiresAt.toISOString().split('T')[0] %>" required
-          style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-      </div>
-
-      <div style="grid-column: span 2;">
-        <button type="submit"
-          style="width: 100%; background-color: #007D8B; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
-          Update Coupon
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 
-  <script>
-    const form = document.getElementById('editCouponForm');
-    form.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const payload = Object.fromEntries(formData.entries());
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 pb-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Edit Coupon Form -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <i class="ri-edit-line text-primary"></i>
+            Update Coupon Details
+          </h3>
+        </div>
+        
+        <div class="p-6">
+          <form id="editCouponForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label for="code" class="block text-sm font-medium text-gray-700">Coupon Code *</label>
+              <input type="text" id="code" name="code" value="<%= coupon.code %>" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm uppercase font-mono">
+              <div id="codeError" class="text-sm text-primary hidden"></div>
+            </div>
 
-      try {
-        const response = await fetch(`/admin/coupons/update/<%= coupon._id %>`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+            <div class="space-y-2">
+              <label for="discountType" class="block text-sm font-medium text-gray-700">Discount Type *</label>
+              <select id="discountType" name="discountType" 
+                      class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm bg-white">
+                <option value="Flat" <%= coupon.discountType === 'Flat' ? 'selected' : '' %>>Flat Amount (₹)</option>
+                <option value="Percentage" <%= coupon.discountType === 'Percentage' ? 'selected' : '' %>>Percentage (%)</option>
+              </select>
+              <div id="discountTypeError" class="text-sm text-primary hidden"></div>
+            </div>
 
-        const result = await response.json();
+            <div class="space-y-2">
+              <label for="discountAmount" class="block text-sm font-medium text-gray-700">Discount Amount *</label>
+              <div class="relative">
+                <input type="number" id="discountAmount" name="discountAmount" step="0.01" min="0" value="<%= coupon.discountAmount %>" 
+                       class="w-full px-3 py-2.5 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span id="discountSymbol" class="text-gray-400 text-sm"><%= coupon.discountType === 'Percentage' ? '%' : '₹' %></span>
+                </div>
+              </div>
+              <div id="discountAmountError" class="text-sm text-primary hidden"></div>
+            </div>
 
-        if (result.success) {
-          Swal.fire({
-            toast: true,
-            icon: 'success',
-            title: 'Coupon updated!',
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000
-          });
-        } else if (result.errors) {
-          let errorList = Object.values(result.errors).join('\n');
-          Swal.fire({ icon: 'error', title: 'Validation Error', text: errorList });
-        } else {
-          throw new Error(result.message || 'Unknown error');
-        }
+            <div class="space-y-2" id="maxDiscountField" style="display: '<%= coupon.discountType === 'Percentage' ? 'block' : 'none' %>';">
+              <label for="maxDiscount" class="block text-sm font-medium text-gray-700">Max Discount (₹)</label>
+              <input type="number" id="maxDiscount" name="maxDiscount" step="0.01" min="0" value="<%= coupon.maxDiscount || '' %>" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
+              <div id="maxDiscountError" class="text-sm text-primary hidden"></div>
+            </div>
 
-      } catch (err) {
-        Swal.fire({ icon: 'error', title: 'Error', text: err.message });
-      }
+            <div class="space-y-2">
+              <label for="minCartAmount" class="block text-sm font-medium text-gray-700">Minimum Cart Amount (₹)</label>
+              <input type="number" id="minCartAmount" name="minCartAmount" step="0.01" min="0" value="<%= coupon.minCartAmount || '' %>" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
+              <div id="minCartAmountError" class="text-sm text-primary hidden"></div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="usageLimit" class="block text-sm font-medium text-gray-700">Usage Limit *</label>
+              <input type="number" id="usageLimit" name="usageLimit" min="1" value="<%= coupon.usageLimit %>" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
+              <div id="usageLimitError" class="text-sm text-primary hidden"></div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="expiresAt" class="block text-sm font-medium text-gray-700">Expiry Date *</label>
+              <input type="date" id="expiresAt" name="expiresAt" value="<%= coupon.expiresAt.toISOString().split('T')[0] %>" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
+              <div id="expiresAtError" class="text-sm text-primary hidden"></div>
+            </div>
+
+            <div class="md:col-span-2">
+              <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-hover transition-all duration-200 font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2">
+                <i class="ri-save-line text-lg"></i>
+                <span class="submit-text">Update Coupon</span>
+                <span class="loading-text hidden">Updating...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Coupon Preview -->
+      <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <i class="ri-eye-line text-primary"></i>
+            Coupon Preview
+          </h3>
+        </div>
+        
+        <div class="p-6">
+          <div class="bg-gradient-to-r from-primary to-primary-dark rounded-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-xl font-bold font-mono" id="previewCode"><%= coupon.code %></h4>
+                <p class="text-sm opacity-90 mt-1" id="previewDescription">
+                  Get <span id="previewAmount"><%= coupon.discountType === 'Percentage' ? coupon.discountAmount + '%' : '₹' + coupon.discountAmount %></span> off
+                  <span id="previewMinCart" style="display: '<%= coupon.minCartAmount ? 'inline' : 'none' %>'">
+                    on orders above ₹<span id="previewMinAmount"><%= coupon.minCartAmount || 0 %></span>
+                  </span>
+                </p>
+              </div>
+              <div class="text-right">
+                <div class="text-xs opacity-75">Expires on</div>
+                <div class="text-sm font-medium" id="previewExpiry"><%= new Date(coupon.expiresAt).toLocaleDateString() %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Validation functions
+function showError(fieldId, message) {
+  const errorElement = document.getElementById(fieldId + 'Error');
+  const inputElement = document.getElementById(fieldId);
+  
+  errorElement.textContent = message;
+  errorElement.classList.remove('hidden');
+  inputElement.classList.add('border-primary', 'ring-2', 'ring-primary/30');
+}
+
+function clearError(fieldId) {
+  const errorElement = document.getElementById(fieldId + 'Error');
+  const inputElement = document.getElementById(fieldId);
+  
+  errorElement.classList.add('hidden');
+  inputElement.classList.remove('border-primary', 'ring-2', 'ring-primary/30');
+}
+
+function validateForm() {
+  let isValid = true;
+  
+  // Clear all previous errors
+  ['code', 'discountType', 'discountAmount', 'maxDiscount', 'minCartAmount', 'usageLimit', 'expiresAt'].forEach(clearError);
+  
+  // Validate coupon code
+  const code = document.getElementById('code').value.trim();
+  if (!code) {
+    showError('code', 'Coupon code is required');
+    isValid = false;
+  } else if (code.length < 3) {
+    showError('code', 'Coupon code must be at least 3 characters');
+    isValid = false;
+  } else if (!/^[A-Z0-9]+$/.test(code)) {
+    showError('code', 'Coupon code can only contain uppercase letters and numbers');
+    isValid = false;
+  }
+  
+  // Validate discount type
+  const discountType = document.getElementById('discountType').value;
+  if (!discountType) {
+    showError('discountType', 'Please select a discount type');
+    isValid = false;
+  }
+  
+  // Validate discount amount
+  const discountAmount = parseFloat(document.getElementById('discountAmount').value);
+  if (!discountAmount || discountAmount <= 0) {
+    showError('discountAmount', 'Please enter a valid discount amount');
+    isValid = false;
+  } else if (discountType === 'Percentage' && discountAmount > 100) {
+    showError('discountAmount', 'Percentage discount cannot exceed 100%');
+    isValid = false;
+  } else if (discountType === 'Flat' && discountAmount > 10000) {
+    showError('discountAmount', 'Flat discount cannot exceed ₹10,000');
+    isValid = false;
+  }
+  
+  // Validate max discount for percentage type
+  if (discountType === 'Percentage') {
+    const maxDiscount = parseFloat(document.getElementById('maxDiscount').value);
+    if (maxDiscount && maxDiscount <= 0) {
+      showError('maxDiscount', 'Max discount must be greater than 0');
+      isValid = false;
+    }
+  }
+  
+  // Validate min cart amount
+  const minCartAmount = parseFloat(document.getElementById('minCartAmount').value);
+  if (minCartAmount && minCartAmount < 0) {
+    showError('minCartAmount', 'Minimum cart amount cannot be negative');
+    isValid = false;
+  }
+  
+  // Validate usage limit
+  const usageLimit = parseInt(document.getElementById('usageLimit').value);
+  if (!usageLimit || usageLimit < 1) {
+    showError('usageLimit', 'Usage limit must be at least 1');
+    isValid = false;
+  } else if (usageLimit > 10000) {
+    showError('usageLimit', 'Usage limit cannot exceed 10,000');
+    isValid = false;
+  }
+  
+  // Validate expiry date
+  const expiresAt = document.getElementById('expiresAt').value;
+  if (!expiresAt) {
+    showError('expiresAt', 'Expiry date is required');
+    isValid = false;
+  } else {
+    const expiryDate = new Date(expiresAt);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (expiryDate <= today) {
+      showError('expiresAt', 'Expiry date must be in the future');
+      isValid = false;
+    }
+  }
+  
+  return isValid;
+}
+
+// Update preview
+function updatePreview() {
+  const code = document.getElementById('code').value || 'COUPON';
+  const discountType = document.getElementById('discountType').value;
+  const discountAmount = document.getElementById('discountAmount').value;
+  const minCartAmount = document.getElementById('minCartAmount').value;
+  const expiresAt = document.getElementById('expiresAt').value;
+  
+  document.getElementById('previewCode').textContent = code;
+  
+  if (discountAmount) {
+    const amountText = discountType === 'Percentage' ? discountAmount + '%' : '₹' + discountAmount;
+    document.getElementById('previewAmount').textContent = amountText;
+  }
+  
+  const minCartSpan = document.getElementById('previewMinCart');
+  if (minCartAmount && parseFloat(minCartAmount) > 0) {
+    document.getElementById('previewMinAmount').textContent = minCartAmount;
+    minCartSpan.style.display = 'inline';
+  } else {
+    minCartSpan.style.display = 'none';
+  }
+  
+  if (expiresAt) {
+    const date = new Date(expiresAt);
+    document.getElementById('previewExpiry').textContent = date.toLocaleDateString();
+  }
+}
+
+// Handle discount type change
+document.getElementById('discountType').addEventListener('change', function() {
+  const discountType = this.value;
+  const maxDiscountField = document.getElementById('maxDiscountField');
+  const discountSymbol = document.getElementById('discountSymbol');
+  
+  if (discountType === 'Percentage') {
+    maxDiscountField.style.display = 'block';
+    discountSymbol.textContent = '%';
+  } else {
+    maxDiscountField.style.display = 'none';
+    discountSymbol.textContent = '₹';
+  }
+  
+  clearError('discountType');
+  updatePreview();
+});
+
+// Handle coupon code input
+document.getElementById('code').addEventListener('input', function() {
+  this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  clearError('code');
+  updatePreview();
+});
+
+// Clear errors and update preview on input
+['discountAmount', 'maxDiscount', 'minCartAmount', 'usageLimit', 'expiresAt'].forEach(fieldId => {
+  document.getElementById(fieldId).addEventListener('input', function() {
+    clearError(fieldId);
+    updatePreview();
+  });
+});
+
+// Form submission
+document.getElementById('editCouponForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  if (!validateForm()) {
+    return;
+  }
+  
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const formData = new FormData(this);
+  const payload = Object.fromEntries(formData.entries());
+  
+  try {
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.querySelector('.submit-text').classList.add('hidden');
+    submitBtn.querySelector('.loading-text').classList.remove('hidden');
+    
+    const response = await fetch(`/admin/coupons/update/<%= coupon._id %>`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
-  </script>
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      Swal.fire({
+        toast: true,
+        icon: 'success',
+        title: 'Coupon updated successfully!',
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000
+      });
+      
+      // Redirect to coupons list after delay
+      setTimeout(() => {
+        window.location.href = '/admin/coupons';
+      }, 1500);
+    } else {
+      if (result.errors) {
+        // Handle validation errors from server
+        Object.keys(result.errors).forEach(field => {
+          showError(field, result.errors[field]);
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: result.message || 'Failed to update coupon',
+          confirmButtonColor: '#007D8B'
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Network Error',
+      text: 'Please check your connection and try again',
+      confirmButtonColor: '#007D8B'
+    });
+  } finally {
+    // Reset button state
+    submitBtn.disabled = false;
+    submitBtn.querySelector('.submit-text').classList.remove('hidden');
+    submitBtn.querySelector('.loading-text').classList.add('hidden');
+  }
+});
+
+// Set minimum date to today
+document.getElementById('expiresAt').min = new Date().toISOString().split('T')[0];
+
+// Initialize preview on page load
+window.onload = () => {
+  updatePreview();
+};
+</script>
+
 </body>
 </html>

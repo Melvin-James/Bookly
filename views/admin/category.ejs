@@ -1,64 +1,250 @@
-<div class="p-6">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-[#007D8B]">Category Management</h1>
-    <form id="searchForm" class="flex space-x-2" onsubmit="return false;">
-      <input
-        id="searchInput"
-        type="text"
-        placeholder="Search by name or email"
-        class="px-4 py-2 border rounded-md"
-      />
-      <button class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]" onclick="performSearch()">Search</button>
-      <button type="button" onclick="clearSearch()" class="px-4 py-2 border rounded-md text-gray-600 hover:text-black">Clear</button>
-    </form>
-  </div>
-
-  <!-- Users Table -->
-  <div class="overflow-x-auto bg-white rounded-lg shadow">
-    <table class="min-w-full table-auto">
-      <thead class="bg-[#007D8B] text-white">
-        <tr>
-          <th class="py-3 px-4 text-left">Index</th>
-          <th class="py-3 px-4 text-left">Name</th>
-          <th class="py-3 px-4 text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="categoryTableBody">
-        <% categories.forEach((category, index) => { %>
-          <tr class="border-b">
-            <td class="py-3 px-4"><%= index + 1 %></td>
-            <td class="py-3 px-4"><%= category.name %></td>
-            <td class="py-3 px-4 text-center space-x-2">
-              <button
-                class="toggle-block-btn text-sm px-4 py-2 rounded-md text-white <%= category.isListed ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' %>"
-                data-category-id="<%= category._id %>"
-                data-is-listed="<%= category.isListed %>"
-                onclick="showConfirmation(this)">
-                <%= category.isListed ? 'Unlist' : 'List' %>
+<div class="min-h-screen bg-gray-50">
+  <!-- Page Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg">
+              <i class="ri-folder-line text-white text-xl"></i>
+            </div>
+            Category Management
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">Organize and manage product categories</p>
+        </div>
+        
+        <!-- Search Form -->
+        <div class="flex-shrink-0">
+          <form id="searchForm" class="flex flex-col sm:flex-row gap-2" onsubmit="return false;">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="ri-search-line text-gray-400"></i>
+              </div>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search by category name"
+                class="w-full sm:w-64 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm bg-white"
+              />
+            </div>
+            <div class="flex gap-2">
+              <button 
+                type="button"
+                class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center gap-2" 
+                onclick="performSearch()">
+                <i class="ri-search-line text-sm"></i>
+                <span class="hidden sm:inline">Search</span>
               </button>
-              <a href="/admin/category-edit/<%= category._id %>"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
-                Edit
-              </a>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+              <button 
+                type="button" 
+                onclick="clearSearch()" 
+                class="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-200 flex items-center gap-2">
+                <i class="ri-close-line text-sm"></i>
+                <span class="hidden sm:inline">Clear</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div id="pagination" class="mt-6 flex justify-center space-x-2"></div>
-  <a href="/admin/category-add"
-    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
-    Add category
-  </a>
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 pb-8">
+    <!-- Stats Cards -->
+    <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="ri-folder-line text-blue-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Categories</p>
+            <p class="text-2xl font-bold text-gray-900" id="totalCategories">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="ri-check-line text-green-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Listed Categories</p>
+            <p class="text-2xl font-bold text-gray-900" id="listedCategories">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+            <i class="ri-close-line text-red-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Unlisted Categories</p>
+            <p class="text-2xl font-bold text-gray-900" id="unlistedCategories">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="ri-book-2-line text-purple-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Products</p>
+            <p class="text-2xl font-bold text-gray-900" id="totalProducts">-</p>
+          </div>
+        </div>
+      </div>
+    </div> -->
 
-  <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-80">
-      <p id="modalMessage" class="mb-4 text-gray-700 text-center">Are you sure?</p>
-      <div class="flex justify-between">
-        <button onclick="confirmAction()" class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]">Confirm</button>
-        <button onclick="closeModal()" class="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400">Cancel</button>
+    <!-- Categories Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="ri-table-line text-primary"></i>
+          Categories List
+        </h3>
+        <a href="/admin/category-add"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30">
+          <i class="ri-add-line text-sm"></i>
+          Add Category
+        </a>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-hashtag text-sm"></i>
+                  Index
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-folder-line text-sm"></i>
+                  Name
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-shield-check-line text-sm"></i>
+                  Status
+                </div>
+              </th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center justify-center gap-2">
+                  <i class="ri-settings-line text-sm"></i>
+                  Actions
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="categoryTableBody" class="bg-white divide-y divide-gray-200">
+            <% categories.forEach((category, index) => { %>
+              <tr class="hover:bg-gray-50 transition-colors duration-200">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-semibold text-gray-600">
+                      <%= index + 1 %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
+                      <i class="ri-folder-line text-white text-lg"></i>
+                    </div>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900"><%= category.name %></div>
+                      <div class="text-xs text-gray-500">Category</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if (category.isListed) { %>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                      <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      Listed
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                      <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                      Unlisted
+                    </span>
+                  <% } %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <a href="/admin/category-edit/<%= category._id %>"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                      <i class="ri-edit-line text-sm"></i>
+                      Edit
+                    </a>
+                    <button
+                      class="toggle-block-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2
+                      <%= category.isListed ? 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500' : 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500' %>"
+                      data-category-id="<%= category._id %>"
+                      data-is-listed="<%= category.isListed %>"
+                      onclick="showConfirmation(this)">
+                      <i class="<%= category.isListed ? 'ri-eye-off-line' : 'ri-eye-line' %> text-sm"></i>
+                      <%= category.isListed ? 'Unlist' : 'List' %>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="ri-folder-line text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No categories found</h3>
+        <p class="text-gray-500">Try adjusting your search criteria or add a new category</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-500">
+      </div>
+      <div id="pagination" class="flex items-center gap-2"></div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all">
+      <div class="p-6">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <i class="ri-alert-line text-yellow-600 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Confirm Action</h3>
+            <p class="text-sm text-gray-500">This action cannot be undone</p>
+          </div>
+        </div>
+        <p id="modalMessage" class="text-gray-700 mb-6">Are you sure?</p>
+        <div class="flex gap-3">
+          <button 
+            onclick="confirmAction()" 
+            class="flex-1 bg-primary text-white px-4 py-2.5 rounded-lg hover:bg-primary-hover transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-primary/30">
+            Confirm
+          </button>
+          <button 
+            onclick="closeModal()" 
+            class="flex-1 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-gray-200">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -70,7 +256,7 @@
   function showConfirmation(button) {
     selectedButton = button;
     const isListed = button.getAttribute('data-is-listed') === 'true';
-    document.getElementById('modalMessage').textContent = `Are you sure you want to ${isListed ? 'Unlist' : 'List'} this category?`;
+    document.getElementById('modalMessage').textContent = `Are you sure you want to ${isListed ? 'unlist' : 'list'} this category?`;
     document.getElementById('confirmationModal').classList.remove('hidden');
   }
 
@@ -92,11 +278,23 @@
       });
 
       if (res.ok) {
-        selectedButton.innerText = isListed ? 'List' : 'Unlist';
+        const row = selectedButton.closest('tr');
+        const statusCell = row.querySelectorAll('td')[2];
+        const newStatus = isListed ? 'Unlisted' : 'Listed';
+        const newClass = isListed 
+          ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200'
+          : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200';
+        const dotColor = isListed ? 'bg-red-500' : 'bg-green-500';
+
+        statusCell.innerHTML = `<span class="${newClass}"><div class="w-1.5 h-1.5 ${dotColor} rounded-full"></div>${newStatus}</span>`;
+
+        selectedButton.innerHTML = `<i class="${isListed ? 'ri-eye-line' : 'ri-eye-off-line'} text-sm"></i>${isListed ? 'List' : 'Unlist'}`;
         selectedButton.setAttribute('data-is-listed', (!isListed).toString());
-        selectedButton.className = `toggle-block-btn text-sm px-4 py-2 rounded-md text-white ${
-          !isListed ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+        selectedButton.className = `toggle-block-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+          !isListed ? 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500' : 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500'
         }`;
+        
+        updateStats();
       } else {
         alert("Failed to update status.");
       }
@@ -114,6 +312,7 @@
       .then(res => res.json())
       .then(data => {
         renderCategory(data.categories);
+        updatePaginationInfo(data.categories.length, data.categories.length, 1);
       })
       .catch(err => console.error("Search error:", err));
   }
@@ -132,31 +331,69 @@
         currentPage = data.currentPage;
         renderCategory(data.categories);
         renderPagination(data.totalPages);
+        updatePaginationInfo(data.categories.length, data.totalCategories, data.currentPage);
+        updateStats();
       })
       .catch(err => console.error("Pagination error:", err));
   }
 
   function renderCategory(categories) {
     const tbody = document.querySelector('#categoryTableBody');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (categories.length === 0) {
+      tbody.innerHTML = '';
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    
+    emptyState.classList.add('hidden');
     tbody.innerHTML = '';
+    
     categories.forEach((category, index) => {
       const isListed = category.isListed;
       const row = document.createElement('tr');
-      row.className = 'border-b';
+      row.className = 'hover:bg-gray-50 transition-colors duration-200';
       row.innerHTML = `
-        <td class="py-3 px-4">${index + 1}</td>
-        <td class="py-3 px-4">${category.name}</td>
-        <td class="py-3 px-4 text-center space-x-2">
-          <button class="toggle-block-btn text-sm px-4 py-2 rounded-md text-white ${isListed ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}"
-            data-category-id="${category._id}"
-            data-is-listed="${isListed}"
-            onclick="showConfirmation(this)">
-            ${isListed ? 'Unlist' : 'List'}
-          </button>
-          <a href="/admin/category-edit/${category._id}"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
-            Edit
-          </a>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-semibold text-gray-600">
+              ${index + 1}
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
+              <i class="ri-folder-line text-white text-lg"></i>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-gray-900">${category.name}</div>
+              <div class="text-xs text-gray-500">Category</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${isListed ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}">
+            <div class="w-1.5 h-1.5 ${isListed ? 'bg-green-500' : 'bg-red-500'} rounded-full"></div>
+            ${isListed ? 'Listed' : 'Unlisted'}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">
+          <div class="flex items-center justify-center gap-2">
+            <a href="/admin/category-edit/${category._id}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+              <i class="ri-edit-line text-sm"></i>
+              Edit
+            </a>
+            <button class="toggle-block-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${isListed ? 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500' : 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500'}"
+              data-category-id="${category._id}"
+              data-is-listed="${isListed}"
+              onclick="showConfirmation(this)">
+              <i class="${isListed ? 'ri-eye-off-line' : 'ri-eye-line'} text-sm"></i>
+              ${isListed ? 'Unlist' : 'List'}
+            </button>
+          </div>
         </td>
       `;
       tbody.appendChild(row);
@@ -166,17 +403,81 @@
   function renderPagination(totalPages) {
     const container = document.querySelector('#pagination');
     container.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    if (currentPage > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.innerHTML = '<i class="ri-arrow-left-s-line"></i>';
+      prevBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+      prevBtn.onclick = () => performPagination(currentPage - 1);
+      container.appendChild(prevBtn);
+    }
+    
+    // Page numbers
     for (let i = 1; i <= totalPages; i++) {
-      const btn = document.createElement('button');
-      btn.innerText = i;
-      btn.className = `px-4 py-2 rounded-md ${
-        i === currentPage ? 'bg-[#007D8B] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-      }`;
-      btn.onclick = () => performPagination(i);
-      container.appendChild(btn);
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = `px-4 py-2 rounded-lg transition-all duration-200 ${
+          i === currentPage 
+            ? 'bg-primary text-white shadow-sm' 
+            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+        }`;
+        btn.onclick = () => performPagination(i);
+        container.appendChild(btn);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        const dots = document.createElement('span');
+        dots.innerText = '...';
+        dots.className = 'px-2 py-2 text-gray-400';
+        container.appendChild(dots);
+      }
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+      const nextBtn = document.createElement('button');
+      nextBtn.innerHTML = '<i class="ri-arrow-right-s-line"></i>';
+      nextBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+      nextBtn.onclick = () => performPagination(currentPage + 1);
+      container.appendChild(nextBtn);
     }
   }
 
+  function updatePaginationInfo(currentCount, totalCount, page) {
+    const itemsPerPage = 10;
+    const from = ((page - 1) * itemsPerPage) + 1;
+    const to = Math.min(page * itemsPerPage, totalCount);
+    
+    document.getElementById('showingFrom').textContent = from;
+    document.getElementById('showingTo').textContent = to;
+    document.getElementById('totalCount').textContent = totalCount;
+  }
+
+  function updateStats() {
+    const rows = document.querySelectorAll('#categoryTableBody tr');
+    let listedCount = 0;
+    let unlistedCount = 0;
+    
+    rows.forEach(row => {
+      const statusSpan = row.querySelector('td:nth-child(3) span');
+      if (statusSpan.textContent.trim().includes('Listed') && !statusSpan.textContent.trim().includes('Unlisted')) {
+        listedCount++;
+      } else {
+        unlistedCount++;
+      }
+    });
+    
+    document.getElementById('totalCategories').textContent = rows.length;
+    document.getElementById('listedCategories').textContent = listedCount;
+    document.getElementById('unlistedCategories').textContent = unlistedCount;
+    document.getElementById('totalProducts').textContent = '0'; // This would come from backend
+  }
+
   // Initial load
-  window.onload = () => performPagination();
+  window.onload = () => {
+    performPagination();
+    updateStats();
+  };
 </script>

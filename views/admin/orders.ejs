@@ -1,129 +1,379 @@
-<div class="container mx-auto p-6">
-  <h1 class="text-2xl font-bold mb-6 text-primary">All Orders</h1>
-
-  <div class="flex justify-between items-center mb-4">
-    <input id="searchInput" type="text" placeholder="Search by OrderID" class="border rounded px-3 py-1 w-64" />
-    <div>
-      <button onclick="performSearch()" class="bg-[#007D8B] text-white px-3 py-1 rounded hover:opacity-90">Search</button>
-      <button onclick="clearSearch()" class="bg-gray-200 text-black px-3 py-1 rounded">Clear</button>
+<div class="min-h-screen bg-gray-50">
+  <!-- Page Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg">
+              <i class="ri-shopping-cart-line text-white text-xl"></i>
+            </div>
+            Orders Management
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">Track and manage customer orders</p>
+        </div>
+        
+        <!-- Search Form -->
+        <div class="flex-shrink-0">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="ri-search-line text-gray-400"></i>
+              </div>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search by Order ID"
+                class="w-full sm:w-64 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm bg-white"
+              />
+            </div>
+            <div class="flex gap-2">
+              <button 
+                onclick="performSearch()"
+                class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center gap-2">
+                <i class="ri-search-line text-sm"></i>
+                <span class="hidden sm:inline">Search</span>
+              </button>
+              <button 
+                onclick="clearSearch()"
+                class="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-200 flex items-center gap-2">
+                <i class="ri-close-line text-sm"></i>
+                <span class="hidden sm:inline">Clear</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <% if (orders.length > 0) { %>
-    <div class="overflow-x-auto">
-      <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden text-sm">
-        <thead class="bg-gray-100 text-left text-gray-700">
-          <tr>
-            <th class="px-4 py-3">Order ID</th>
-            <th class="px-4 py-3">Date</th>
-            <th class="px-4 py-3">User</th>
-            <th class="px-4 py-3">Amount</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="orderBody">
-          <% orders.forEach(order => { %>
-            <tr class="border-b hover:bg-gray-50">
-              <td class="px-4 py-3"><%= order.orderId %></td>
-              <td class="px-4 py-3"><%= new Date(order.createdAt).toLocaleDateString() %></td>
-              <td class="px-4 py-3"><%= order.user?.name %> <br> <small class="text-gray-500"><%= order.user?.email %></small></td>
-              <td class="px-4 py-3 font-semibold">₹<%= order.totalAmount.toFixed(2) %></td>
-              <td class="px-4 py-3">
-                <span class="inline-block px-2 py-1 rounded text-white
-                  <% if (order.status === 'Pending') { %> bg-yellow-500
-                    <% } else if (order.status === 'Placed') { %> bg-yellow-300
-                  <% } else if (order.status === 'Shipped') { %> bg-blue-400
-                  <% } else if (order.status === 'Out for Delivery') { %> bg-green-600
-                  <% } else if (order.status === 'Delivered') { %> bg-lime-400
-                  <% } else if (order.status === 'Failed') { %> bg-gray-400
-                  <% } else if (order.status === 'Returned') { %> bg-orange-500
-                  <% } else if (order.status === 'Cancelled') { %> bg-red-500 <% } %>">
-                  <%= order.status %>
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <a href="/admin/orders/<%= order._id %>" class="text-primary hover:underline">View</a>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 pb-8">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="ri-shopping-cart-line text-blue-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Orders</p>
+            <p class="text-2xl font-bold text-gray-900" id="totalOrders">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <i class="ri-time-line text-yellow-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Pending Orders</p>
+            <p class="text-2xl font-bold text-gray-900" id="pendingOrders">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="ri-check-line text-green-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Delivered</p>
+            <p class="text-2xl font-bold text-gray-900" id="deliveredOrders">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="ri-money-dollar-circle-line text-purple-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+            <p class="text-2xl font-bold text-gray-900" id="totalRevenue">₹0</p>
+          </div>
+        </div>
+      </div>
     </div>
-  <% } else { %>
-    <p class="text-gray-600">No orders available.</p>
-  <% } %>
 
-  <div class="flex justify-center mt-6 space-x-2" id="paginationControls">
-    <!-- Pagination buttons will be generated by JS -->
+    <!-- Orders Table -->
+    <% if (orders.length > 0) { %>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <i class="ri-table-line text-primary"></i>
+            Orders List
+          </h3>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <div class="flex items-center gap-2">
+                    <i class="ri-hashtag text-sm"></i>
+                    Order ID
+                  </div>
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <div class="flex items-center gap-2">
+                    <i class="ri-calendar-line text-sm"></i>
+                    Date
+                  </div>
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <div class="flex items-center gap-2">
+                    <i class="ri-user-line text-sm"></i>
+                    Customer
+                  </div>
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <div class="flex items-center gap-2">
+                    <i class="ri-money-dollar-circle-line text-sm"></i>
+                    Amount
+                  </div>
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <div class="flex items-center gap-2">
+                    <i class="ri-truck-line text-sm"></i>
+                    Status
+                  </div>
+                </th>
+                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <div class="flex items-center justify-center gap-2">
+                    <i class="ri-eye-line text-sm"></i>
+                    Actions
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="orderBody" class="bg-white divide-y divide-gray-200">
+              <% orders.forEach(order => { %>
+                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">#<%= order.orderId %></div>
+                    <div class="text-xs text-gray-500">Order ID</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900"><%= new Date(order.createdAt).toLocaleDateString() %></div>
+                    <div class="text-xs text-gray-500"><%= new Date(order.createdAt).toLocaleTimeString() %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
+                        <span class="text-white font-semibold text-sm"><%= order.user?.name?.charAt(0).toUpperCase() || 'U' %></span>
+                      </div>
+                      <div>
+                        <div class="text-sm font-medium text-gray-900"><%= order.user?.name || 'Unknown' %></div>
+                        <div class="text-xs text-gray-500"><%= order.user?.email || 'No email' %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-semibold text-gray-900">₹<%= order.totalAmount.toFixed(2) %></div>
+                    <div class="text-xs text-gray-500">Total amount</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+                      <% if (order.status === 'Pending') { %> bg-yellow-100 text-yellow-800 border border-yellow-200
+                      <% } else if (order.status === 'Placed') { %> bg-blue-100 text-blue-800 border border-blue-200
+                      <% } else if (order.status === 'Shipped') { %> bg-indigo-100 text-indigo-800 border border-indigo-200
+                      <% } else if (order.status === 'Out for Delivery') { %> bg-purple-100 text-purple-800 border border-purple-200
+                      <% } else if (order.status === 'Delivered') { %> bg-green-100 text-green-800 border border-green-200
+                      <% } else if (order.status === 'Failed') { %> bg-gray-100 text-gray-800 border border-gray-200
+                      <% } else if (order.status === 'Returned') { %> bg-orange-100 text-orange-800 border border-orange-200
+                      <% } else if (order.status === 'Cancelled') { %> bg-red-100 text-red-800 border border-red-200 <% } %>">
+                      <div class="w-1.5 h-1.5 rounded-full
+                        <% if (order.status === 'Pending') { %> bg-yellow-500
+                        <% } else if (order.status === 'Placed') { %> bg-blue-500
+                        <% } else if (order.status === 'Shipped') { %> bg-indigo-500
+                        <% } else if (order.status === 'Out for Delivery') { %> bg-purple-500
+                        <% } else if (order.status === 'Delivered') { %> bg-green-500
+                        <% } else if (order.status === 'Failed') { %> bg-gray-500
+                        <% } else if (order.status === 'Returned') { %> bg-orange-500
+                        <% } else if (order.status === 'Cancelled') { %> bg-red-500 <% } %>"></div>
+                      <%= order.status %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <a href="/admin/orders/<%= order._id %>" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30">
+                      <i class="ri-eye-line text-sm"></i>
+                      View Details
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } else { %>
+      <!-- Empty State -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="ri-shopping-cart-line text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+        <p class="text-gray-500">Orders will appear here when customers place them</p>
+      </div>
+    <% } %>
+
+    <!-- Pagination -->
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-500">
+        Showing results for orders
+      </div>
+      <div id="paginationControls" class="flex items-center gap-2"></div>
+    </div>
   </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    async function performPagination(page = 1){
-      const query = document.getElementById('searchInput').value;
-      const response = await fetch(`/admin/order-pagination?page=${page}&query=${encodeURIComponent(query)}`);
-      const data = await response.json();
+  async function performPagination(page = 1) {
+    const query = document.getElementById('searchInput').value;
+    const response = await fetch(`/admin/order-pagination?page=${page}&query=${encodeURIComponent(query)}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      const tbody = document.getElementById('orderBody');
+      tbody.innerHTML = '';
+
+      data.orders.forEach(order => {
+        const statusColors = {
+          'Pending': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+          'Placed': 'bg-blue-100 text-blue-800 border border-blue-200',
+          'Shipped': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+          'Out for Delivery': 'bg-purple-100 text-purple-800 border border-purple-200',
+          'Delivered': 'bg-green-100 text-green-800 border border-green-200',
+          'Failed': 'bg-gray-100 text-gray-800 border border-gray-200',
+          'Returned': 'bg-orange-100 text-orange-800 border border-orange-200',
+          'Cancelled': 'bg-red-100 text-red-800 border border-red-200'
+        };
+
+        const dotColors = {
+          'Pending': 'bg-yellow-500',
+          'Placed': 'bg-blue-500',
+          'Shipped': 'bg-indigo-500',
+          'Out for Delivery': 'bg-purple-500',
+          'Delivered': 'bg-green-500',
+          'Failed': 'bg-gray-500',
+          'Returned': 'bg-orange-500',
+          'Cancelled': 'bg-red-500'
+        };
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-gray-50 transition-colors duration-200">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">#${order.orderId}</div>
+              <div class="text-xs text-gray-500">Order ID</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">${new Date(order.createdAt).toLocaleDateString()}</div>
+              <div class="text-xs text-gray-500">${new Date(order.createdAt).toLocaleTimeString()}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
+                  <span class="text-white font-semibold text-sm">${(order.user?.name?.charAt(0) || 'U').toUpperCase()}</span>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-900">${order.user?.name || 'Unknown'}</div>
+                  <div class="text-xs text-gray-500">${order.user?.email || 'No email'}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-semibold text-gray-900">₹${order.totalAmount.toFixed(2)}</div>
+              <div class="text-xs text-gray-500">Total amount</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}">
+                <div class="w-1.5 h-1.5 rounded-full ${dotColors[order.status] || 'bg-gray-500'}"></div>
+                ${order.status}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              <a href="/admin/orders/${order._id}" 
+                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <i class="ri-eye-line text-sm"></i>
+                View Details
+              </a>
+            </td>
+          </tr>
+        `;
+      });
+
+      updateStats(data.orders);
+    }
+
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = '';
+    
+    if (data.totalPages > 1) {
+      // Previous button
+      if (data.currentPage > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '<i class="ri-arrow-left-s-line"></i>';
+        prevBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+        prevBtn.onclick = () => performPagination(data.currentPage - 1);
+        paginationControls.appendChild(prevBtn);
+      }
       
-      if(data.success){
-        const tbody = document.getElementById('orderBody');
-        tbody.innerHTML='';
-
-        data.orders.forEach(order => {
-          tbody.innerHTML += `
-            <tr class="border-b hover:bg-gray-50">
-              <td class="px-4 py-3">${order.orderId}</td>
-              <td class="px-4 py-3">${new Date(order.createdAt).toLocaleDateString()}</td>
-              <td class="px-4 py-3">${order.user?.name || ''} <br> <small class="text-gray-500">${order.user?.email || ''}</small></td>
-              <td class="px-4 py-3 font-semibold">₹${order.totalAmount.toFixed(2)}</td>
-              <td class="px-4 py-3">
-                <span class="inline-block px-2 py-1 rounded text-white ${getStatusColor(order.status)}">
-                  ${order.status}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <a href="/admin/orders/${order._id}" class="text-primary hover:underline">View</a>
-              </td>
-            </tr>
-          `;
-        });
+      // Page numbers
+      for (let i = 1; i <= data.totalPages; i++) {
+        if (i === 1 || i === data.totalPages || (i >= data.currentPage - 1 && i <= data.currentPage + 1)) {
+          const btn = document.createElement('button');
+          btn.innerText = i;
+          btn.className = `px-4 py-2 rounded-lg transition-all duration-200 ${
+            i === data.currentPage 
+              ? 'bg-primary text-white shadow-sm' 
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`;
+          btn.onclick = () => performPagination(i);
+          paginationControls.appendChild(btn);
+        } else if (i === data.currentPage - 2 || i === data.currentPage + 2) {
+          const dots = document.createElement('span');
+          dots.innerText = '...';
+          dots.className = 'px-2 py-2 text-gray-400';
+          paginationControls.appendChild(dots);
+        }
       }
-
-      const paginationControls = document.getElementById('paginationControls');
-      paginationControls.innerHTML = '';
-      for(let i=1; i<=data.totalPages; i++){
-        paginationControls.innerHTML +=`
-        <button onclick="performPagination(${i})"
-        class="px-3 py-1 rounded ${i === data.currentPage ? 'bg-[#007D8B] text-white':'bg-white border text-[#007D8B] hover:bg-[#007D8B] hover:text-white'}">
-        ${i}
-        </button>`;
+      
+      // Next button
+      if (data.currentPage < data.totalPages) {
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = '<i class="ri-arrow-right-s-line"></i>';
+        nextBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+        nextBtn.onclick = () => performPagination(data.currentPage + 1);
+        paginationControls.appendChild(nextBtn);
       }
     }
+  }
 
-    function performSearch() {
-      performPagination(1);
-    }
+  function performSearch() {
+    performPagination(1);
+  }
 
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      performPagination(1);
-    }
+  function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    performPagination(1);
+  }
 
-    function getStatusColor(status) {
-      switch (status) {
-        case 'Pending': return 'bg-yellow-500';
-        case 'Placed': return 'bg-yellow-300';
-        case 'Shipped': return 'bg-blue-400';
-        case 'Out for Delivery': return 'bg-green-600';
-        case 'Delivered': return 'bg-lime-400';
-        case 'Failed': return 'bg-gray-400';
-        case 'Returned': return 'bg-orange-500';
-        case 'Cancelled': return 'bg-red-500';
-        default: return 'bg-gray-300';
-      }
-    }
+  function updateStats(orders) {
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(order => ['Pending', 'Placed'].includes(order.status)).length;
+    const deliveredOrders = orders.filter(order => order.status === 'Delivered').length;
+    const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
+    document.getElementById('totalOrders').textContent = totalOrders;
+    document.getElementById('pendingOrders').textContent = pendingOrders;
+    document.getElementById('deliveredOrders').textContent = deliveredOrders;
+    document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toFixed(2)}`;
+  }
 
-    window.onload = () => performPagination(1);
+  window.onload = () => performPagination(1);
 </script>
-

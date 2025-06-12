@@ -1,109 +1,276 @@
-<form action="/admin/sales-report" method="GET" class="mb-6 space-y-4">
-  <div class="flex flex-wrap items-end gap-4">
-
-    <!-- Filter Type -->
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-1">Filter Type</label>
-      <select name="filter" class="border rounded px-3 py-2 w-48">
-        <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Today</option>
-        <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>This Week</option>
-        <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>This Month</option>
-        <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom</option>
-      </select>
-    </div>
-
-    <!-- Date From -->
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-1">From</label>
-      <input type="date" name="from" class="border rounded px-3 py-2" value="<%= from || '' %>">
-    </div>
-
-    <!-- Date To -->
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-1">To</label>
-      <input type="date" name="to" class="border rounded px-3 py-2" value="<%= to || '' %>">
-    </div>
-
-    <!-- Apply Filter -->
-    <div class="mt-6">
-      <button type="submit" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-[#005f66] transition">Apply Filter</button>
-    </div>
-  </div>
-</form>
-
-<!-- Download Buttons -->
-<div class="flex flex-wrap gap-4 mb-6">
-  <form action="/admin/sales-report/download/pdf" method="GET">
-    <input type="hidden" name="filter" value="<%= filter %>">
-    <input type="hidden" name="from" value="<%= from %>">
-    <input type="hidden" name="to" value="<%= to %>">
-    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
-      Download PDF
-    </button>
-  </form>
-
-  <form action="/admin/sales-report/download/excel" method="GET">
-    <input type="hidden" name="filter" value="<%= filter %>">
-    <input type="hidden" name="from" value="<%= from %>">
-    <input type="hidden" name="to" value="<%= to %>">
-    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-      Download Excel
-    </button>
-  </form>
-</div>
-
-<!-- Sales Report Summary -->
-<div class="p-6">
-  <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <div class="bg-white p-4 rounded shadow">
-      <h2 class="text-gray-500">Total Orders</h2>
-      <p class="text-xl font-semibold"><%= stats.totalSalesCount %></p>
-    </div>
-    <div class="bg-white p-4 rounded shadow">
-      <h2 class="text-gray-500">Total Revenue</h2>
-      <p class="text-xl font-semibold">₹<%= stats.totalSalesAmount.toFixed(2) %></p>
-    </div>
-    <div class="bg-white p-4 rounded shadow">
-      <h2 class="text-gray-500">Total Discounts</h2>
-      <p class="text-xl font-semibold">₹<%= stats.totalDiscount.toFixed(2) %></p>
+<div class="min-h-screen bg-gray-50">
+  <!-- Page Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg">
+              <i class="ri-line-chart-line text-white text-xl"></i>
+            </div>
+            Sales Report
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">Analyze sales performance and generate reports</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Sales Table -->
-  <table class="w-full bg-white rounded shadow">
-    <thead class="bg-gray-100">
-      <tr>
-        <th class="px-4 py-3 text-left">Date</th>
-        <th class="px-4 py-3 text-left">Order ID</th>
-        <th class="px-4 py-3 text-left">Amount</th>
-        <th class="px-4 py-3 text-left">Discount</th>
-        <th class="px-4 py-3 text-left">Coupon</th>
-        <th class="px-4 py-3 text-left">Status</th>
-      </tr>
-    </thead>
-    <tbody id="salesBody">
-      <% if (orders && orders.length > 0) { %>
-        <% orders.forEach(order => { %>
-          <tr class="border-t">
-            <td class="px-4 py-2"><%= new Date(order.createdAt).toLocaleDateString() %></td>
-            <td class="px-4 py-2"><%= order.orderId %></td>
-            <td class="px-4 py-2">₹<%= order.totalAmount.toFixed(2) %></td>
-            <td class="px-4 py-2">₹<%= order.discountAmount?.toFixed(2) || '0.00' %></td>
-            <td class="px-4 py-2"><%= order.couponApplied || '—' %></td>
-            <td class="px-4 py-2"><%= order.status %></td>
-          </tr>
-        <% }) %>
-      <% } else { %>
-        <tr><td colspan="6" class="text-center py-4">No data available</td></tr>
-      <% } %>
-    </tbody>
-  </table>
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 pb-8">
+    <!-- Filters Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="ri-filter-line text-primary"></i>
+          Report Filters
+        </h3>
+      </div>
+      <div class="p-6">
+        <form action="/admin/sales-report" method="GET" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Filter Type -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Filter Type</label>
+              <select name="filter" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Today</option>
+                <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>This Week</option>
+                <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>This Month</option>
+                <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+              </select>
+            </div>
 
-  <!-- Pagination Controls -->
-  <div class="flex justify-center items-center mt-6 gap-2" id="paginationControls">
-    <!-- Pagination buttons will be inserted here -->
+            <!-- Date From -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+              <input type="date" 
+                     name="from" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" 
+                     value="<%= from || '' %>">
+            </div>
+
+            <!-- Date To -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+              <input type="date" 
+                     name="to" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" 
+                     value="<%= to || '' %>">
+            </div>
+
+            <!-- Apply Filter Button -->
+            <div class="flex items-end">
+              <button type="submit" 
+                      class="w-full bg-primary text-white px-4 py-2.5 rounded-lg hover:bg-primary-hover transition-all duration-200 font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2">
+                <i class="ri-search-line text-sm"></i>
+                Apply Filter
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Download Options -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="ri-download-line text-primary"></i>
+          Export Options
+        </h3>
+      </div>
+      <div class="p-6">
+        <div class="flex flex-wrap gap-4">
+          <form action="/admin/sales-report/download/pdf" method="GET" class="inline-block">
+            <input type="hidden" name="filter" value="<%= filter %>">
+            <input type="hidden" name="from" value="<%= from %>">
+            <input type="hidden" name="to" value="<%= to %>">
+            <button type="submit" 
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500/30">
+              <i class="ri-file-pdf-line text-sm"></i>
+              Download PDF
+            </button>
+          </form>
+
+          <form action="/admin/sales-report/download/excel" method="GET" class="inline-block">
+            <input type="hidden" name="filter" value="<%= filter %>">
+            <input type="hidden" name="from" value="<%= from %>">
+            <input type="hidden" name="to" value="<%= to %>">
+            <button type="submit" 
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-500/30">
+              <i class="ri-file-excel-line text-sm"></i>
+              Download Excel
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="ri-shopping-cart-line text-blue-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Orders</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.totalSalesCount %></p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="ri-money-dollar-circle-line text-green-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+            <p class="text-2xl font-bold text-gray-900">₹<%= stats.totalSalesAmount.toFixed(2) %></p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <i class="ri-coupon-line text-orange-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Discounts</p>
+            <p class="text-2xl font-bold text-gray-900">₹<%= stats.totalDiscount.toFixed(2) %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="ri-table-line text-primary"></i>
+          Sales Data
+        </h3>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-calendar-line text-sm"></i>
+                  Date
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-hashtag text-sm"></i>
+                  Order ID
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-money-dollar-circle-line text-sm"></i>
+                  Amount
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-price-tag-line text-sm"></i>
+                  Discount
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-coupon-line text-sm"></i>
+                  Coupon
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-truck-line text-sm"></i>
+                  Status
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="salesBody" class="bg-white divide-y divide-gray-200">
+            <% if (orders && orders.length > 0) { %>
+              <% orders.forEach(order => { %>
+                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900"><%= new Date(order.createdAt).toLocaleDateString() %></div>
+                    <div class="text-xs text-gray-500"><%= new Date(order.createdAt).toLocaleTimeString() %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">#<%= order.orderId %></div>
+                    <div class="text-xs text-gray-500">Order ID</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-semibold text-gray-900">₹<%= order.totalAmount.toFixed(2) %></div>
+                    <div class="text-xs text-gray-500">Total amount</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">₹<%= order.discountAmount?.toFixed(2) || '0.00' %></div>
+                    <div class="text-xs text-gray-500">Discount applied</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <% if (order.couponApplied) { %>
+                      <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                        <i class="ri-coupon-line text-xs"></i>
+                        <%= order.couponApplied %>
+                      </span>
+                    <% } else { %>
+                      <span class="text-sm text-gray-400">—</span>
+                    <% } %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+                      <% if (order.status === 'Pending') { %> bg-yellow-100 text-yellow-800 border border-yellow-200
+                      <% } else if (order.status === 'Placed') { %> bg-blue-100 text-blue-800 border border-blue-200
+                      <% } else if (order.status === 'Shipped') { %> bg-indigo-100 text-indigo-800 border border-indigo-200
+                      <% } else if (order.status === 'Out for Delivery') { %> bg-purple-100 text-purple-800 border border-purple-200
+                      <% } else if (order.status === 'Delivered') { %> bg-green-100 text-green-800 border border-green-200
+                      <% } else if (order.status === 'Failed') { %> bg-gray-100 text-gray-800 border border-gray-200
+                      <% } else if (order.status === 'Returned') { %> bg-orange-100 text-orange-800 border border-orange-200
+                      <% } else if (order.status === 'Cancelled') { %> bg-red-100 text-red-800 border border-red-200 <% } %>">
+                      <div class="w-1.5 h-1.5 rounded-full
+                        <% if (order.status === 'Pending') { %> bg-yellow-500
+                        <% } else if (order.status === 'Placed') { %> bg-blue-500
+                        <% } else if (order.status === 'Shipped') { %> bg-indigo-500
+                        <% } else if (order.status === 'Out for Delivery') { %> bg-purple-500
+                        <% } else if (order.status === 'Delivered') { %> bg-green-500
+                        <% } else if (order.status === 'Failed') { %> bg-gray-500
+                        <% } else if (order.status === 'Returned') { %> bg-orange-500
+                        <% } else if (order.status === 'Cancelled') { %> bg-red-500 <% } %>"></div>
+                      <%= order.status %>
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="ri-file-list-line text-gray-400 text-2xl"></i>
+                  </div>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">No sales data found</h3>
+                  <p class="text-gray-500">Try adjusting your filter criteria</p>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-500">
+        Showing sales report data
+      </div>
+      <div id="paginationControls" class="flex items-center gap-2"></div>
+    </div>
   </div>
 </div>
 
@@ -111,16 +278,15 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   async function performPagination(page = 1, filter = '', from = '', to = '') {
-    const query = document.getElementById('searchInput').value;
-    const filter = document.querySelector('select[name="filter"]').value;
-    const from = document.querySelector('input[name="from"]').value;
-    const to = document.querySelector('input[name="to"]').value;
+    const filterValue = filter || document.querySelector('select[name="filter"]').value;
+    const fromValue = from || document.querySelector('input[name="from"]').value;
+    const toValue = to || document.querySelector('input[name="to"]').value;
 
-     const params = new URLSearchParams({
+    const params = new URLSearchParams({
       page,
-      filter,
-      from,
-      to
+      filter: filterValue,
+      from: fromValue,
+      to: toValue
     });
 
     const response = await fetch(`/admin/sale-pagination?${params.toString()}`);
@@ -130,44 +296,133 @@
       const tbody = document.getElementById('salesBody');
       tbody.innerHTML = '';
 
-      data.orders.forEach(order => {
-        const date = new Date(order.createdAt).toLocaleDateString();
-        const coupon = order.couponApplied || '—';
-        const discount = order.discountAmount?.toFixed(2) || '0.00';
-
-        tbody.innerHTML += `
-          <tr class="border-t">
-            <td class="px-4 py-2">${date}</td>
-            <td class="px-4 py-2">${order.orderId}</td>
-            <td class="px-4 py-2">₹${order.totalAmount.toFixed(2)}</td>
-            <td class="px-4 py-2">₹${discount}</td>
-            <td class="px-4 py-2">${coupon}</td>
-            <td class="px-4 py-2">${order.status}</td>
+      if (data.orders.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-6 py-12 text-center">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ri-file-list-line text-gray-400 text-2xl"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No sales data found</h3>
+              <p class="text-gray-500">Try adjusting your filter criteria</p>
+            </td>
           </tr>
         `;
-      });
+      } else {
+        data.orders.forEach(order => {
+          const date = new Date(order.createdAt).toLocaleDateString();
+          const time = new Date(order.createdAt).toLocaleTimeString();
+          const coupon = order.couponApplied || '';
+          const discount = order.discountAmount?.toFixed(2) || '0.00';
+
+          const statusColors = {
+            'Pending': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+            'Placed': 'bg-blue-100 text-blue-800 border border-blue-200',
+            'Shipped': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+            'Out for Delivery': 'bg-purple-100 text-purple-800 border border-purple-200',
+            'Delivered': 'bg-green-100 text-green-800 border border-green-200',
+            'Failed': 'bg-gray-100 text-gray-800 border border-gray-200',
+            'Returned': 'bg-orange-100 text-orange-800 border border-orange-200',
+            'Cancelled': 'bg-red-100 text-red-800 border border-red-200'
+          };
+
+          const dotColors = {
+            'Pending': 'bg-yellow-500',
+            'Placed': 'bg-blue-500',
+            'Shipped': 'bg-indigo-500',
+            'Out for Delivery': 'bg-purple-500',
+            'Delivered': 'bg-green-500',
+            'Failed': 'bg-gray-500',
+            'Returned': 'bg-orange-500',
+            'Cancelled': 'bg-red-500'
+          };
+
+          tbody.innerHTML += `
+            <tr class="hover:bg-gray-50 transition-colors duration-200">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${date}</div>
+                <div class="text-xs text-gray-500">${time}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">#${order.orderId}</div>
+                <div class="text-xs text-gray-500">Order ID</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-semibold text-gray-900">₹${order.totalAmount.toFixed(2)}</div>
+                <div class="text-xs text-gray-500">Total amount</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">₹${discount}</div>
+                <div class="text-xs text-gray-500">Discount applied</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                ${coupon ? `
+                  <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                    <i class="ri-coupon-line text-xs"></i>
+                    ${coupon}
+                  </span>
+                ` : '<span class="text-sm text-gray-400">—</span>'}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}">
+                  <div class="w-1.5 h-1.5 rounded-full ${dotColors[order.status] || 'bg-gray-500'}"></div>
+                  ${order.status}
+                </span>
+              </td>
+            </tr>
+          `;
+        });
+      }
 
       const paginationControls = document.getElementById('paginationControls');
       paginationControls.innerHTML = '';
 
-      for (let i = 1; i <= data.totalPages; i++) {
-        paginationControls.innerHTML += `
-          <button onclick="performPagination(${i})"
-            class="px-3 py-1 rounded ${i === data.currentPage ? 'bg-[#007D8B] text-white' : 'bg-white border text-[#007D8B] hover:bg-[#007D8B] hover:text-white'}">
-            ${i}
-          </button>
-        `;
+      if (data.totalPages > 1) {
+        // Previous button
+        if (data.currentPage > 1) {
+          const prevBtn = document.createElement('button');
+          prevBtn.innerHTML = '<i class="ri-arrow-left-s-line"></i>';
+          prevBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+          prevBtn.onclick = () => performPagination(data.currentPage - 1, filterValue, fromValue, toValue);
+          paginationControls.appendChild(prevBtn);
+        }
+        
+        // Page numbers
+        for (let i = 1; i <= data.totalPages; i++) {
+          if (i === 1 || i === data.totalPages || (i >= data.currentPage - 1 && i <= data.currentPage + 1)) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.className = `px-4 py-2 rounded-lg transition-all duration-200 ${
+              i === data.currentPage 
+                ? 'bg-primary text-white shadow-sm' 
+                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`;
+            btn.onclick = () => performPagination(i, filterValue, fromValue, toValue);
+            paginationControls.appendChild(btn);
+          } else if (i === data.currentPage - 2 || i === data.currentPage + 2) {
+            const dots = document.createElement('span');
+            dots.innerText = '...';
+            dots.className = 'px-2 py-2 text-gray-400';
+            paginationControls.appendChild(dots);
+          }
+        }
+        
+        // Next button
+        if (data.currentPage < data.totalPages) {
+          const nextBtn = document.createElement('button');
+          nextBtn.innerHTML = '<i class="ri-arrow-right-s-line"></i>';
+          nextBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+          nextBtn.onclick = () => performPagination(data.currentPage + 1, filterValue, fromValue, toValue);
+          paginationControls.appendChild(nextBtn);
+        }
       }
     }
   }
 
-window.onload = () => {
-  const filter = document.querySelector('select[name="filter"]').value;
-  const from = document.querySelector('input[name="from"]').value;
-  const to = document.querySelector('input[name="to"]').value;
-  performPagination(1, filter, from, to);
-};
-
-
+  window.onload = () => {
+    const filter = document.querySelector('select[name="filter"]').value;
+    const from = document.querySelector('input[name="from"]').value;
+    const to = document.querySelector('input[name="to"]').value;
+    performPagination(1, filter, from, to);
+  };
 </script>
-

@@ -1,26 +1,113 @@
-<header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
-    <div class="flex items-center gap-4">
-        <button id="sidebar-toggle" class="md:hidden text-gray-700 hover:bg-gray-100 p-2 rounded-md">
-            <i class="ri-menu-line text-xl"></i>
-        </button>
-        <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <span class="text-primary"><i class="ri-book-open-line"></i></span>
-            Bookly
-        </h1>
-    </div>
+<header class="bg-white header-shadow sticky top-0 z-30 border-b border-gray-100">
+    <div class="px-4 md:px-6 py-4">
+        <div class="flex justify-between items-center">
+            <!-- Left Section -->
+            <div class="flex items-center gap-4">
+                <!-- Mobile Menu Toggle -->
+                <button id="sidebar-toggle" class="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <i class="ri-menu-line text-xl"></i>
+                </button>
+                
+                <!-- Logo and Title -->
+                <div class="flex items-center gap-3">
+                    <div class="logo-animation">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg">
+                            <i class="ri-book-open-line text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="text-xl lg:text-2xl font-bold text-gray-900">Bookly</h1>
+                        <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="flex items-center gap-4">
-        <div class="flex items-center gap-3">
-            <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-                <i class="ri-notification-3-line text-xl"></i>
-                <span class="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
-            </button>
-            
-            <div class="hidden md:flex items-center gap-2">
-                <span class="text-gray-700 text-sm">Welcome</span>
-                <a href="/admin/logout" class="px-4 py-2 rounded text-white bg-primary hover:bg-primary-hover transition">
-                    Logout
-                </a>
+            <!-- Right Section -->
+            <div class="flex items-center gap-2 md:gap-4">
+                <!-- Search Bar (Hidden on mobile) -->
+                <div class="hidden lg:flex relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <!-- <i class="ri-search-line text-gray-400"></i> -->
+                    </div>
+                    <!-- <input 
+                        type="text" 
+                        placeholder="Search..." 
+                        class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm bg-gray-50 hover:bg-white"
+                    > -->
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="flex items-center gap-1 md:gap-2">
+                    <!-- Search Button (Mobile) -->
+                    <!-- <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 hover:text-primary rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <i class="ri-search-line text-lg"></i>
+                    </button> -->
+                    
+                    <!-- Notifications -->
+                    <div class="relative">
+                        <!-- <button class="p-2 text-gray-600 hover:bg-gray-100 hover:text-primary rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 relative">
+                            <i class="ri-notification-3-line text-lg"></i>
+                            <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium shadow-lg">3</span>
+                        </button> -->
+                        
+                        <!-- Notification Dropdown (Hidden by default) -->
+                        <div class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 hidden">
+                            <div class="p-4 border-b border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                    <span class="text-xs text-gray-500">3 new</span>
+                                </div>
+                            </div>
+                            <div class="max-h-64 overflow-y-auto custom-scrollbar">
+                                <div class="p-3 hover:bg-gray-50 border-b border-gray-50 cursor-pointer transition-colors">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <i class="ri-shopping-cart-line text-blue-600 text-sm"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900">New order received</p>
+                                            <p class="text-xs text-gray-500 mt-1">Order #12345 - ₹2,499</p>
+                                            <p class="text-xs text-gray-400 mt-1">2 minutes ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 border-t border-gray-100">
+                                <button class="w-full text-center text-sm text-primary hover:text-primary-dark font-medium">
+                                    View all notifications
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings -->
+                    <!-- <button class="hidden md:flex p-2 text-gray-600 hover:bg-gray-100 hover:text-primary rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <i class="ri-settings-3-line text-lg"></i>
+                    </button> -->
+                </div>
+                
+                <!-- User Profile Section -->
+                <div class="flex items-center gap-3 ml-2 md:ml-4 pl-2 md:pl-4 border-l border-gray-200">
+                    <!-- Welcome Text (Hidden on mobile) -->
+                    <div class="hidden md:block text-right">
+                        <p class="text-sm font-medium text-gray-900">Welcome back</p>
+                        <p class="text-xs text-gray-500">Administrator</p>
+                    </div>
+                    
+                    <!-- Profile Picture -->
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-md cursor-pointer hover:shadow-lg transition-all duration-200">
+                            <span class="text-white font-semibold text-sm">M</span>
+                        </div>
+                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    
+                    <!-- Logout Button -->
+                    <a href="/admin/logout" class="px-3 md:px-4 py-2 rounded-lg text-white bg-primary hover:bg-primary-hover transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center gap-2">
+                        <i class="ri-logout-box-r-line text-sm"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

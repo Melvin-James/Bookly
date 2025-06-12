@@ -1,76 +1,258 @@
-<div class="p-6">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-[#007D8B]">User Management</h1>
-
-    <form id="searchForm" class="flex space-x-2" onsubmit="return false;">
-      <input
-        id="searchInput"
-        type="text"
-        placeholder="Search by name or email"
-        class="px-4 py-2 border rounded-md"
-      />
-      <button class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]" onclick="performSearch()">Search</button>
-      <button type="button" onclick="clearSearch()" class="px-4 py-2 border rounded-md text-gray-600 hover:text-black">Clear</button>
-    </form>
-  </div>
-
-  <!-- Users Table -->
-  <div class="overflow-x-auto bg-white rounded-lg shadow">
-    <table class="min-w-full table-auto">
-      <thead class="bg-[#007D8B] text-white">
-        <tr>
-          <th class="py-3 px-4 text-left">index</th>
-          <th class="py-3 px-4 text-left">Name</th>
-          <th class="py-3 px-4 text-left">Email</th>
-          <th class="py-3 px-4 text-left">Status</th>
-          <th class="py-3 px-4 text-center">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% users.forEach((user, index) => { %>
-          <tr class="border-b">
-            <td class="py-3 px-4"><%= index + 1 %></td>
-            <td class="py-3 px-4"><%= user.name %></td>
-            <td class="py-3 px-4"><%= user.email %></td>
-            <td class="py-3 px-4">
-              <% if (user.isBlocked) { %>
-                <span class="px-2 py-1 text-sm rounded-md bg-red-100 text-red-700">Blocked</span>
-              <% } else { %>
-                <span class="px-2 py-1 text-sm rounded-md bg-green-100 text-green-700">Active</span>
-              <% } %>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <button
-                class="toggle-block-btn text-sm px-4 py-2 rounded-md 
-                <%= user.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600' %> text-white"
-                data-user-id="<%= user._id %>"
-                data-is-blocked="<%= user.isBlocked %>"
-                onclick="showConfirmation(this)">
-                <%= user.isBlocked ? 'Unblock' : 'Block' %>
+<div class="min-h-screen bg-gray-50">
+  <!-- Page Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg">
+              <i class="ri-user-line text-white text-xl"></i>
+            </div>
+            User Management
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">Manage customer accounts and permissions</p>
+        </div>
+        
+        <!-- Search Form -->
+        <div class="flex-shrink-0">
+          <form id="searchForm" class="flex flex-col sm:flex-row gap-2" onsubmit="return false;">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="ri-search-line text-gray-400"></i>
+              </div>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search by name or email"
+                class="w-full sm:w-64 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm bg-white"
+              />
+            </div>
+            <div class="flex gap-2">
+              <button 
+                type="button"
+                class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center gap-2" 
+                onclick="performSearch()">
+                <i class="ri-search-line text-sm"></i>
+                <span class="hidden sm:inline">Search</span>
               </button>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+              <button 
+                type="button" 
+                onclick="clearSearch()" 
+                class="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-200 flex items-center gap-2">
+                <i class="ri-close-line text-sm"></i>
+                <span class="hidden sm:inline">Clear</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
-<div id="pagination" class="mt-6 flex justify-center space-x-2"></div>
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 pb-8">
+    <!-- Stats Cards -->
+    <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="ri-user-line text-blue-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Users</p>
+            <p class="text-2xl font-bold text-gray-900" id="totalUsers">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="ri-user-check-line text-green-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Active Users</p>
+            <p class="text-2xl font-bold text-gray-900" id="activeUsers">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+            <i class="ri-user-forbid-line text-red-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Blocked Users</p>
+            <p class="text-2xl font-bold text-gray-900" id="blockedUsers">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="ri-user-add-line text-purple-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">New Today</p>
+            <p class="text-2xl font-bold text-gray-900" id="newUsers">-</p>
+          </div>
+        </div>
+      </div>
+    </div> -->
 
-<div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-80">
-    <p id="modalMessage" class="mb-4 text-gray-700 text-center">Are you sure?</p>
-    <div class="flex justify-between">
-      <button onclick="confirmAction()" class="bg-[#007D8B] text-white px-4 py-2 rounded-md hover:bg-[#005f66]">Confirm</button>
-      <button onclick="closeModal()" class="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400">Cancel</button>
+    <!-- Users Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="ri-table-line text-primary"></i>
+          Users List
+        </h3>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  
+                  Index
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-user-line text-sm"></i>
+                  Name
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-mail-line text-sm"></i>
+                  Email
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <i class="ri-shield-check-line text-sm"></i>
+                  Status
+                </div>
+              </th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center justify-center gap-2">
+                  <i class="ri-settings-line text-sm"></i>
+                  Action
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody" class="bg-white divide-y divide-gray-200">
+            <% users.forEach((user, index) => { %>
+              <tr class="hover:bg-gray-50 transition-colors duration-200">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-semibold text-gray-600">
+                      <%= index + 1 %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
+                      <span class="text-white font-semibold text-sm"><%= user.name.charAt(0).toUpperCase() %></span>
+                    </div>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900"><%= user.name %></div>
+                      <div class="text-xs text-gray-500">Customer</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= user.email %></div>
+                  <div class="text-xs text-gray-500">Email verified</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if (user.isBlocked) { %>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                      <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                      Blocked
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                      <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      Active
+                    </span>
+                  <% } %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <button
+                    class="toggle-block-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2
+                    <%= user.isBlocked ? 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500' : 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500' %>"
+                    data-user-id="<%= user._id %>"
+                    data-is-blocked="<%= user.isBlocked %>"
+                    onclick="showConfirmation(this)">
+                    <i class="<%= user.isBlocked ? 'ri-user-unfollow-line' : 'ri-user-forbid-line' %> text-sm"></i>
+                    <%= user.isBlocked ? 'Unblock' : 'Block' %>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="ri-user-line text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+        <p class="text-gray-500">Try adjusting your search criteria</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-500">
+       
+      </div>
+      <div id="pagination" class="flex items-center gap-2"></div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all">
+      <div class="p-6">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <i class="ri-alert-line text-yellow-600 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Confirm Action</h3>
+            <p class="text-sm text-gray-500">This action cannot be undone</p>
+          </div>
+        </div>
+        <p id="modalMessage" class="text-gray-700 mb-6">Are you sure?</p>
+        <div class="flex gap-3">
+          <button 
+            onclick="confirmAction()" 
+            class="flex-1 bg-primary text-white px-4 py-2.5 rounded-lg hover:bg-primary-hover transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-primary/30">
+            Confirm
+          </button>
+          <button 
+            onclick="closeModal()" 
+            class="flex-1 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-gray-200">
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-
 <!-- JavaScript -->
 <script>
   let selectedButton = null;
+  
   function showConfirmation(button) {
     selectedButton = button;
     const isBlocked = button.getAttribute('data-is-blocked') === 'true';
@@ -97,19 +279,23 @@
       });
 
       if (res.ok) {
-        const statusCell = selectedButton.closest('tr').querySelectorAll('td')[3];
+        const row = selectedButton.closest('tr');
+        const statusCell = row.querySelectorAll('td')[3];
         const newStatus = isBlocked ? 'Active' : 'Blocked';
-        const newColorClass = isBlocked
-          ? 'bg-green-100 text-green-700'
-          : 'bg-red-100 text-red-700';
+        const newClass = isBlocked 
+          ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200'
+          : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200';
+        const dotColor = isBlocked ? 'bg-green-500' : 'bg-red-500';
 
-        statusCell.innerHTML = `<span class="px-2 py-1 text-sm rounded-md ${newColorClass}">${newStatus}</span>`;
+        statusCell.innerHTML = `<span class="${newClass}"><div class="w-1.5 h-1.5 ${dotColor} rounded-full"></div>${newStatus}</span>`;
 
-        selectedButton.innerText = isBlocked ? 'Block' : 'Unblock';
+        selectedButton.innerHTML = `<i class="${isBlocked ? 'ri-user-forbid-line' : 'ri-user-unfollow-line'} text-sm"></i>${isBlocked ? 'Block' : 'Unblock'}`;
         selectedButton.setAttribute('data-is-blocked', !isBlocked);
-        selectedButton.className = `toggle-block-btn text-sm px-4 py-2 rounded-md text-white ${
-          isBlocked ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+        selectedButton.className = `toggle-block-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+          isBlocked ? 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500' : 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500'
         }`;
+        
+        updateStats();
       } else {
         alert("Failed to update user status.");
       }
@@ -121,50 +307,25 @@
     }
   }
 
-  function performSearch(){
+  function performSearch() {
     const query = document.getElementById('searchInput').value;
 
     fetch(`/admin/search-customer?query=${encodeURIComponent(query)}`)
-    .then(res=>res.json())
-    .then(data=>{
-      const tbody = document.querySelector('tbody');
-      tbody.innerHTML = '';
-
-      data.users.forEach((user,index)=>{
-        const row = document.createElement('tr');
-        row.className = 'border-b';
-
-        row.innerHTML=`
-          <td class="py-3 px-4">${index + 1}</td>
-           <td class="py-3 px-4">${user.name}</td>
-            <td class="py-3 px-4">${user.email}</td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-1 text-sm rounded-md ${user.isBlocked ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
-                ${user.isBlocked ? 'Blocked' : 'Active'}
-              </span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <button class="toggle-block-btn text-sm px-4 py-2 rounded-md 
-                ${user.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'} text-white"
-                data-user-id="${user._id}"
-                data-is-blocked="${user.isBlocked}"
-                onclick="showConfirmation(this)">
-                ${user.isBlocked ? 'Unblock' : 'Block'}
-              </button>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-      })
-      .catch(err => console.error("Search error:", err));
+    .then(res => res.json())
+    .then(data => {
+      renderUsers(data.users);
+      updatePaginationInfo(data.users.length, data.users.length, data.users.length);
+    })
+    .catch(err => console.error("Search error:", err));
   }
 
   function clearSearch() {
     document.getElementById('searchInput').value = '';
-    performSearch(); // Reload full list
+    performPagination(1);
   }
 
   let currentPage = 1;
+  
   function performPagination(page = 1) {
     fetch(`/admin/customer-pagination?page=${page}`)
       .then(res => res.json())
@@ -172,31 +333,64 @@
         currentPage = data.currentPage;
         renderUsers(data.users);
         renderPagination(data.totalPages);
+        updatePaginationInfo(data.users.length, data.totalUsers, data.currentPage);
+        updateStats();
       })
       .catch(err => console.error("Pagination error:", err));
   }
 
   function renderUsers(users) {
-    const tbody = document.querySelector('tbody');
+    const tbody = document.querySelector('#userTableBody');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (users.length === 0) {
+      tbody.innerHTML = '';
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    
+    emptyState.classList.add('hidden');
     tbody.innerHTML = '';
+    
     users.forEach((user, index) => {
       const row = document.createElement('tr');
-      row.className = "border-b";
+      row.className = "hover:bg-gray-50 transition-colors duration-200";
       row.innerHTML = `
-        <td class="py-3 px-4">${index + 1}</td>
-        <td class="py-3 px-4">${user.name}</td>
-        <td class="py-3 px-4">${user.email}</td>
-        <td class="py-3 px-4">
-          <span class="px-2 py-1 text-sm rounded-md ${user.isBlocked ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-semibold text-gray-600">
+              ${index + 1}
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
+              <span class="text-white font-semibold text-sm">${user.name.charAt(0).toUpperCase()}</span>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-gray-900">${user.name}</div>
+              <div class="text-xs text-gray-500">Customer</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm text-gray-900">${user.email}</div>
+          <div class="text-xs text-gray-500">Email verified</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${user.isBlocked ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-green-100 text-green-800 border border-green-200'}">
+            <div class="w-1.5 h-1.5 ${user.isBlocked ? 'bg-red-500' : 'bg-green-500'} rounded-full"></div>
             ${user.isBlocked ? 'Blocked' : 'Active'}
           </span>
         </td>
-        <td class="py-3 px-4 text-center">
-          <button class="toggle-block-btn text-sm px-4 py-2 rounded-md 
-            ${user.isBlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'} text-white"
+        <td class="px-6 py-4 whitespace-nowrap text-center">
+          <button class="toggle-block-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 
+            ${user.isBlocked ? 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-500' : 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500'}"
             data-user-id="${user._id}"
             data-is-blocked="${user.isBlocked}"
             onclick="showConfirmation(this)">
+            <i class="${user.isBlocked ? 'ri-user-unfollow-line' : 'ri-user-forbid-line'} text-sm"></i>
             ${user.isBlocked ? 'Unblock' : 'Block'}
           </button>
         </td>
@@ -208,17 +402,82 @@
   function renderPagination(totalPages) {
     const container = document.querySelector('#pagination');
     container.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    if (currentPage > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.innerHTML = '<i class="ri-arrow-left-s-line"></i>';
+      prevBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+      prevBtn.onclick = () => performPagination(currentPage - 1);
+      container.appendChild(prevBtn);
+    }
+    
+    // Page numbers
     for (let i = 1; i <= totalPages; i++) {
-      const btn = document.createElement('button');
-      btn.innerText = i;
-      btn.className = `px-4 py-2 rounded-md ${
-        i === currentPage ? 'bg-[#007D8B] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-      }`;
-      btn.onclick = () => performPagination(i);
-      container.appendChild(btn);
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = `px-4 py-2 rounded-lg transition-all duration-200 ${
+          i === currentPage 
+            ? 'bg-primary text-white shadow-sm' 
+            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+        }`;
+        btn.onclick = () => performPagination(i);
+        container.appendChild(btn);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        const dots = document.createElement('span');
+        dots.innerText = '...';
+        dots.className = 'px-2 py-2 text-gray-400';
+        container.appendChild(dots);
+      }
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+      const nextBtn = document.createElement('button');
+      nextBtn.innerHTML = '<i class="ri-arrow-right-s-line"></i>';
+      nextBtn.className = 'px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200';
+      nextBtn.onclick = () => performPagination(currentPage + 1);
+      container.appendChild(nextBtn);
     }
   }
 
+  function updatePaginationInfo(currentCount, totalCount, page) {
+    const itemsPerPage = 10;
+    const from = ((page - 1) * itemsPerPage) + 1;
+    const to = Math.min(page * itemsPerPage, totalCount);
+    
+    document.getElementById('showingFrom').textContent = from;
+    document.getElementById('showingTo').textContent = to;
+    document.getElementById('totalCount').textContent = totalCount;
+  }
+
+  function updateStats() {
+    // This would typically fetch real stats from your backend
+    const rows = document.querySelectorAll('#userTableBody tr');
+    let activeCount = 0;
+    let blockedCount = 0;
+    
+    rows.forEach(row => {
+      const statusSpan = row.querySelector('td:nth-child(4) span');
+      if (statusSpan.textContent.trim() === 'Active') {
+        activeCount++;
+      } else {
+        blockedCount++;
+      }
+    });
+    
+    document.getElementById('totalUsers').textContent = rows.length;
+    document.getElementById('activeUsers').textContent = activeCount;
+    document.getElementById('blockedUsers').textContent = blockedCount;
+    document.getElementById('newUsers').textContent = '0'; // This would come from backend
+  }
+
   // Initial load
-  window.onload = () => performPagination(1);
+  window.onload = () => {
+    performPagination(1);
+    updateStats();
+  };
 </script>

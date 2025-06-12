@@ -81,6 +81,8 @@ router.get('/sales-report/download/excel',salesReportControllers.downloadSalesRe
 router.get('/dashboard/stats', adminAuth, dashboardControllers.getDashboardStas);
 router.get('/top-products', adminAuth, dashboardControllers.getTopProducts);
 router.get('/top-categories', adminAuth, dashboardControllers.getTopCategories);
+router.get('/top-publishers', adminAuth, dashboardControllers.getTopPublishers);
 router.get('/sales-chart', adminAuth, dashboardControllers.getSalesChart);
+
 
 module.exports=router;

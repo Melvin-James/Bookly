@@ -14,76 +14,243 @@
                         primary: {
                             DEFAULT: '#007D8B',
                             hover: '#006B78',
-                            light: '#e6f3f5'
+                            light: '#e6f3f5',
+                            dark: '#005F6B'
                         }
+                    },
+                    animation: {
+                        'slide-in': 'slideIn 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.2s ease-out',
+                        'bounce-in': 'bounceIn 0.4s ease-out'
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
+        
         .sidebar-transition {
-            transition: transform 0.3s ease, width 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.3s ease;
         }
+        
         .active-nav-item {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left: 3px solid white;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            border-left: 3px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-overlay {
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+        
+        .main-content {
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .header-shadow {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
+        }
+        
+        .notification-badge {
+            animation: bounceIn 0.4s ease-out;
+        }
+        
+        .logo-animation {
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-animation:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
-<body class="bg-gray-50 flex flex-col md:flex-row min-h-screen">
+<body class="bg-gray-50 flex flex-col md:flex-row min-h-screen antialiased">
 
-    <!-- Mobile Sidebar Toggle Button -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-20 hidden"></div>
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 sidebar-overlay z-40 opacity-0 invisible md:hidden transition-all duration-300"></div>
 
     <!-- Sidebar -->
     <%- include("../partials/sidebar") %>
 
-    <div class="flex-1 flex flex-col w-full">
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col w-full main-content">
         <!-- Header -->
         <%- include("../partials/header") %>
 
         <!-- Dynamic Content -->
-        <div class="p-4 md:p-6 flex-grow">
-            <%- include(body) %>
-        </div>
+        <main class="flex-1 p-4 md:p-6 overflow-auto">
+            <div class="max-w-7xl mx-auto">
+                <%- include(body) %>
+            </div>
+        </main>
         
         <!-- Footer -->
-        <footer class="bg-white p-4 text-center text-gray-500 text-sm border-t">
-            &copy; <%= new Date().getFullYear() %> Bookly Admin Dashboard. All rights reserved.
+        <footer class="bg-white border-t border-gray-200 px-4 md:px-6 py-4">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
+                    <p class="text-gray-500 text-sm">
+                        &copy; <%= new Date().getFullYear() %> Bookly Admin Dashboard. All rights reserved.
+                    </p>
+                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                        <span>Version 2.1.0</span>
+                        <span>•</span>
+                        <span>Last updated: <%= new Date().toLocaleDateString() %></span>
+                    </div>
+                </div>
+            </div>
         </footer>
     </div>
 
     <script>
-        // Handle sidebar toggle
         document.addEventListener('DOMContentLoaded', function() {
             const sidebarToggle = document.getElementById('sidebar-toggle');
+            const closeSidebar = document.getElementById('close-sidebar');
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const mainContent = document.querySelector('.main-content');
             
             function toggleSidebar() {
-                sidebar.classList.toggle('translate-x-0');
-                sidebar.classList.toggle('-translate-x-full');
-                sidebarOverlay.classList.toggle('hidden');
+                if (window.innerWidth < 768) {
+                    // Mobile behavior
+                    sidebar.classList.toggle('open');
+                    if (sidebar.classList.contains('open')) {
+                        sidebarOverlay.classList.remove('invisible', 'opacity-0');
+                        sidebarOverlay.classList.add('visible', 'opacity-100');
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        sidebarOverlay.classList.add('invisible', 'opacity-0');
+                        sidebarOverlay.classList.remove('visible', 'opacity-100');
+                        document.body.style.overflow = '';
+                    }
+                }
             }
             
+            function closeSidebarMobile() {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('open');
+                    sidebarOverlay.classList.add('invisible', 'opacity-0');
+                    sidebarOverlay.classList.remove('visible', 'opacity-100');
+                    document.body.style.overflow = '';
+                }
+            }
+            
+            // Event listeners
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', toggleSidebar);
             }
             
-            if (sidebarOverlay) {
-                sidebarOverlay.addEventListener('click', toggleSidebar);
+            if (closeSidebar) {
+                closeSidebar.addEventListener('click', closeSidebarMobile);
             }
+            
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', closeSidebarMobile);
+            }
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    sidebar.classList.remove('open');
+                    sidebarOverlay.classList.add('invisible', 'opacity-0');
+                    sidebarOverlay.classList.remove('visible', 'opacity-100');
+                    document.body.style.overflow = '';
+                }
+            });
             
             // Highlight active nav item
             const currentPath = window.location.pathname;
             document.querySelectorAll('.nav-item').forEach(item => {
                 if (item.getAttribute('href') === currentPath) {
                     item.classList.add('active-nav-item');
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeSidebarMobile();
                 }
             });
         });

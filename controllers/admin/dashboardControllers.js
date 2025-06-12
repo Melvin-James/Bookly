@@ -191,10 +191,45 @@ const getSalesChart = async (req, res, next) => {
   }
 };
 
+const getTopPublishers = async (req, res, next) => {
+  try {
+    const orders = await Order.aggregate([
+      { $unwind: "$items" },
+
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.product",
+          foreignField: "_id",
+          as: "productInfo"
+        }
+      },
+      { $unwind: "$productInfo" },
+
+      {
+        $group: {
+          _id: "$productInfo.publisher",
+          totalSold: { $sum: "$items.quantity" }
+        }
+      },
+
+
+      { $sort: { totalSold: -1 } },
+
+      { $limit: 10 }
+    ]);
+
+    res.json({ publishers: orders });
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 module.exports={
     getDashboardStas,
     getTopProducts,
     getTopCategories,
     getSalesChart,
+    getTopPublishers
 }
