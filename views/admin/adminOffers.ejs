@@ -12,6 +12,19 @@
         </h1>
         <p class="mt-1 text-sm text-gray-500">Manage product and category offers</p>
       </div>
+      
+      <!-- Pagination Controls -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label for="itemsPerPage" class="text-sm font-medium text-gray-700">Items per page:</label>
+          <select id="itemsPerPage" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#007D8B]/30 focus:border-[#007D8B]">
+            <option value="5" <%= pagination.limit === 5 ? 'selected' : '' %>>5</option>
+            <option value="10" <%= pagination.limit === 10 ? 'selected' : '' %>>10</option>
+            <option value="20" <%= pagination.limit === 20 ? 'selected' : '' %>>20</option>
+            <option value="50" <%= pagination.limit === 50 ? 'selected' : '' %>>50</option>
+          </select>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -27,7 +40,7 @@
         </div>
         <div class="ml-4">
           <p class="text-sm font-medium text-gray-500">Product Offers</p>
-          <p class="text-2xl font-bold text-gray-900" id="productOffersCount">-</p>
+          <p class="text-2xl font-bold text-gray-900" id="productOffersCount"><%= stats.productOffersCount %></p>
         </div>
       </div>
     </div>
@@ -38,7 +51,7 @@
         </div>
         <div class="ml-4">
           <p class="text-sm font-medium text-gray-500">Category Offers</p>
-          <p class="text-2xl font-bold text-gray-900" id="categoryOffersCount">-</p>
+          <p class="text-2xl font-bold text-gray-900" id="categoryOffersCount"><%= stats.categoryOffersCount %></p>
         </div>
       </div>
     </div>
@@ -59,8 +72,8 @@
           <i class="ri-money-dollar-circle-line text-yellow-600 text-xl"></i>
         </div>
         <div class="ml-4">
-          <p class="text-sm font-medium text-gray-500">Total Savings</p>
-          <p class="text-2xl font-bold text-gray-900" id="totalSavings">₹0</p>
+          <p class="text-sm font-medium text-gray-500">Total Items</p>
+          <p class="text-2xl font-bold text-gray-900" id="totalItems"><%= Math.max(pagination.totalProducts, pagination.totalCategories) %></p>
         </div>
       </div>
     </div>
@@ -69,10 +82,25 @@
   <!-- Product Offers Section -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
     <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-        <i class="ri-book-2-line text-[#007D8B]"></i>
-        Product Offers
-      </h3>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="ri-book-2-line text-[#007D8B]"></i>
+          Product Offers
+        </h3>
+        
+        <!-- Search for Products -->
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <input type="text" id="productSearch" placeholder="Search products..." 
+                   value="<%= pagination.productSearch %>"
+                   class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#007D8B]/30 focus:border-[#007D8B] w-64">
+            <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+          <button onclick="searchProducts()" class="px-4 py-2 bg-[#007D8B] text-white rounded-lg hover:bg-[#006a75] transition-colors text-sm">
+            <i class="ri-search-line"></i>
+          </button>
+        </div>
+      </div>
     </div>
     
     <div class="p-6">
@@ -81,7 +109,7 @@
           <label for="productSelect" class="block text-sm font-medium text-gray-700">Select Product</label>
           <select id="productSelect" name="productId" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007D8B]/30 focus:border-[#007D8B] transition-all text-sm bg-white">
             <option value="">Choose a product...</option>
-            <% products.forEach(p => { %>
+            <% allProducts.forEach(p => { %>
               <option value="<%= p._id %>"><%= p.name %></option>
             <% }) %>
           </select>
@@ -146,17 +174,40 @@
             <% } }) %>
           </tbody>
         </table>
+        
+        <!-- No results message -->
+        <% if (products.length === 0) { %>
+          <div class="text-center py-8">
+            <i class="ri-inbox-line text-4xl text-gray-400 mb-2"></i>
+            <p class="text-gray-500">No products found</p>
+          </div>
+        <% } %>
       </div>
     </div>
   </div>
 
   <!-- Category Offers Section -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
     <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-        <i class="ri-folder-line text-[#007D8B]"></i>
-        Category Offers
-      </h3>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="ri-folder-line text-[#007D8B]"></i>
+          Category Offers
+        </h3>
+        
+        <!-- Search for Categories -->
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <input type="text" id="categorySearch" placeholder="Search categories..." 
+                   value="<%= pagination.categorySearch %>"
+                   class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#007D8B]/30 focus:border-[#007D8B] w-64">
+            <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+          <button onclick="searchCategories()" class="px-4 py-2 bg-[#007D8B] text-white rounded-lg hover:bg-[#006a75] transition-colors text-sm">
+            <i class="ri-search-line"></i>
+          </button>
+        </div>
+      </div>
     </div>
     
     <div class="p-6">
@@ -165,7 +216,7 @@
           <label for="categorySelect" class="block text-sm font-medium text-gray-700">Select Category</label>
           <select id="categorySelect" name="categoryId" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007D8B]/30 focus:border-[#007D8B] transition-all text-sm bg-white">
             <option value="">Choose a category...</option>
-            <% categories.forEach(c => { %>
+            <% allCategories.forEach(c => { %>
               <option value="<%= c._id %>"><%= c.name %></option>
             <% }) %>
           </select>
@@ -230,15 +281,124 @@
             <% } }) %>
           </tbody>
         </table>
+        
+        <!-- No results message -->
+        <% if (categories.length === 0) { %>
+          <div class="text-center py-8">
+            <i class="ri-inbox-line text-4xl text-gray-400 mb-2"></i>
+            <p class="text-gray-500">No categories found</p>
+          </div>
+        <% } %>
       </div>
     </div>
   </div>
+
+  <!-- Pagination Controls -->
+  <% if (pagination.totalPages > 1) { %>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <!-- Page Info -->
+        <div class="text-sm text-gray-700">
+          Showing page <span class="font-medium"><%= pagination.currentPage %></span> of 
+          <span class="font-medium"><%= pagination.totalPages %></span>
+          (<%= Math.max(pagination.totalProducts, pagination.totalCategories) %> total items)
+        </div>
+        
+        <!-- Pagination Buttons -->
+        <div class="flex items-center gap-2">
+          <!-- First Page -->
+          <% if (pagination.currentPage > 2) { %>
+            <button onclick="goToPage(1)" class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <i class="ri-skip-back-line"></i>
+            </button>
+          <% } %>
+          
+          <!-- Previous Page -->
+          <% if (pagination.hasPrevPage) { %>
+            <button onclick="goToPage('<%= pagination.currentPage - 1 %>')" class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <i class="ri-arrow-left-s-line"></i> Previous
+            </button>
+          <% } %>
+          
+          <!-- Page Numbers -->
+          <% 
+            const startPage = Math.max(1, pagination.currentPage - 2);
+            const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+            for (let i = startPage; i <= endPage; i++) { 
+          %>
+            <button onclick="goToPage('<%= i %>')" 
+                    class="px-3 py-2 text-sm rounded-lg transition-colors <%= i === pagination.currentPage ? 'bg-[#007D8B] text-white' : 'border border-gray-300 hover:bg-gray-50' %>">
+              <%= i %>
+            </button>
+          <% } %>
+          
+          <!-- Next Page -->
+          <% if (pagination.hasNextPage) { %>
+            <button onclick="goToPage('<%= pagination.currentPage + 1 %>')" class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              Next <i class="ri-arrow-right-s-line"></i>
+            </button>
+          <% } %>
+          
+          <!-- Last Page -->
+          <% if (pagination.currentPage < pagination.totalPages - 1) { %>
+            <button onclick="goToPage('<%= pagination.totalPages %>')" class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <i class="ri-skip-forward-line"></i>
+            </button>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  <% } %>
 </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Validation functions
+// Pagination functions
+function goToPage(page) {
+  const url = new URL(window.location);
+  url.searchParams.set('page', page);
+  window.location.href = url.toString();
+}
+
+function searchProducts() {
+  const searchTerm = document.getElementById('productSearch').value;
+  const url = new URL(window.location);
+  url.searchParams.set('productSearch', searchTerm);
+  url.searchParams.set('page', 1); // Reset to first page
+  window.location.href = url.toString();
+}
+
+function searchCategories() {
+  const searchTerm = document.getElementById('categorySearch').value;
+  const url = new URL(window.location);
+  url.searchParams.set('categorySearch', searchTerm);
+  url.searchParams.set('page', 1); // Reset to first page
+  window.location.href = url.toString();
+}
+
+// Items per page change
+document.getElementById('itemsPerPage').addEventListener('change', function() {
+  const url = new URL(window.location);
+  url.searchParams.set('limit', this.value);
+  url.searchParams.set('page', 1); // Reset to first page
+  window.location.href = url.toString();
+});
+
+// Search on Enter key
+document.getElementById('productSearch').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    searchProducts();
+  }
+});
+
+document.getElementById('categorySearch').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    searchCategories();
+  }
+});
+
+// Existing validation and form functions remain the same...
 function validateOfferInput(input) {
   let value = parseFloat(input.value);
   if (isNaN(value)) {
@@ -271,18 +431,15 @@ function validateForm(formType) {
   const selectId = formType + 'Select';
   const offerId = formType + 'Offer';
   
-  // Clear previous errors
   clearError(selectId);
   clearError(offerId);
   
-  // Validate selection
   const selectValue = document.getElementById(selectId).value;
   if (!selectValue) {
     showError(selectId, 'Please select a ' + formType);
     isValid = false;
   }
   
-  // Validate offer percentage
   const offerValue = document.getElementById(offerId).value;
   if (!offerValue || offerValue <= 0 || offerValue > 100) {
     showError(offerId, 'Please enter a valid offer percentage (1-100)');
@@ -292,7 +449,6 @@ function validateForm(formType) {
   return isValid;
 }
 
-// Form submission handlers
 async function submitOfferForm(type, form) {
   if (!validateForm(type)) {
     return;
@@ -302,7 +458,6 @@ async function submitOfferForm(type, form) {
   const submitBtn = form.querySelector('button[type="submit"]');
   
   try {
-    // Show loading state
     submitBtn.disabled = true;
     submitBtn.querySelector('.submit-text').classList.add('hidden');
     submitBtn.querySelector('.loading-text').classList.remove('hidden');
@@ -322,8 +477,8 @@ async function submitOfferForm(type, form) {
       form.reset();
       clearError(type + 'Select');
       clearError(type + 'Offer');
-      updateOffersTable(type, result[type]);
-      updateStats();
+      // Refresh page to show updated data
+      window.location.reload();
     } else {
       showToast('error', result.message);
     }
@@ -331,14 +486,12 @@ async function submitOfferForm(type, form) {
     showToast('error', 'Network error. Please try again.');
     console.error(error);
   } finally {
-    // Reset button state
     submitBtn.disabled = false;
     submitBtn.querySelector('.submit-text').classList.remove('hidden');
     submitBtn.querySelector('.loading-text').classList.add('hidden');
   }
 }
 
-// Remove offer handler
 async function removeOffer(type, id) {
   const result = await Swal.fire({
     title: 'Remove Offer?',
@@ -368,7 +521,6 @@ async function removeOffer(type, id) {
     if (result.success) {
       showToast('success', result.message);
       document.getElementById(`${type}-${id}`).remove();
-      updateStats();
     } else {
       showToast('error', result.message);
     }
@@ -383,47 +535,6 @@ async function removeOffer(type, id) {
   }
 }
 
-// Update offers table dynamically
-function updateOffersTable(type, item) {
-  const tableBody = document.getElementById(`${type}OffersTable`);
-  const existingRow = document.getElementById(`${type}-${item._id}`);
-
-  if (existingRow) {
-    // Update existing row
-    existingRow.querySelector('td:nth-child(2) span').innerHTML = `<i class="ri-percent-line text-xs"></i> ${item[`${type}Offer`]}% OFF`;
-  } else if (item[`${type}Offer`] > 0) {
-    // Add new row
-    const row = document.createElement('tr');
-    row.id = `${type}-${item._id}`;
-    row.className = 'hover:bg-gray-50 transition-colors duration-200';
-    row.innerHTML = `
-      <td class="px-6 py-4 whitespace-nowrap">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-[#007D8B] to-[#006a75] rounded-lg flex items-center justify-center shadow-sm">
-            <i class="ri-${type === 'product' ? 'book-2' : 'folder'}-line text-white text-lg"></i>
-          </div>
-          <div class="text-sm font-medium text-gray-900">${item.name}</div>
-        </div>
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-          <i class="ri-percent-line text-xs"></i>
-          ${item[`${type}Offer`]}% OFF
-        </span>
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap text-center">
-        <button onclick="removeOffer('${type}', '${item._id}')" 
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500/30">
-          <i class="ri-delete-bin-line text-sm"></i>
-          Remove
-        </button>
-      </td>
-    `;
-    tableBody.appendChild(row);
-  }
-}
-
-// Toast notification
 function showToast(icon, message) {
   const Toast = Swal.mixin({
     toast: true,
@@ -443,36 +554,6 @@ function showToast(icon, message) {
   });
 }
 
-// Update statistics
-function updateStats() {
-  const productRows = document.querySelectorAll('#productOffersTable tr');
-  const categoryRows = document.querySelectorAll('#categoryOffersTable tr');
-  
-  document.getElementById('productOffersCount').textContent = productRows.length;
-  document.getElementById('categoryOffersCount').textContent = categoryRows.length;
-  
-  // Calculate average discount
-  let totalDiscount = 0;
-  let totalOffers = 0;
-  
-  productRows.forEach(row => {
-    const offerText = row.querySelector('span').textContent;
-    const offer = parseInt(offerText.match(/\d+/)[0]);
-    totalDiscount += offer;
-    totalOffers++;
-  });
-  
-  categoryRows.forEach(row => {
-    const offerText = row.querySelector('span').textContent;
-    const offer = parseInt(offerText.match(/\d+/)[0]);
-    totalDiscount += offer;
-    totalOffers++;
-  });
-  
-  const avgDiscount = totalOffers > 0 ? Math.round(totalDiscount / totalOffers) : 0;
-  document.getElementById('avgDiscount').textContent = avgDiscount + '%';
-}
-
 // Add input validation on keyup
 document.getElementById('productOffer').addEventListener('input', function() {
   validateOfferInput(this);
@@ -484,7 +565,6 @@ document.getElementById('categoryOffer').addEventListener('input', function() {
   clearError('categoryOffer');
 });
 
-// Clear errors on select change
 document.getElementById('productSelect').addEventListener('change', function() {
   clearError('productSelect');
 });
@@ -493,7 +573,6 @@ document.getElementById('categorySelect').addEventListener('change', function() 
   clearError('categorySelect');
 });
 
-// Initialize form event listeners
 document.getElementById('productOfferForm').addEventListener('submit', (e) => {
   e.preventDefault();
   submitOfferForm('product', e.target);
@@ -503,9 +582,4 @@ document.getElementById('categoryOfferForm').addEventListener('submit', (e) => {
   e.preventDefault();
   submitOfferForm('category', e.target);
 });
-
-// Initialize stats on page load
-window.onload = () => {
-  updateStats();
-};
 </script>

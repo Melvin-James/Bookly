@@ -11,7 +11,12 @@ const getDashboardStas = async (req, res, next) => {
     const currentStart = new Date(now);
     const previousStart = new Date(now);
 
-    if (period === 'week') {
+    if (period === 'today') {
+      currentStart.setHours(0, 0, 0, 0);
+      previousStart.setDate(currentStart.getDate() - 1);
+      previousStart.setHours(0, 0, 0, 0);
+    }
+    else if (period === 'week') {
       currentStart.setDate(currentStart.getDate() - 7);
       previousStart.setDate(previousStart.getDate() - 14);
     } else if (period === 'month') {
@@ -74,7 +79,6 @@ const getDashboardStas = async (req, res, next) => {
     next(err);
   }
 };
-
 
 const getTopProducts = async (req,res,next)=>{
     try{

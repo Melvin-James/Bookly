@@ -60,7 +60,6 @@ const getCheckoutPage = async (req, res,next) => {
   }
 };
 
-
 const placeOrder = async (req, res,next) => {
   try {
     const userId = req.session.user._id;
@@ -212,7 +211,6 @@ const placeOrder = async (req, res,next) => {
   }
 }
 
-
 const createRazorpayOrder = async (req, res,next) => {
   try {
     const amount = req.body.amount;
@@ -229,7 +227,6 @@ const createRazorpayOrder = async (req, res,next) => {
     next(err);
   }
 };
-
 
 const getOrderSuccessPage = async (req, res,next) => {
   try {
@@ -252,10 +249,62 @@ const getOrderFailurePage = async (req, res,next) => {
   }
 };
 
+const getaddAddress = async(req,res,next)=>{
+  try{
+    res.render('addAddress',
+      {userData : req.session.user,
+      address : null,
+      formAction : '/user/checkout/addAddress'}
+    )
+  }catch(err){
+    next(err);
+  }
+}
+
+const postaddAddress = async(req,res,next)=>{
+    try{
+        const userId = req.session.user._id;
+        const{
+            addressType, name, city, state,
+            landmark, pincode, phone, altPhone
+        }=req.body;
+
+    if(!addressType || !name || !city || !state || !landmark || !pincode || !phone || !altPhone){
+        return res.render('addAddress',{
+            userData:req.session.user,
+            error:'All fields are required'
+        });
+    }
+
+    const existing = await Address.findOne({userId});
+
+    if(existing){
+        existing.address.push({
+            addressType,name,city,state,landmark,
+            pincode,phone,altPhone
+        });
+        await existing.save();
+    }else{
+        await Address.create({
+            userId,
+            address:[{
+                addressType, name, city, state, landmark, pincode, phone, altPhone
+            }]
+        });
+    }
+
+    res.redirect('/user/checkout');
+}catch(err){
+    next(err);
+}
+};
+
 module.exports={
     getCheckoutPage,
     placeOrder,
     getOrderSuccessPage,
     createRazorpayOrder,
     getOrderFailurePage,
+    getaddAddress,
+    postaddAddress,
 }

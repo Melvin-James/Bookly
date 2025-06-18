@@ -38,16 +38,16 @@ const applyCoupon = async(req,res,next)=>{
             return res.status(400).json({success:false,message:`Minimum cart amount should be ₹${coupon.minCartAmount}`});
         }
 
-        let discount =0;
+        let couponDiscount =0;
         if(coupon.discountType === 'Flat'){
-            discount = coupon.discountAmount;
+            couponDiscount = coupon.discountAmount;
         }else if(coupon.discountType === 'Percentage'){
-            discount = (coupon.discountAmount / 100)*cartTotal;
-            if(coupon.maxDiscount && discount > coupon.maxDiscount){
-                discount = coupon.maxDiscount;
+            couponDiscount = (coupon.discountAmount / 100)*cartTotal;
+            if(coupon.maxDiscount && couponDiscount > coupon.maxDiscount){
+                couponDiscount = coupon.maxDiscount;
             }
         }
-        const finalTotal = cartTotal - discount;
+        const finalTotal = cartTotal - couponDiscount;
 
         if (user.couponUsage?.get(coupon.code) >= coupon.usageLimit) {
             return res.status(400).json({
@@ -59,14 +59,14 @@ const applyCoupon = async(req,res,next)=>{
 
         req.session.coupon = {
             code:coupon.code,
-            discountAmount:discount,
+            discountAmount:couponDiscount,
             finalTotal
         };
 
         return res.status(200).json({
             success:true,
             message:`Coupon applied successfully!`,
-            discount,
+            couponDiscount,
             finalTotal
         });
     }catch(err){

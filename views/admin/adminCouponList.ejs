@@ -380,6 +380,8 @@ document.getElementById('createCouponForm').addEventListener('submit', async fun
   
   const submitBtn = this.querySelector('button[type="submit"]');
   const formData = new FormData(this);
+  const data = Object.fromEntries(formData.entries());
+
   
   try {
     // Show loading state
@@ -389,7 +391,10 @@ document.getElementById('createCouponForm').addEventListener('submit', async fun
     
     const response = await fetch('/admin/coupons/create', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
     });
     
     const result = await response.json();
@@ -554,4 +559,4 @@ window.onload = () => {
     timer: 2000
   });
 <% } %>
-<script
+</script>

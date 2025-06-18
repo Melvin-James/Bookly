@@ -1,5 +1,7 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
+const fs = require('fs');
+const path = require('path');
 
 const productInfo = async (req, res,next) => {
     try{
@@ -127,44 +129,185 @@ const addProduct = async (req, res,next) => {
   }
 };
   
-const getEditProduct = async(req,res,next)=>{
-  try{
+const getEditProduct = async (req, res, next) => {
+  try {
     const product = await Product.findById(req.params.id);
-    const categories = await Category.find({isListed:true});
-    if(!product) return res.status(404).send('product not found');
-    res.render('product-edit',{product,categories});
-  }catch(err){
+    const categories = await Category.find({ isListed: true });
+    
+    if (!product) {
+      return res.status(404).render('admin/error', {
+        title: 'Product Not Found',
+        message: 'The requested product could not be found.'
+      });
+    }
+    
+    res.render('product-edit', {
+      title: 'Edit Product',
+      product,
+      categories
+    });
+  } catch (err) {
+    console.error('Error fetching product for edit:', err);
     next(err);
   }
 };
 
-const updateProduct = async(req,res,next)=>{
-  try{
-    const updatedProduct = {
-      name:req.body.name,
-      description:req.body.description,
-      publisher:req.body.publisher,
-      category:req.body.category,
-      price:req.body.price,
-      productOffer:req.body.productOffer,
-      quantity:req.body.quantity,
-      color:req.body.color,
-      status:req.body.status,
-    };
+const updateProduct = async (req, res, next) => {
+  try {
+    const productId = req.params.id;
+    const {
+      name,
+      description,
+      publisher,
+      category,
+      price,
+      productOffer,
+      quantity,
+      color,
+      status,
+      existingImages
+    } = req.body;
 
-    if(req.files?.length>0){
-      updatedProduct.productImage = req.files.map(file=>file.filename);
+    // Validation
+    const errors = {};
+
+    // Basic field validation
+    if (!name || name.trim().length < 2) {
+      errors.name = 'Product name must be at least 2 characters';
+    }
+    if (!description || description.trim().length < 10) {
+      errors.description = 'Description must be at least 10 characters';
+    }
+    if (!publisher || publisher.trim().length < 2) {
+      errors.publisher = 'Publisher name must be at least 2 characters';
+    }
+    if (!category) {
+      errors.category = 'Please select a category';
+    }
+    if (!price || isNaN(price) || parseFloat(price) <= 0) {
+      errors.price = 'Please enter a valid price';
+    }
+    if (productOffer && (isNaN(productOffer) || parseFloat(productOffer) < 0 || parseFloat(productOffer) > 100)) {
+      errors.productOffer = 'Product offer must be between 0 and 100';
+    }
+    if (!quantity || isNaN(quantity) || parseInt(quantity) < 0) {
+      errors.quantity = 'Please enter a valid quantity';
+    }
+    if (!color || color.trim().length < 2) {
+      errors.color = 'Color must be at least 2 characters';
+    }
+    if (!status) {
+      errors.status = 'Please select a status';
     }
 
-    // if (req.files.length !== 3) {
-    //   return res.status(400).json({ errors: { productImage: 'Exactly 3 images required.' } });
-    // }
-    
+    // Handle existing images
+    let finalImages = [];
+    if (existingImages) {
+      try {
+        const parsedExistingImages = JSON.parse(existingImages);
+        if (Array.isArray(parsedExistingImages)) {
+          finalImages = parsedExistingImages;
+        }
+      } catch (e) {
+        console.error('Error parsing existing images:', e);
+      }
+    }
 
-    await Product.findByIdAndUpdate(req.params.id,updatedProduct);
-    res.json({success:true, redirectTo:'/admin/products'});
-  }catch(err){
-    next(err);
+    // Handle new uploaded images
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map(file => file.filename);
+      finalImages = [...finalImages, ...newImages];
+    }
+
+    // STRICT Image validation - EXACTLY 3 images required
+    if (finalImages.length !== 3) {
+      errors.productImage = 'Exactly 3 product images are required';
+    }
+
+    // If there are validation errors, return them
+    if (Object.keys(errors).length > 0) {
+      // Clean up uploaded files if validation fails
+      if (req.files && req.files.length > 0) {
+        req.files.forEach(file => {
+          const filePath = path.join(__dirname, '../public/uploads/product-images', file.filename);
+          fs.unlink(filePath, (unlinkErr) => {
+            if (unlinkErr) {
+              console.error('Error cleaning up uploaded file:', unlinkErr);
+            }
+          });
+        });
+      }
+      
+      return res.status(400).json({
+        success: false,
+        errors: errors
+      });
+    }
+
+    // Get the current product to handle image cleanup
+    const currentProduct = await Product.findById(productId);
+    if (!currentProduct) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    // Find images to delete (images that were in the original product but not in finalImages)
+    const imagesToDelete = currentProduct.productImage.filter(img => !finalImages.includes(img));
+
+    // Delete removed images from filesystem
+    imagesToDelete.forEach(imageName => {
+      const imagePath = path.join(__dirname, '../public/uploads/product-images', imageName);
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error('Error deleting image:', err);
+        }
+      });
+    });
+
+    // Prepare update object
+    const updatedProduct = {
+      name: name.trim(),
+      description: description.trim(),
+      publisher: publisher.trim(),
+      category,
+      price: parseFloat(price),
+      productOffer: productOffer ? parseFloat(productOffer) : 0,
+      quantity: parseInt(quantity),
+      color: color.trim(),
+      status,
+      productImage: finalImages
+    };
+
+    // Update the product
+    await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
+
+    res.json({
+      success: true,
+      message: 'Product updated successfully',
+      redirectTo: '/admin/products'
+    });
+
+  } catch (err) {
+    console.error('Error updating product:', err);
+    
+    // Clean up uploaded files if there's an error
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        const filePath = path.join(__dirname, '../public/uploads/product-images', file.filename);
+        fs.unlink(filePath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error('Error cleaning up uploaded file:', unlinkErr);
+          }
+        });
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while updating product'
+    });
   }
 };
 

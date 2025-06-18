@@ -3,296 +3,1050 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edit Product</title>
+  <title>Edit Product - Bookly Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <link rel="icon" href="/images/favicon.ico" />
+  
   <style>
-    .error {
-      color: red;
-      font-size: 15px;
-      text-align: left;
-      margin-left: 10px;
+    :root {
+      --primary-color: #007D8B;
+      --primary-hover: #005f66;
     }
 
-    #preview-container {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
+    .error-message {
+      color: var(--primary-color);
+      font-size: 14px;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .field-error {
+      border-color: var(--primary-color) !important;
+      box-shadow: 0 0 0 1px var(--primary-color) !important;
+    }
+
+    .image-container {
+      position: relative;
+      display: inline-block;
+      margin: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 125, 139, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .image-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 125, 139, 0.25);
     }
 
     .thumbnail {
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       object-fit: cover;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      opacity: 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .image-container:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      background: #dc2626;
+      transform: scale(1.1);
     }
 
     #cropModal {
       position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.8);
+      top: 0; 
+      left: 0;
+      width: 100vw; 
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      backdrop-filter: blur(4px);
     }
 
     #cropImageBox {
       background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      max-height: 80vh;
+      padding: 24px;
+      border-radius: 16px;
+      max-width: 700px;
+      max-height: 85vh;
       overflow: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
     #cropImage {
       max-width: 100%;
-      max-height: 70vh;
+      max-height: 60vh;
+      border-radius: 8px;
+    }
+
+    .upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s ease;
+      background: #f9fafb;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary-color);
+      background: #f0fdff;
+    }
+
+    .upload-area.dragover {
+      border-color: var(--primary-color);
+      background: #e6fffa;
+      transform: scale(1.02);
+    }
+
+    .upload-area.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .form-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e5e7eb;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      border: 2px solid #e5e7eb;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(0, 125, 139, 0.1);
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+      color: white;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 125, 139, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 125, 139, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .image-count {
+      background: var(--primary-color);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+      margin-left: 8px;
+    }
+
+    .image-count.complete {
+      background: #10b981;
+    }
+
+    .image-count.warning {
+      background: #f59e0b;
     }
   </style>
 </head>
-<!-- Same head content remains -->
 
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-50 font-sans min-h-screen">
 
-  <!-- Navbar -->
-  <nav class="bg-white shadow-md p-4">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <h1 class="text-xl font-bold text-[#007D8B]">Bookly Admin</h1>
-      <a href="/admin/products" class="text-gray-600 hover:text-[#007D8B] text-sm">← Back to Products</a>
+  <!-- Enhanced Navbar -->
+  <nav class="bg-white shadow-lg border-b-2 border-[#007D8B]">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-[#007D8B] to-[#005f66] rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-[#007D8B]">Bookly Admin</h1>
+        </div>
+        <a href="/admin/products" class="flex items-center gap-2 text-gray-600 hover:text-[#007D8B] transition-colors font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Back to Products
+        </a>
+      </div>
     </div>
   </nav>
 
-  <!-- Main content -->
-  <div class="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
-    <h2 class="text-2xl font-semibold text-[#007D8B] mb-6">Edit Product</h2>
+  <!-- Main Content -->
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">Edit Product</h2>
+      <p class="text-gray-600">Update product information and manage images</p>
+    </div>
 
-    <form id="productForm" enctype="multipart/form-data" class="space-y-6">
-
+    <form id="productForm" enctype="multipart/form-data">
       <input type="hidden" name="productId" value="<%= product._id %>">
 
-      <!-- Product Name -->
-      <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-        <input type="text" name="name" id="name" value="<%= product.name %>" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none" />
-        <p class="error" id="error-name"></p>
-      </div>
+      <!-- Basic Information Section -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Basic Information
+        </h3>
 
-      <!-- Description -->
-      <div>
-        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-        <textarea name="description" id="description" rows="4" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"><%= product.description %></textarea>
-        <p class="error" id="error-description"></p>
-      </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Product Name -->
+          <div>
+            <label for="name" class="form-label">Product Name *</label>
+            <input type="text" name="name" id="name" value="<%= product.name %>" 
+                   class="form-input" placeholder="Enter product name" />
+            <span class="error-message" id="error-name"></span>
+          </div>
 
-      <!-- Publisher -->
-      <div>
-        <label for="publisher" class="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
-        <input type="text" name="publisher" id="publisher" value="<%= product.publisher %>" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none" />
-        <p class="error" id="error-publisher"></p>
-      </div>
+          <!-- Publisher -->
+          <div>
+            <label for="publisher" class="form-label">Publisher *</label>
+            <input type="text" name="publisher" id="publisher" value="<%= product.publisher %>" 
+                   class="form-input" placeholder="Enter publisher name" />
+            <span class="error-message" id="error-publisher"></span>
+          </div>
+        </div>
 
-      <!-- Category -->
-      <div>
-        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-        <select name="category" id="category" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none">
-          <option value="">Select a category</option>
-          <% categories.forEach(cat => { %>
-            <option value="<%= cat._id %>" <%= cat._id.equals(product.category) ? 'selected' : '' %>><%= cat.name %></option>
-          <% }) %>
-        </select>
-        <p class="error" id="error-category"></p>
-      </div>
+        <!-- Description -->
+        <div class="mt-6">
+          <label for="description" class="form-label">Description *</label>
+          <textarea name="description" id="description" rows="4" 
+                    class="form-input resize-none" placeholder="Enter product description"><%= product.description %></textarea>
+          <span class="error-message" id="error-description"></span>
+        </div>
 
-      <!-- Price -->
-      <div>
-        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price</label>
-        <input type="number" name="price" id="price" value="<%= product.price %>" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none" />
-        <p class="error" id="error-price"></p>
-      </div>
-
-      <!-- Offer -->
-      <div>
-        <label for="productOffer" class="block text-sm font-medium text-gray-700 mb-1">Product Offer (%)</label>
-        <input type="number" name="productOffer" id="productOffer" value="<%= product.productOffer %>" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none" />
-        <p class="error" id="error-offer"></p>
-      </div>
-
-      <!-- Quantity -->
-      <div>
-        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-        <input type="number" name="quantity" id="quantity" value="<%= product.quantity %>" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none" />
-        <p class="error" id="error-quantity"></p>
-      </div>
-
-      <!-- Color -->
-      <div>
-        <label for="color" class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-        <input type="text" name="color" id="color" value="<%= product.color %>" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none" />
-        <p class="error" id="error-color"></p>
-      </div>
-
-      <!-- Status -->
-      <div>
-        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-        <select name="status" id="status" class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none">
-          <option value="">Select status</option>
-          <option value="Available" <%= product.status === "Available" ? 'selected' : '' %>>Available</option>
-          <option value="Out of Stock" <%= product.status === "Out of Stock" ? 'selected' : '' %>>Out of Stock</option>
-          <option value="Discontinued" <%= product.status === "Discontinued" ? 'selected' : '' %>>Discontinued</option>
-        </select>
-        <p class="error" id="error-status"></p>
-      </div>
-
-      <!-- Image Upload -->
-      <div>
-        <label for="productImage" class="block text-sm font-medium text-gray-700 mb-1">Product Images (re-upload if you'd like to change)</label>
-        <input type="file" name='productImage' id="productImage" accept="image/*" multiple class="w-full border px-4 py-2 rounded-md border-gray-300 focus:outline-none" />
-        <p class="error" id="error-productImage"></p>
-        <div id="preview-container">
-          <% product.productImage.forEach(img => { %>
-            <img src="/uploads/product-images/<%= img %>" class="thumbnail" />
-          <% }) %>
+        <!-- Category -->
+        <div class="mt-6">
+          <label for="category" class="form-label">Category *</label>
+          <select name="category" id="category" class="form-input">
+            <option value="">Select a category</option>
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat._id %>" <%= cat._id.equals(product.category) ? 'selected' : '' %>>
+                <%= cat.name %>
+              </option>
+            <% }) %>
+          </select>
+          <span class="error-message" id="error-category"></span>
         </div>
       </div>
 
+      <!-- Pricing & Inventory Section -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+          </svg>
+          Pricing & Inventory
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Price -->
+          <div>
+            <label for="price" class="form-label">Price (₹) *</label>
+            <input type="number" name="price" id="price" value="<%= product.price %>" 
+                   class="form-input" placeholder="0.00" min="0" step="0.01" />
+            <span class="error-message" id="error-price"></span>
+          </div>
+
+          <!-- Product Offer -->
+          <div>
+            <label for="productOffer" class="form-label">Product Offer (%)</label>
+            <input type="number" name="productOffer" id="productOffer" value="<%= product.productOffer %>" 
+                   class="form-input" placeholder="0" min="0" max="100" />
+            <span class="error-message" id="error-productOffer"></span>
+          </div>
+
+          <!-- Quantity -->
+          <div>
+            <label for="quantity" class="form-label">Quantity *</label>
+            <input type="number" name="quantity" id="quantity" value="<%= product.quantity %>" 
+                   class="form-input" placeholder="0" min="0" />
+            <span class="error-message" id="error-quantity"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Details Section -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+          </svg>
+          Product Details
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Color -->
+          <div>
+            <label for="color" class="form-label">Color *</label>
+            <input type="text" name="color" id="color" value="<%= product.color %>" 
+                   class="form-input" placeholder="Enter color" />
+            <span class="error-message" id="error-color"></span>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label for="status" class="form-label">Status *</label>
+            <select name="status" id="status" class="form-input">
+              <option value="">Select status</option>
+              <option value="Available" <%= product.status === "Available" ? 'selected' : '' %>>Available</option>
+              <option value="Out of Stock" <%= product.status === "Out of Stock" ? 'selected' : '' %>>Out of Stock</option>
+              <option value="Discontinued" <%= product.status === "Discontinued" ? 'selected' : '' %>>Discontinued</option>
+            </select>
+            <span class="error-message" id="error-status"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Management Section -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          Product Images (Required: Exactly 3 Images)
+          <span class="image-count" id="image-count">0/3</span>
+        </h3>
+
+        <!-- Current Images Display -->
+        <div id="current-images" class="mb-6">
+          <h4 class="text-sm font-semibold text-gray-700 mb-3">Current Images:</h4>
+          <div id="current-images-container" class="flex flex-wrap gap-3">
+            <% product.productImage.forEach((img, index) => { %>
+              <div class="image-container" data-image="<%= img %>" data-type="existing">
+                <img src="/uploads/product-images/<%= img %>" class="thumbnail" alt="Product Image" />
+                <button type="button" class="delete-btn" onclick="deleteExistingImage('<%= img %>', this)">×</button>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- File Input (Hidden) -->
+        <input type="file" name="productImage" id="productImage" accept="image/*" multiple style="display: none;" />
+
+        <!-- Upload Area -->
+        <div class="upload-area" id="upload-area">
+          <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+          </svg>
+          <p class="text-gray-600 mb-2">
+            <span class="font-semibold">Click to upload</span> or drag and drop new images
+          </p>
+          <p class="text-sm text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
+          <p class="text-sm text-[#007D8B] font-semibold mt-2">Exactly 3 images required</p>
+        </div>
+
+        <!-- New Images Preview -->
+        <div id="new-images-preview" class="mt-4" style="display: none;">
+          <h4 class="text-sm font-semibold text-gray-700 mb-3">New Images to Upload:</h4>
+          <div id="new-images-container" class="flex flex-wrap gap-3"></div>
+        </div>
+
+        <span class="error-message" id="error-productImage"></span>
+      </div>
+
       <!-- Submit Button -->
-      <div class="flex justify-end">
-        <button type="submit" class="bg-[#007D8B] hover:bg-[#005f66] text-white px-6 py-2 rounded-md transition-colors shadow">
-          Update Product
+      <div class="flex justify-end gap-4 mt-8">
+        <a href="/admin/products" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+          Cancel
+        </a>
+        <button type="submit" id="submit-btn" class="btn-primary">
+          <span id="submit-text">Update Product</span>
         </button>
       </div>
     </form>
   </div>
 
-  <!-- Crop Modal (same) -->
+  <!-- Crop Modal -->
   <div id="cropModal">
     <div id="cropImageBox">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Crop Image</h3>
+      <p class="text-gray-600 mb-4">Adjust the crop area to get the perfect square image for your product.</p>
       <img id="cropImage" />
-      <div class="mt-4 text-right">
-        <button id="cropConfirm" class="bg-[#007D8B] hover:bg-[#005f66] text-white px-4 py-2 rounded">Crop</button>
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" id="cropCancel" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+          Cancel
+        </button>
+        <button type="button" id="cropConfirm" class="btn-primary">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Crop & Add
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Footer -->
-  <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
+  <footer class="text-center text-gray-500 text-sm py-8 border-t border-gray-200 mt-12">
     &copy; <%= new Date().getFullYear() %> Bookly Admin Panel. All rights reserved.
   </footer>
 
-  <!-- Script block: Only minor change to AJAX URL -->
   <script>
+    // Global variables
     let selectedImages = [];
+    let existingImages = [];
     let cropper;
+    let currentFileIndex = 0;
+    let filesToProcess = [];
+    
     const cropModal = $("#cropModal");
     const cropImage = $("#cropImage");
-    const previewContainer = $("#preview-container");
+    const uploadArea = $("#upload-area");
+    const fileInput = $("#productImage");
+    const newImagesContainer = $("#new-images-container");
+    const newImagesPreview = $("#new-images-preview");
 
-    $("#productImage").on("change", function () {
-      const files = this.files;
+    // Initialize existing images
+    '<% product.productImage.forEach(img => { %>'
+      existingImages.push('<%= img %>');
+    '<% }) %>'
 
-      if (selectedImages.length + files.length > 3) {
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: "error",
-          title: "you can only upload 3 images",
-          showConfirmButton: false,
-          timer: 2000
-        });
-        this.value = "";
-        return;
+    updateImageCount();
+
+    // Validation rules
+    const validationRules = {
+      name: {
+        required: true,
+        minLength: 2,
+        maxLength: 100,
+        pattern: /^[a-zA-Z0-9\s\-_.,()]+$/,
+        message: 'Product name must be 2-100 characters and contain only letters, numbers, and basic punctuation'
+      },
+      description: {
+        required: true,
+        minLength: 10,
+        maxLength: 1000,
+        message: 'Description must be between 10-1000 characters'
+      },
+      publisher: {
+        required: true,
+        minLength: 2,
+        maxLength: 50,
+        pattern: /^[a-zA-Z0-9\s\-_.,&()]+$/,
+        message: 'Publisher name must be 2-50 characters and contain only letters, numbers, and basic punctuation'
+      },
+      category: {
+        required: true,
+        message: 'Please select a category'
+      },
+      price: {
+        required: true,
+        min: 0.01,
+        max: 999999.99,
+        message: 'Price must be between ₹0.01 and ₹999,999.99'
+      },
+      productOffer: {
+        min: 0,
+        max: 100,
+        message: 'Product offer must be between 0% and 100%'
+      },
+      quantity: {
+        required: true,
+        min: 0,
+        max: 99999,
+        message: 'Quantity must be between 0 and 99,999'
+      },
+      color: {
+        required: true,
+        minLength: 2,
+        maxLength: 30,
+        pattern: /^[a-zA-Z\s\-]+$/,
+        message: 'Color must be 2-30 characters and contain only letters, spaces, and hyphens'
+      },
+      status: {
+        required: true,
+        message: 'Please select a status'
+      }
+    };
+
+    // Real-time validation
+    function validateField(fieldName, value) {
+      const rules = validationRules[fieldName];
+      if (!rules) return { isValid: true };
+
+      const errors = [];
+
+      // Required validation
+      if (rules.required && (!value || value.toString().trim() === '')) {
+        errors.push(`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`);
       }
 
-      if (files.length > 0) {
-        previewContainer.html(""); // Clear previous thumbnails
-        selectedImages = [];       // Reset previously selected images
-        showCropModal(files[0]);
+      if (value && value.toString().trim() !== '') {
+        // Length validation
+        if (rules.minLength && value.length < rules.minLength) {
+          errors.push(`Minimum ${rules.minLength} characters required`);
+        }
+        if (rules.maxLength && value.length > rules.maxLength) {
+          errors.push(`Maximum ${rules.maxLength} characters allowed`);
+        }
+
+        // Numeric validation
+        if (rules.min !== undefined && parseFloat(value) < rules.min) {
+          errors.push(`Minimum value is ${rules.min}`);
+        }
+        if (rules.max !== undefined && parseFloat(value) > rules.max) {
+          errors.push(`Maximum value is ${rules.max}`);
+        }
+
+        // Pattern validation
+        if (rules.pattern && !rules.pattern.test(value)) {
+          errors.push(rules.message || 'Invalid format');
+        }
+      }
+
+      return {
+        isValid: errors.length === 0,
+        errors: errors,
+        message: errors.length > 0 ? errors[0] : ''
+      };
+    }
+
+    function showFieldValidation(fieldName, validation) {
+      const field = $(`#${fieldName}`);
+      const errorElement = $(`#error-${fieldName}`);
+
+      // Remove existing classes
+      field.removeClass('field-error');
+      
+      if (validation.isValid) {
+        errorElement.text('').hide();
+      } else {
+        field.addClass('field-error');
+        errorElement.text(validation.message).show();
+      }
+    }
+
+    // Add real-time validation to all fields
+    Object.keys(validationRules).forEach(fieldName => {
+      $(`#${fieldName}`).on('input change blur', function() {
+        const validation = validateField(fieldName, $(this).val());
+        showFieldValidation(fieldName, validation);
+      });
+    });
+
+    // Fixed click handler - prevent event bubbling and ensure proper triggering
+    uploadArea.on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Check if upload is disabled
+      if ($(this).hasClass('disabled')) {
+        return false;
+      }
+      
+      // Trigger file input click
+      fileInput[0].click();
+      return false;
+    });
+
+    // Prevent any child elements from interfering with click
+    uploadArea.find('*').on('click', function(e) {
+      e.stopPropagation();
+    });
+
+    // Drag and drop functionality
+    uploadArea.on('dragover', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!$(this).hasClass('disabled')) {
+        $(this).addClass('dragover');
       }
     });
 
+    uploadArea.on('dragleave', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $(this).removeClass('dragover');
+    });
+
+    uploadArea.on('drop', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $(this).removeClass('dragover');
+      
+      if ($(this).hasClass('disabled')) {
+        return;
+      }
+      
+      const files = e.originalEvent.dataTransfer.files;
+      handleFileSelection(files);
+    });
+
+    // File input change handler
+    fileInput.on('change', function(e) {
+      e.preventDefault();
+      handleFileSelection(this.files);
+    });
+
+    function handleFileSelection(files) {
+      const totalImages = existingImages.length + selectedImages.length;
+      const availableSlots = 3 - totalImages;
+
+      if (files.length > availableSlots) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Too Many Images',
+          text: `You can only upload ${availableSlots} more image(s). Exactly 3 images required.`,
+          confirmButtonColor: '#007D8B'
+        });
+        fileInput.val(''); // Clear the input
+        return;
+      }
+
+      // Validate file types and sizes
+      const validFiles = [];
+      for (let file of files) {
+        if (!file.type.startsWith('image/')) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid File Type',
+            text: 'Please select only image files (PNG, JPG, JPEG)',
+            confirmButtonColor: '#007D8B'
+          });
+          fileInput.val(''); // Clear the input
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+          Swal.fire({
+            icon: 'error',
+            title: 'File Too Large',
+            text: `${file.name} is too large. Maximum file size is 5MB.`,
+            confirmButtonColor: '#007D8B'
+          });
+          fileInput.val(''); // Clear the input
+          return;
+        }
+        validFiles.push(file);
+      }
+
+      if (validFiles.length > 0) {
+        filesToProcess = validFiles;
+        currentFileIndex = 0;
+        processNextFile();
+      }
+    }
+
+    function processNextFile() {
+      if (currentFileIndex >= filesToProcess.length) {
+        updateImageCount();
+        updateImagePreview();
+        fileInput.val(''); // Clear the file input
+        return;
+      }
+
+      const file = filesToProcess[currentFileIndex];
+      showCropModal(file);
+    }
+
     function showCropModal(file) {
       const reader = new FileReader();
-      reader.onload = function (e) {
-        cropImage.attr("src", e.target.result);
-        cropModal.show();
+      reader.onload = function(e) {
+        cropImage.attr('src', e.target.result);
+        cropModal.css('display', 'flex');
+
+        if (cropper) {
+          cropper.destroy();
+        }
 
         cropper = new Cropper(cropImage[0], {
           aspectRatio: 1,
           viewMode: 1,
-          autoCropArea: 1,
+          autoCropArea: 0.8,
+          responsive: true,
+          background: false,
+          guides: true,
+          center: true,
+          highlight: false,
+          cropBoxMovable: true,
+          cropBoxResizable: true,
+          toggleDragModeOnDblclick: false,
+          minCropBoxWidth: 100,
+          minCropBoxHeight: 100,
         });
       };
       reader.readAsDataURL(file);
     }
 
-    $("#cropConfirm").on("click", function () {
-      cropper.getCroppedCanvas().toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        selectedImages.push(blob);
+    $('#cropConfirm').on('click', function() {
+      if (!cropper) return;
+      
+      cropper.getCroppedCanvas({
+        width: 400,
+        height: 400,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+      }).toBlob((blob) => {
+        selectedImages.push({
+          blob: blob,
+          url: URL.createObjectURL(blob),
+          name: `image_${Date.now()}_${currentFileIndex}.jpg`
+        });
 
-        const img = $("<img>").attr("src", url).addClass("thumbnail");
-        previewContainer.append(img);
-
+        currentFileIndex++;
         cropper.destroy();
-        cropModal.hide();
-        $("#productImage").val("");
-      });
+        cropper = null;
+        cropModal.css('display', 'none');
+        
+        processNextFile();
+      }, 'image/jpeg', 0.9);
     });
 
-    $('#productForm').submit(function (event) {
-      event.preventDefault();
+    $('#cropCancel').on('click', function() {
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      cropModal.css('display', 'none');
+      currentFileIndex = filesToProcess.length; // Skip remaining files
+      updateImageCount();
+      updateImagePreview();
+      fileInput.val(''); // Clear the file input
+    });
 
-      const formData = new FormData(this);
+    function updateImagePreview() {
+      newImagesContainer.empty();
+      
+      if (selectedImages.length > 0) {
+        newImagesPreview.show();
+        selectedImages.forEach((imageData, index) => {
+          const imageContainer = $(`
+            <div class="image-container" data-index="${index}" data-type="new">
+              <img src="${imageData.url}" class="thumbnail" alt="New Product Image" />
+              <button type="button" class="delete-btn" onclick="deleteNewImage(${index})">×</button>
+            </div>
+          `);
+          newImagesContainer.append(imageContainer);
+        });
+      } else {
+        newImagesPreview.hide();
+      }
+    }
 
-      if (selectedImages.length > 0 && selectedImages.length !== 3) {
-        $("#error-productImage").text("Please upload exactly 3 images.");
+    function deleteNewImage(index) {
+      Swal.fire({
+        title: 'Delete Image?',
+        text: 'Are you sure you want to remove this image?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#007D8B',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, delete it'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          URL.revokeObjectURL(selectedImages[index].url);
+          selectedImages.splice(index, 1);
+          updateImagePreview();
+          updateImageCount();
+        }
+      });
+    }
+
+    function deleteExistingImage(imageName, button) {
+      Swal.fire({
+        title: 'Delete Image?',
+        text: 'Are you sure you want to remove this existing image?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#007D8B',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'delete'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const index = existingImages.indexOf(imageName);
+          if (index > -1) {
+            existingImages.splice(index, 1);
+          }
+          $(button).closest('.image-container').remove();
+          updateImageCount();
+        }
+      });
+    }
+
+    function updateImageCount() {
+      const totalImages = existingImages.length + selectedImages.length;
+      const countElement = $('#image-count');
+      
+      countElement.text(`${totalImages}/3`);
+      
+      // Update count styling
+      countElement.removeClass('complete warning');
+      if (totalImages === 3) {
+        countElement.addClass('complete');
+      } else if (totalImages > 0) {
+        countElement.addClass('warning');
+      }
+      
+      // Update upload area state
+      if (totalImages >= 3) {
+        uploadArea.addClass('disabled');
+        uploadArea.find('p').first().html('<span class="font-semibold text-gray-400">Maximum images reached</span>');
+      } else {
+        uploadArea.removeClass('disabled');
+        uploadArea.find('p').first().html('<span class="font-semibold">Click to upload</span> or drag and drop new images');
+      }
+    }
+
+    // Form submission
+    $('#productForm').on('submit', function(e) {
+      e.preventDefault();
+
+      // Validate all fields
+      let isFormValid = true;
+      const formData = new FormData();
+
+      Object.keys(validationRules).forEach(fieldName => {
+        const value = $(`#${fieldName}`).val();
+        const validation = validateField(fieldName, value);
+        showFieldValidation(fieldName, validation);
+        
+        if (!validation.isValid) {
+          isFormValid = false;
+        }
+      });
+
+      // Image validation - EXACTLY 3 images required
+      const totalImages = existingImages.length + selectedImages.length;
+      if (totalImages !== 3) {
+        $('#error-productImage').text('Exactly 3 product images are required').show();
+        isFormValid = false;
+      } else {
+        $('#error-productImage').hide();
+      }
+
+      if (!isFormValid) {
+       Swal.fire({
+          toast: true,
+          icon: 'error',
+          title: 'Validation Error',
+          text: 'you miss something',
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3500,
+          timerProgressBar: true,
+          confirmButtonColor: '#007D8B',
+          background: '#fff',
+          iconColor: '#d33',
+          customClass: {
+            popup: 'colored-toast'
+          },
+          didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+          }
+        });
         return;
       }
 
-      if (selectedImages.length === 3) {
-        selectedImages.forEach((blob, i) => {
-          formData.append('productImage', blob, `image${i}.jpg`);
-        });
-      }
+      // Prepare form data
+      const submitBtn = $('#submit-btn');
+      const submitText = $('#submit-text');
       
+      submitBtn.prop('disabled', true);
+      submitText.html('<span class="loading-spinner"></span>Updating Product...');
+
+      // Add form fields
+      formData.append('productId', $('input[name="productId"]').val());
+      formData.append('name', $('#name').val().trim());
+      formData.append('description', $('#description').val().trim());
+      formData.append('publisher', $('#publisher').val().trim());
+      formData.append('category', $('#category').val());
+      formData.append('price', $('#price').val());
+      formData.append('productOffer', $('#productOffer').val() || 0);
+      formData.append('quantity', $('#quantity').val());
+      formData.append('color', $('#color').val().trim());
+      formData.append('status', $('#status').val());
+
+      // Add existing images that weren't deleted
+      formData.append('existingImages', JSON.stringify(existingImages));
+
+      // Add new images
+      selectedImages.forEach((imageData, index) => {
+        formData.append('productImage', imageData.blob, imageData.name);
+      });
+
       const productId = $('input[name="productId"]').val();
 
       $.ajax({
         url: `/admin/product-edit/${productId}`,
-        type: "PATCH",
+        type: 'PATCH',
         data: formData,
         processData: false,
         contentType: false,
-        success: function (response) {
-          $(".error").text("");
-
-          if (response.errors) {
-            for (const field in response.errors) {
-              $(`#error-${field}`).text(response.errors[field]);
-            }
-          } else {
+        success: function(response) {
+          if (response.success) {
             Swal.fire({
               toast: true,
+              icon: 'success',
+              title: 'Product updated successfully',
               position: 'top-end',
-              icon: "success",
-              title: "Product updated",
               showConfirmButton: false,
-              timer: 2000
+              timer: 2000,
+              timerProgressBar: true,
+              background: '#fff',
+              iconColor: '#007D8B',
+              customClass: {
+                popup: 'colored-toast'
+              },
+              didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+              }
             }).then(() => {
               window.location.href = response.redirectTo;
             });
+          } else {
+            handleFormErrors(response.errors);
           }
+        },
+        error: function(xhr) {
+          console.error('Error:', xhr);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to update product. Please try again.',
+            confirmButtonColor: '#007D8B'
+          });
+        },
+        complete: function() {
+          submitBtn.prop('disabled', false);
+          submitText.text('Update Product');
         }
       });
+    });
+
+    function handleFormErrors(errors) {
+      if (errors) {
+        Object.keys(errors).forEach(field => {
+          $(`#error-${field}`).text(errors[field]).show();
+          $(`#${field}`).addClass('field-error');
+        });
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Validation Error',
+          text: 'Please fix the highlighted errors',
+          confirmButtonColor: '#007D8B'
+        });
+      }
+    }
+
+    // Initialize validation icons
+    $(document).ready(function() {
+      Object.keys(validationRules).forEach(fieldName => {
+        const value = $(`#${fieldName}`).val();
+        if (value) {
+          const validation = validateField(fieldName, value);
+          showFieldValidation(fieldName, validation);
+        }
+      });
+    });
+
+    // Close modal when clicking outside
+    $(document).on('click', function(e) {
+      if (e.target.id === 'cropModal') {
+        $('#cropCancel').click();
+      }
     });
   </script>
 </body>

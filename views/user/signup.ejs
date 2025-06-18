@@ -9,7 +9,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Google Sign-In API -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <style>
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007D8B;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         :root {
             --primary: #007D8B;
             --primary-dark: #005F66;
@@ -389,7 +405,12 @@
                         </div>
 
                         <button type="button" class="btn" id="nextBtn1">Continue to Verification</button>
+                        <div id="loading" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+
                     </div>
+                    
                 </div>
                 
                 <!-- Verification Section -->
@@ -458,36 +479,46 @@
             }
 
             // Continue to verification
-            $('#nextBtn1').click(function () {
-                const formData ={
+           $('#nextBtn1').click(function () {
+                const formData = {
                     name: $('#name').val(),
                     email: $('#email').val(),
                     phone: $('#phone').val(),
                     password: $('#password').val(),
                     confirmPassword: $('#confirmPassword').val(),
                     referralCode: $('#referralCode').val()
-                }
+                };
+
+                // Show loader and disable button
+                $('#loading').show();
+                $('#nextBtn1').prop('disabled', true).text('Sending...');
 
                 $.ajax({
-                url: '/user/signup',
-                method: 'POST',
-                contentType: 'application/json',  
-                data: JSON.stringify(formData),
-                success: function (res) {
-                    showToast('OTP sent to your email successfully!', 'success');
-                    goToStep(1);
-                },
-                error: function (xhr) {
-                    const response = xhr.responseJSON;
-                    if (response && response.errors) {
-                    const errorMessage = response.errors.general || Object.values(response.errors)[0];
-                    showToast(errorMessage, 'error');
-                    } else {
-                    showToast('An error occurred. Please try again.', 'error');
+                    url: '/user/signup',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (res) {
+                        showToast('OTP sent to your email successfully!', 'success');
+                        goToStep(1);
+                    },
+                    error: function (xhr) {
+                        const response = xhr.responseJSON;
+                        if (response && response.errors) {
+                            const errorMessage = response.errors.general || Object.values(response.errors)[0];
+                            showToast(errorMessage, 'error');
+                        } else {
+                            showToast('An error occurred. Please try again.', 'error');
+                        }
+                    },
+                    complete: function () {
+                        // Hide loader and re-enable button
+                        $('#loading').hide();
+                        $('#nextBtn1').prop('disabled', false).text('Continue to Verification');
                     }
-                }
                 });
             });
+
 
             // OTP verification
             $('#signupForm').submit(function (e) {

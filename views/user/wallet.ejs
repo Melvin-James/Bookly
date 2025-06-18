@@ -36,9 +36,6 @@
     </div>
   </div>
 
-  <!-- Quick Actions -->
-  
-
   <!-- Transaction History -->
   <div class="bg-white shadow-custom rounded-xl p-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
@@ -46,12 +43,21 @@
         <h3 class="text-xl font-bold theme mb-1">Transaction History</h3>
         <p class="text-gray-600 text-sm">Your recent wallet activities</p>
       </div>
+      
+      <!-- Pagination Info -->
+      <div class="text-sm text-gray-600" id="paginationInfo">
+        <% if (pagination.totalTransactions > 0) { %>
+          Showing <span id="currentCount"><%= walletTransactions.length %></span> of 
+          <span id="totalCount"><%= pagination.totalTransactions %></span> transactions
+        <% } %>
+      </div>
     </div>
 
     <% if (walletTransactions && walletTransactions.length > 0) { %>
-      <div class="space-y-4">
+      <!-- Transactions Container -->
+      <div class="space-y-4" id="transactionsContainer">
         <% walletTransactions.forEach((transaction, index) => { %>
-          <div class="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all-200">
+          <div class="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all-200 transaction-item">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center <%= transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100' %>">
@@ -67,8 +73,8 @@
                   </p>
                   <p class="text-xs text-gray-500 mt-1">
                     <i class="fas fa-clock mr-1"></i>
-                    <% if (transaction.createdAt) { %>
-                      <%= new Date(transaction.createdAt).toLocaleDateString('en-IN', { 
+                    <% if (transaction.createdAt || transaction.date) { %>
+                      <%= new Date(transaction.createdAt || transaction.date).toLocaleDateString('en-IN', { 
                         year: 'numeric', 
                         month: 'short', 
                         day: 'numeric',
@@ -94,15 +100,63 @@
         <% }); %>
       </div>
 
-      <!-- Pagination or Load More (if needed) -->
-      <% if (walletTransactions.length >= 10) { %>
-        <div class="text-center mt-6">
-          <button class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 transition-all-200 font-medium">
-            <i class="fas fa-chevron-down mr-2"></i>
-            Load More Transactions
+      <!-- Loading Indicator -->
+      <div id="loadingIndicator" class="text-center py-4 hidden">
+        <div class="inline-flex items-center">
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Loading transactions...
+        </div>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="mt-6" id="paginationControls">
+        <!-- Load More Button -->
+        <% if (pagination.hasMore) { %>
+          <div class="text-center">
+            <button id="loadMoreBtn" class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 transition-all-200 font-medium">
+              <i class="fas fa-chevron-down mr-2"></i>
+              Load More Transactions
+            </button>
+          </div>
+        <% } %>
+
+        <!-- Page Navigation (Alternative) -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4" id="pageNavigation" style="display: none;">
+          <div class="flex items-center gap-2">
+            <button id="prevPageBtn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            <span class="px-4 py-2 text-sm text-gray-600">
+              Page <span id="currentPageNum">1</span> of <span id="totalPagesNum"><%= pagination.totalPages %></span>
+            </span>
+            <button id="nextPageBtn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" <%= !pagination.hasMore ? 'disabled' : '' %>>
+              Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+          </div>
+          
+          <!-- Items per page -->
+          <div class="flex items-center gap-2">
+            <label for="itemsPerPage" class="text-sm text-gray-600">Show:</label>
+            <select id="itemsPerPage" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+            <span class="text-sm text-gray-600">per page</span>
+          </div>
+        </div>
+
+        <!-- Toggle View Button -->
+        <div class="text-center mt-4">
+          <button id="toggleViewBtn" class="text-primary hover:text-primary-dark text-sm font-medium">
+            <i class="fas fa-list mr-1"></i>
+            Switch to Page Navigation
           </button>
         </div>
-      <% } %>
+      </div>
 
     <% } else { %>
       <!-- Empty State -->
@@ -147,4 +201,291 @@
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   }
+  
+  .transaction-item {
+    animation: fadeInUp 0.3s ease-out;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
+
+<script>
+// Pagination state
+let currentPage = '<%= pagination.currentPage %>';
+let totalPages = '<%= pagination.totalPages %>';
+let totalTransactions = '<%= pagination.totalTransactions %>';
+let itemsPerPage = '<%= pagination.limit %>';
+let isLoadMoreMode = true;
+let isLoading = false;
+
+// DOM elements
+const transactionsContainer = document.getElementById('transactionsContainer');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const loadingIndicator = document.getElementById('loadingIndicator');
+const paginationInfo = document.getElementById('paginationInfo');
+const pageNavigation = document.getElementById('pageNavigation');
+const toggleViewBtn = document.getElementById('toggleViewBtn');
+const prevPageBtn = document.getElementById('prevPageBtn');
+const nextPageBtn = document.getElementById('nextPageBtn');
+const currentPageNum = document.getElementById('currentPageNum');
+const totalPagesNum = document.getElementById('totalPagesNum');
+const currentCount = document.getElementById('currentCount');
+const totalCount = document.getElementById('totalCount');
+const itemsPerPageSelect = document.getElementById('itemsPerPage');
+
+// Load more transactions
+async function loadMoreTransactions() {
+  if (isLoading) return;
+  
+  isLoading = true;
+  loadingIndicator.classList.remove('hidden');
+  loadMoreBtn.disabled = true;
+  
+  try {
+    const response = await fetch(`/user/wallet/transactions?page=${currentPage + 1}&limit=${itemsPerPage}`);
+    const data = await response.json();
+    
+    if (data.success && data.transactions.length > 0) {
+      // Append new transactions
+      data.transactions.forEach(transaction => {
+        const transactionElement = createTransactionElement(transaction);
+        transactionsContainer.appendChild(transactionElement);
+      });
+      
+      currentPage = data.pagination.currentPage;
+      
+      // Update pagination info
+      const currentTransactionCount = transactionsContainer.children.length;
+      currentCount.textContent = currentTransactionCount;
+      
+      // Hide load more button if no more transactions
+      if (!data.pagination.hasMore) {
+        loadMoreBtn.style.display = 'none';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading transactions:', error);
+    showToast('error', 'Failed to load more transactions');
+  } finally {
+    isLoading = false;
+    loadingIndicator.classList.add('hidden');
+    loadMoreBtn.disabled = false;
+  }
+}
+
+// Load specific page (for page navigation mode)
+async function loadPage(page) {
+  if (isLoading || page < 1 || page > totalPages) return;
+  
+  isLoading = true;
+  loadingIndicator.classList.remove('hidden');
+  
+  try {
+    const response = await fetch(`/user/wallet/transactions?page=${page}&limit=${itemsPerPage}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      // Replace all transactions
+      transactionsContainer.innerHTML = '';
+      data.transactions.forEach(transaction => {
+        const transactionElement = createTransactionElement(transaction);
+        transactionsContainer.appendChild(transactionElement);
+      });
+      
+      currentPage = data.pagination.currentPage;
+      totalPages = data.pagination.totalPages;
+      
+      // Update pagination controls
+      updatePaginationControls();
+      
+      // Update pagination info
+      currentCount.textContent = data.transactions.length;
+    }
+  } catch (error) {
+    console.error('Error loading page:', error);
+    showToast('error', 'Failed to load transactions');
+  } finally {
+    isLoading = false;
+    loadingIndicator.classList.add('hidden');
+  }
+}
+
+// Create transaction element
+function createTransactionElement(transaction) {
+  const div = document.createElement('div');
+  div.className = 'border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all-200 transaction-item';
+  
+  const transactionDate = transaction.createdAt || transaction.date;
+  const formattedDate = transactionDate ? 
+    new Date(transactionDate).toLocaleDateString('en-IN', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }) : 'Recent transaction';
+  
+  div.innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center ${transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'}">
+          <i class="fas ${transaction.type === 'credit' ? 'fa-arrow-down text-green-600' : 'fa-arrow-up text-red-600'} text-lg"></i>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-800">
+            ${transaction.type === 'credit' ? 'Money Added' : 'Payment Made'}
+          </h4>
+          <p class="text-sm text-gray-600">
+            ${transaction.type === 'credit' ? 'Refund from Order' : 'Payment for Order'} 
+            <span class="font-medium">#${transaction.orderId}</span>
+          </p>
+          <p class="text-xs text-gray-500 mt-1">
+            <i class="fas fa-clock mr-1"></i>
+            ${formattedDate}
+          </p>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="text-lg font-bold ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}">
+          ${transaction.type === 'credit' ? '+' : '-'}₹${transaction.amount.toFixed(2)}
+        </p>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.type === 'credit' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+          ${transaction.type === 'credit' ? 'Credit' : 'Debit'}
+        </span>
+      </div>
+    </div>
+  `;
+  
+  return div;
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+  currentPageNum.textContent = currentPage;
+  totalPagesNum.textContent = totalPages;
+  
+  prevPageBtn.disabled = currentPage <= 1;
+  nextPageBtn.disabled = currentPage >= totalPages;
+}
+
+// Toggle between load more and page navigation
+function togglePaginationMode() {
+  isLoadMoreMode = !isLoadMoreMode;
+  
+  if (isLoadMoreMode) {
+    // Switch to load more mode
+    pageNavigation.style.display = 'none';
+    if (currentPage < totalPages) {
+      loadMoreBtn.style.display = 'block';
+    }
+    toggleViewBtn.innerHTML = '<i class="fas fa-list mr-1"></i>Switch to Page Navigation';
+    
+    // Reload all transactions up to current page
+    loadAllTransactionsUpToPage(currentPage);
+  } else {
+    // Switch to page navigation mode
+    loadMoreBtn.style.display = 'none';
+    pageNavigation.style.display = 'flex';
+    toggleViewBtn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Switch to Load More';
+    
+    // Load only current page
+    loadPage(1);
+    currentPage = 1;
+  }
+}
+
+// Load all transactions up to a specific page (for load more mode)
+async function loadAllTransactionsUpToPage(page) {
+  if (isLoading) return;
+  
+  isLoading = true;
+  loadingIndicator.classList.remove('hidden');
+  
+  try {
+    const response = await fetch(`/user/wallet/transactions?page=1&limit=${page * itemsPerPage}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      transactionsContainer.innerHTML = '';
+      data.transactions.forEach(transaction => {
+        const transactionElement = createTransactionElement(transaction);
+        transactionsContainer.appendChild(transactionElement);
+      });
+      
+      currentCount.textContent = data.transactions.length;
+      
+      if (!data.pagination.hasMore) {
+        loadMoreBtn.style.display = 'none';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading transactions:', error);
+    showToast('error', 'Failed to load transactions');
+  } finally {
+    isLoading = false;
+    loadingIndicator.classList.add('hidden');
+  }
+}
+
+// Change items per page
+async function changeItemsPerPage(newLimit) {
+  itemsPerPage = parseInt(newLimit);
+  totalPages = Math.ceil(totalTransactions / itemsPerPage);
+  
+  if (isLoadMoreMode) {
+    // Reload with new limit
+    currentPage = 1;
+    loadAllTransactionsUpToPage(1);
+  } else {
+    // Load first page with new limit
+    currentPage = 1;
+    loadPage(1);
+  }
+}
+
+// Toast notification function
+function showToast(type, message) {
+  // Simple toast implementation - you can replace with your preferred toast library
+  const toast = document.createElement('div');
+  toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// Event listeners
+if (loadMoreBtn) {
+  loadMoreBtn.addEventListener('click', loadMoreTransactions);
+}
+
+if (toggleViewBtn) {
+  toggleViewBtn.addEventListener('click', togglePaginationMode);
+}
+
+if (prevPageBtn) {
+  prevPageBtn.addEventListener('click', () => loadPage(currentPage - 1));
+}
+
+if (nextPageBtn) {
+  nextPageBtn.addEventListener('click', () => loadPage(currentPage + 1));
+}
+
+if (itemsPerPageSelect) {
+  itemsPerPageSelect.addEventListener('change', (e) => changeItemsPerPage(e.target.value));
+}
+
+// Initialize pagination controls
+updatePaginationControls();
+</script>

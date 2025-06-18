@@ -74,6 +74,31 @@
               <p class="text-sm font-medium text-gray-500">Order Date</p>
               <p class="text-sm text-gray-900"><%= new Date(order.createdAt).toLocaleDateString() %></p>
             </div>
+              <% 
+                  let originalTotal = 0;
+                  let discountedTotal = 0;
+
+                  order.items.forEach(item => {
+                    originalTotal += item.originalPrice * item.quantity;
+                    discountedTotal += item.discountedPrice * item.quantity;
+                  });
+
+                  let offerDiscount = originalTotal - discountedTotal;
+                  let couponDiscount = order.discountAmount - offerDiscount;
+                %>
+               <% if (order.couponApplied) { %>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Coupon Discount</span>
+                  <span class="font-medium text-green-600">-₹<%=couponDiscount.toFixed(2) %></span>
+                </div>
+              <% } %>
+              
+              <% if (order.productDiscount && order.productDiscount > 0) { %>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Offer Discount</span>
+                  <span class="font-medium text-green-600">-₹<%= order.productDiscount.toFixed(2) %></span>
+                </div>
+              <% } %>
           </div>
         </div>
       </div>
@@ -110,38 +135,70 @@
           </div>
         </div>
       </div>
-
       <!-- Products Card -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <i class="ri-shopping-bag-line text-primary"></i>
-            Order Items
-          </h3>
-        </div>
-        <div class="p-6">
-          <div class="space-y-4">
-            <% order.items.forEach(item => { %>
-              <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <div class="flex-shrink-0">
-                  <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
-                       class="w-16 h-16 object-cover rounded-lg shadow-sm" 
-                       alt="<%= item.product.name %>">
+      <%
+      const discountTotal = order.items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
+      
+      const couponAdjustedPrices = {};
+      order.items.forEach(item => {
+        const itemId = item._id;
+        const itemTotal = item.discountedPrice * item.quantity;
+        const couponShare = (itemTotal / discountTotal) * couponDiscount;
+        const finalPrice = itemTotal - couponShare;
+        couponAdjustedPrices[itemId] = finalPrice.toFixed(2);
+      });
+    %>
+    <div class="bg-white shadow-custom rounded-lg overflow-hidden md:col-span-2">
+      <div class="p-5 border-b border-gray-100">
+        <h3 class="text-md font-semibold text-gray-900 flex items-center">
+          <i class="fas fa-shopping-bag text-primary mr-2"></i>
+          Ordered Items (<%= order.items.length %>)
+        </h3>
+      </div>
+      <div class="divide-y divide-gray-100">
+        <% order.items.forEach(item => { %>
+          <div class="p-5 flex flex-col sm:flex-row">
+            <div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-4">
+              <img
+                src="/uploads/product-images/<%= item.product.productImage[0] %>"
+                class="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                alt="<%= item.product.name %>"
+              />
+            </div>
+            <div class="flex-grow">
+              <h4 class="font-medium text-gray-900 mb-1"><%= item.product.name %></h4>
+              <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div>
+                  Quantity: <span class="font-medium"><%= item.quantity %></span>
+                  <p class="text-xs text-gray-400">Unit Price: ₹<%= item.product.discountedPrice.toFixed(2) %></p>
                 </div>
-                <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-medium text-gray-900 truncate"><%= item.product.name %></h4>
-                  <p class="text-sm text-gray-500">Quantity: <%= item.quantity %></p>
-                  <p class="text-xs text-gray-400">Unit Price: ₹<%= item.product.price.toFixed(2) %></p>
-                </div>
-                <div class="text-right">
-                  <p class="text-sm font-semibold text-gray-900">₹<%= (item.product.price * item.quantity).toFixed(2) %></p>
-                  <p class="text-xs text-gray-500">Total</p>
+                <div>
+                  Price: 
+                  <span class="font-medium">₹<%= couponAdjustedPrices[item._id] %></span>
                 </div>
               </div>
-            <% }) %>
+                <div class="mt-3 text-sm">
+                  <%
+                    const itemStatusColors = {
+                      'Placed': 'text-yellow-600',
+                      'Shipped': 'text-blue-600',
+                      'Out for Delivery': 'text-indigo-600',
+                      'Delivered': 'text-green-600',
+                      'Cancelled': 'text-red-600',
+                      'Returned': 'text-orange-600'
+                    };
+                    const itemStatusClass = itemStatusColors[item.status] || 'text-gray-600';
+                  %>
+                  <span class="<%= itemStatusClass %> font-medium">
+                    <i class="fas fa-circle text-xs mr-1"></i>
+                    <%= item.status %>
+                  </span>
+                </div>
+            </div>
           </div>
-        </div>
+        <% }) %>
       </div>
+    </div>
 
       <!-- Status Update Card -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

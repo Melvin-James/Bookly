@@ -13,7 +13,7 @@
       <div class="bg-white p-6 rounded-lg shadow">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-xl font-semibold">Select Delivery Address</h2>
-          <a href="/user/profile/addresses/add" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+          <a href="/user/checkout/addAddress" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
             + Add Address
           </a>
         </div>
@@ -187,7 +187,7 @@
         confirmButtonColor: '#007D8B',
       });
       document.getElementById('discountSection').style.display = 'flex';
-      document.getElementById('discountAmount').innerText = `- ₹${data.discount.toFixed(2)}`;
+      document.getElementById('discountAmount').innerText = `- ₹${data.couponDiscount.toFixed(2)}`;
       document.getElementById('totalPayable').innerText = `₹${data.finalTotal.toFixed(2)}`;
       document.getElementById('applyCouponBtn').classList.add('hidden');
       document.getElementById('removeCouponBtn').classList.remove('hidden');

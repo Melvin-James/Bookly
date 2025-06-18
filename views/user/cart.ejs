@@ -1,165 +1,466 @@
 <%- include("../partials/userHead") %>
 
 <div class="max-w-6xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-6 theme">My Cart</h1>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold theme">My Cart</h1>
+    <div class="text-sm text-gray-600">
+      <span id="cart-item-count"><%= cartItems.length %></span> item(s) in cart
+    </div>
+  </div>
 
-  <% if (cartItems.length > 0) { %>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Cart Items -->
-      <div class="lg:col-span-2 space-y-6">
-        <% cartItems.forEach(item => { %>
-          <div class="cart-item flex flex-col sm:flex-row items-center gap-4 bg-white shadow rounded-lg p-4" data-product-id="<%= item.product._id %>">
-            <!-- Image -->
-            <div class="w-24 h-24 flex-shrink-0">
-              <img src="/uploads/product-images/<%= item.product.productImage[0] %>" alt="<%= item.product.name %>" class="w-full h-full object-cover rounded-md">
-            </div>
-
-            <!-- Info -->
-            <div class="flex-1">
-              <h2 class="text-lg font-semibold"><%= item.product.name %></h2>
+  <div id="cart-content">
+    <% if (cartItems.length > 0) { %>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items -->
+        <div class="lg:col-span-2 space-y-6" id="cart-items-container">
+          <% cartItems.forEach(item => { %>
+            <div class="cart-item flex flex-col sm:flex-row items-center gap-4 bg-white shadow-lg rounded-xl p-6 transition-all duration-300 hover:shadow-xl border border-gray-100" 
+                 data-product-id="<%= item.product._id %>" 
+                 data-price="<%= item.product.discountedPrice %>"
+                 data-original-price="<%= item.product.price %>">
               
-                <div class="flex items-center space-x-3 mb-4">
+              <!-- Image -->
+              <div class="w-28 h-28 flex-shrink-0 rounded-lg overflow-hidden shadow-md">
+                <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                     alt="<%= item.product.name %>" 
+                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2 truncate"><%= item.product.name %></h2>
+                
+                <div class="flex items-center space-x-3 mb-3">
                   <span class="text-sm text-gray-400 line-through">₹<%= item.product.price.toFixed(2) %></span>
-                  <span class="text-sm text-primary font-bold">₹<%= item.product.discountedPrice %></span>
-                  <span class="text-sm text-green-500">Save <%= item.product.appliedOffer %>%</span>
-                </div>           
-              <p class="text-gray-500 text-xs mt-1"><%= item.product.description %></p>
+                  <span class="text-lg text-primary font-bold">₹<%= item.product.discountedPrice %></span>
+                  <span class="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full font-medium">
+                    Save <%= item.product.appliedOffer %>%
+                  </span>
+                </div>
+                
+                <p class="text-gray-500 text-sm line-clamp-2"><%= item.product.description %></p>
+                
+                <!-- Item Total -->
+                <div class="mt-3">
+                  <span class="text-sm text-gray-600">Subtotal: </span>
+                  <span class="font-semibold text-gray-900 item-subtotal" data-product-id="<%= item.product._id %>">
+                    ₹<%= (item.product.discountedPrice * item.quantity).toFixed(2) %>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Quantity Controls -->
+              <div class="flex flex-col items-center gap-4">
+                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-2">
+                  <button class="qty-btn w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                          data-action="decrease"
+                          data-product-id="<%= item.product._id %>"
+                          <%= item.quantity <= 1 ? 'disabled' : '' %>>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                    </svg>
+                  </button>
+
+                  <span class="quantity px-4 py-2 bg-white border border-gray-300 rounded-lg text-center font-semibold min-w-[60px]"
+                        data-product-id="<%= item.product._id %>"><%= item.quantity %></span>
+
+                  <button class="qty-btn w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                          data-action="increase"
+                          data-product-id="<%= item.product._id %>">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Remove Button -->
+                <button class="remove-btn text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-all duration-200"
+                        data-product-id="<%= item.product._id %>"
+                        title="Remove from cart">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
             </div>
+          <% }) %>
+        </div>
 
-            <!-- Quantity Controls -->
-            <div class="flex items-center gap-2">
-              <button class="qty-btn bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition"
-                      data-action="decrease"
-                      data-product-id="<%= item.product._id %>">−</button>
+        <!-- Cart Summary -->
+        <div class="bg-white shadow-lg rounded-xl p-6 h-fit sticky top-4 border border-gray-100" id="cart-summary">
+          <h3 class="text-xl font-semibold mb-6 text-gray-900 border-b border-gray-200 pb-3">Order Summary</h3>
+          
+          <!-- Items List -->
+          <div class="space-y-3 mb-6" id="summary-items">
+            <% cartItems.forEach(item => { %>
+              <div class="flex justify-between text-sm text-gray-700 summary-item" data-product-id="<%= item.product._id %>">
+                <span class="truncate mr-2">
+                  <span class="item-name"><%= item.product.name %></span> × 
+                  <span class="item-qty"><%= item.quantity %></span>
+                </span>
+                <span class="font-medium item-total">₹<%= (item.product.discountedPrice * item.quantity).toFixed(2) %></span>
+              </div>
+            <% }) %>
+          </div>
 
-              <span class="quantity px-3 py-1 border rounded text-sm"
-                    data-product-id="<%= item.product._id %>"><%= item.quantity %></span>
+          <hr class="my-4 border-gray-200" />
 
-              <button class="qty-btn bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition"
-                      data-action="increase"
-                      data-product-id="<%= item.product._id %>">+</button>
+          <!-- Totals -->
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm text-gray-600">
+              <span>Original Total:</span>
+              <span id="original-total">₹<%= (cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)).toFixed(2) %></span>
             </div>
-
-            <!-- Remove Button -->
-            <button class="remove-btn text-red-500 hover:text-red-700 transition"
-                    data-product-id="<%= item.product._id %>">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
+            
+            <div class="flex justify-between text-sm text-green-600 font-medium">
+              <span>You Saved:</span>
+              <span id="total-savings">₹<%= cartSavings.toFixed(2) %></span>
+            </div>
+            
+            <hr class="border-gray-200" />
+            
+            <div class="flex justify-between text-xl font-bold text-gray-900">
+              <span>Total:</span>
+              <span id="cart-total">₹<%= cartTotalDiscounted.toFixed(2) %></span>
+            </div>
           </div>
-        <% }) %>
-      </div>
 
-      <!-- Cart Summary -->
-      <div class="bg-white shadow rounded-lg p-6">
-        <h3 class="text-xl font-semibold mb-4">Order Summary</h3>
-        <% cartItems.forEach(item => { 
-          const offer = item.product.productOffer || 0;
-          const discounted = item.product.price * (1 - offer / 100);
-        %>
-          <div class="flex justify-between text-sm text-gray-700 mb-2">
-            <span><%= item.product.name %> x <%= item.quantity %></span>
-            ₹<%= (item.product.discountedPrice * item.quantity).toFixed(2) %>
+          <!-- Checkout Button -->
+          <div class="mt-8">
+            <a href="/user/checkout" 
+               class="w-full inline-block bg-primary text-white text-center py-3 rounded-lg hover:bg-primary-dark transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+               id="checkout-btn">
+              Proceed to Checkout
+            </a>
           </div>
-        <% }) %>
 
-        <hr class="my-4" />
-
-        <div class="flex justify-between text-lg font-semibold">
-          <span>Total:</span>
-          <span>₹ <%= cartTotalDiscounted.toFixed(2) %></span>
-        </div>
-        <br>
-        <div class="flex justify-between text-sm text-green-600 font-medium">
-          <span>You Saved:</span>
-          <span>₹ <%= cartSavings.toFixed(2) %></span>
-        </div>
-
-
-        <div class="mt-6">
-          <a href="/user/checkout" class="w-full inline-block bg-primary text-white text-center py-2 rounded-md hover:bg-primary-dark transition">
-            Proceed to Checkout
-          </a>
+          <!-- Continue Shopping -->
+          <div class="mt-4">
+            <a href="/user/shop" 
+               class="w-full inline-block border-2 border-gray-300 text-gray-700 text-center py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium">
+              Continue Shopping
+            </a>
+          </div>
         </div>
       </div>
+    <% } else { %>
+      <div class="text-center py-20" id="empty-cart">
+        <div class="w-32 h-32 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+          <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0h15M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"/>
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-700 mb-4">Your cart is empty</h2>
+        <p class="text-gray-500 mb-8 max-w-md mx-auto">Looks like you haven't added any items to your cart yet. Start shopping to fill it up!</p>
+        <a href="/user/shop" 
+           class="inline-flex items-center bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-dark transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+          Start Shopping
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
+      <svg class="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-gray-700 font-medium">Updating cart...</span>
     </div>
-  <% } else { %>
-    <div class="text-center py-16">
-      <h2 class="text-2xl font-bold text-gray-700 mb-4">Your cart is empty 🛒</h2>
-      <a href="/user/shop" class="bg-primary text-white px-5 py-2 rounded hover:bg-primary-dark transition">
-        Continue Shopping
-      </a>
-    </div>
-  <% } %>
+  </div>
 </div>
 
 <%- include("../partials/userFooter") %>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .cart-item {
+    animation: slideInUp 0.3s ease-out;
+  }
+  
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+</style>
+
 <script>
-  document.querySelectorAll('.qty-btn').forEach(button => {
-    button.addEventListener('click', async () => {
-      const productId = button.dataset.productId;
-      const action = button.dataset.action;
+  // Cart management state
+  let isUpdating = false;
 
-      try {
-        const res = await fetch(`/user/cart/update/${productId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action })
-        });
+  // Utility functions
+  function showLoading() {
+    document.getElementById('loading-overlay').classList.remove('hidden');
+  }
 
-        const result = await res.json();
+  function hideLoading() {
+    document.getElementById('loading-overlay').classList.add('hidden');
+  }
 
-        if (result.limitReached) {
-          Swal.fire({
-            toast: true,
-            icon: 'info',
-            title: 'Maximum quantity of 10 reached',
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000
-          });
-        } else if (result.success) {
-          document.querySelector(`.quantity[data-product-id="${productId}"]`).textContent = result.newQuantity;
-          location.reload(); // Or update totals dynamically
-        }
-      } catch (err) {
-        console.error(err);
+  function showToast(icon, title, text = '') {
+    Swal.fire({
+      toast: true,
+      icon: icon,
+      title: title,
+      text: text,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
       }
     });
-  });
+  }
 
-  document.querySelectorAll('.remove-btn').forEach(button => {
-    button.addEventListener('click', async () => {
-      const productId = button.dataset.productId;
+  // Update cart totals and summary
+  function updateCartSummary() {
+    const cartItems = document.querySelectorAll('.cart-item');
+    let originalTotal = 0;
+    let discountedTotal = 0;
+    let totalItems = 0;
 
-      try {
-        const res = await fetch(`/user/cart/remove/${productId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
+    // Clear existing summary items
+    const summaryContainer = document.getElementById('summary-items');
+    summaryContainer.innerHTML = '';
 
-        const result = await res.json();
+    cartItems.forEach(item => {
+      const productId = item.dataset.productId;
+      const price = parseFloat(item.dataset.price);
+      const originalPrice = parseFloat(item.dataset.originalPrice);
+      const quantity = parseInt(document.querySelector(`.quantity[data-product-id="${productId}"]`).textContent);
+      const productName = item.querySelector('h2').textContent.trim();
 
-        if (result.success) {
-          Swal.fire({
-            toast: true,
-            icon: 'success',
-            title: 'Item removed',
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 1500
-          });
+      const itemTotal = price * quantity;
+      const itemOriginalTotal = originalPrice * quantity;
 
-          document.querySelector(`.cart-item[data-product-id="${productId}"]`).remove();
-          location.reload(); 
-        }
-      } catch (err) {
-        console.error(err);
+      originalTotal += itemOriginalTotal;
+      discountedTotal += itemTotal;
+      totalItems += quantity;
+
+      // Update item subtotal
+      const subtotalElement = document.querySelector(`.item-subtotal[data-product-id="${productId}"]`);
+      if (subtotalElement) {
+        subtotalElement.textContent = `₹${itemTotal.toFixed(2)}`;
       }
+
+      // Add to summary
+      const summaryItem = document.createElement('div');
+      summaryItem.className = 'flex justify-between text-sm text-gray-700 summary-item';
+      summaryItem.dataset.productId = productId;
+      summaryItem.innerHTML = `
+        <span class="truncate mr-2">
+          <span class="item-name">${productName}</span> × 
+          <span class="item-qty">${quantity}</span>
+        </span>
+        <span class="font-medium item-total">₹${itemTotal.toFixed(2)}</span>
+      `;
+      summaryContainer.appendChild(summaryItem);
+    });
+
+    const savings = originalTotal - discountedTotal;
+
+    // Update totals
+    document.getElementById('original-total').textContent = `₹${originalTotal.toFixed(2)}`;
+    document.getElementById('total-savings').textContent = `₹${savings.toFixed(2)}`;
+    document.getElementById('cart-total').textContent = `₹${discountedTotal.toFixed(2)}`;
+    document.getElementById('cart-item-count').textContent = totalItems;
+
+    // Update checkout button state
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (cartItems.length === 0) {
+      checkoutBtn.style.display = 'none';
+    } else {
+      checkoutBtn.style.display = 'block';
+    }
+  }
+
+  // Update quantity buttons state
+  function updateQuantityButtons(productId, quantity) {
+    const decreaseBtn = document.querySelector(`.qty-btn[data-action="decrease"][data-product-id="${productId}"]`);
+    const increaseBtn = document.querySelector(`.qty-btn[data-action="increase"][data-product-id="${productId}"]`);
+    
+    if (decreaseBtn) {
+      decreaseBtn.disabled = quantity <= 1;
+    }
+  }
+
+  // Handle quantity update
+  async function updateQuantity(productId, action) {
+    if (isUpdating) return;
+    
+    isUpdating = true;
+    // showLoading();
+
+    try {
+      const response = await fetch(`/user/cart/update/${productId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+
+      const result = await response.json();
+
+      if (result.limitReached) {
+        showToast('warning', 'Stock Limit Reached', 'Cannot add more items than available in stock');
+      } else if (result.success) {
+        // Update quantity display
+        const quantityElement = document.querySelector(`.quantity[data-product-id="${productId}"]`);
+        quantityElement.textContent = result.newQuantity;
+        
+        // Update button states
+        updateQuantityButtons(productId, result.newQuantity);
+        
+        // Update cart summary
+        updateCartSummary();
+        
+      } else {
+        showToast('error', 'Update Failed', result.message || 'Failed to update quantity');
+      }
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      showToast('error', 'Network Error', 'Please check your connection and try again');
+    } finally {
+      isUpdating = false;
+      hideLoading();
+    }
+  }
+
+  // Handle item removal
+  async function removeItem(productId) {
+    const result = await Swal.fire({
+      title: 'Remove Item?',
+      text: 'Are you sure you want to remove this item from your cart?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, remove it',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) return;
+
+    // showLoading();
+
+    try {
+      const response = await fetch(`/user/cart/remove/${productId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Animate item removal
+        const cartItem = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
+        cartItem.classList.add('fade-out');
+        
+        setTimeout(() => {
+          cartItem.remove();
+          updateCartSummary();
+          
+          // Check if cart is empty
+          const remainingItems = document.querySelectorAll('.cart-item');
+          if (remainingItems.length === 0) {
+            showEmptyCart();
+          }
+        }, 300);
+
+        showToast('success', 'Item Removed', 'Item has been removed from your cart');
+      } else {
+        showToast('error', 'Removal Failed', result.message || 'Failed to remove item');
+      }
+    } catch (error) {
+      console.error('Error removing item:', error);
+      showToast('error', 'Network Error', 'Please check your connection and try again');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Show empty cart state
+  function showEmptyCart() {
+    const cartContent = document.getElementById('cart-content');
+    cartContent.innerHTML = `
+      <div class="text-center py-20" id="empty-cart">
+        <div class="w-32 h-32 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+          <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0h15M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"/>
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-700 mb-4">Your cart is empty</h2>
+        <p class="text-gray-500 mb-8 max-w-md mx-auto">Looks like you haven't added any items to your cart yet. Start shopping to fill it up!</p>
+        <a href="/user/shop" 
+           class="inline-flex items-center bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-dark transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+          Start Shopping
+        </a>
+      </div>
+    `;
+    
+    // Update cart count
+    document.getElementById('cart-item-count').textContent = '0';
+  }
+
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    // Quantity buttons
+    document.querySelectorAll('.qty-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const productId = this.dataset.productId;
+        const action = this.dataset.action;
+        updateQuantity(productId, action);
+      });
+    });
+
+    document.querySelectorAll('.remove-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const productId = this.dataset.productId;
+        removeItem(productId);
+      });
+    });
+
+    document.querySelectorAll('.cart-item').forEach(item => {
+      const productId = item.dataset.productId;
+      const quantity = parseInt(document.querySelector(`.quantity[data-product-id="${productId}"]`).textContent);
+      updateQuantityButtons(productId, quantity);
     });
   });
 </script>

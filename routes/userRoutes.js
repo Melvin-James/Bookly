@@ -66,6 +66,8 @@ router.post('/cart/remove/:productId',userAuth,cartControllers.removeFromCart);
 router.get('/itemsInCartcount',cartControllers.getItemsInCartCount);
 
 router.get('/checkout',userAuth,checkOutControllers.getCheckoutPage);
+router.get('/checkout/addAddress',userAuth,checkOutControllers.getaddAddress);
+router.post('/checkout/addAddress',userAuth,checkOutControllers.postaddAddress);
 router.post('/place-order',userAuth,checkOutControllers.placeOrder);
 router.post('/create-order', userAuth, checkOutControllers.createRazorpayOrder);
 router.get('/order-success',userAuth,checkOutControllers.getOrderSuccessPage);
@@ -78,6 +80,8 @@ router.post('/wishlist/move-to-cart/:productId', wishlistControllers.moveToCart)
 router.post('/apply-coupon',userAuth,couponControllers.applyCoupon);
 router.post('/remove-coupon',userAuth,couponControllers.removeCoupon);
 
-router.get('/wallet', userAuth,walletControllers.getWalletPage);
+router.get('/wallet', userAuth, walletControllers.getWalletPage);
+router.get('/wallet/transactions', userAuth, walletControllers.getWalletTransactions);
+
 
 module.exports = router;

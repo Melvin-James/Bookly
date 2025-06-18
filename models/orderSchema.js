@@ -61,6 +61,14 @@ const orderSchema = new mongoose.Schema({
   },
   isReturnApproved: { type: Boolean, default: false },
   couponApplied:{type:String},
+  couponDiscount: {
+    type: Number,
+    default: 0
+  },
+  productDiscount: {
+    type: Number,
+    default: 0
+  },
   discountAmount:{type:Number, default:0},
 }, { timestamps: true });
 

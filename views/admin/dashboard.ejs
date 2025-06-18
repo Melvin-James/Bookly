@@ -123,8 +123,8 @@
           <p class="text-gray-600 text-sm lg:text-base">Track your sales performance over time</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button class="chart-filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="7">7 Days</button>
-          <button class="chart-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="30">30 Days</button>
+          <button class="chart-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="7">7 Days</button>
+          <button class="chart-filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="30">30 Days</button>
           <button class="chart-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="90">3 Months</button>
           <button class="chart-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-period="365">1 Year</button>
         </div>
@@ -589,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadTopPublishers() {
     fetch('/admin/top-publishers')
       .then(response => response.json())
-      .then(data => renderTopItems('topPublishers', data, 'publisher'))
+      .then(data => renderTopPublishers('topPublishers', data, 'publisher'))
       .catch(console.error);
   }
 
@@ -627,6 +627,44 @@ document.addEventListener('DOMContentLoaded', function () {
       container.appendChild(itemElement);
     });
   }
+
+  function renderTopPublishers(containerId, data, type) {
+  const container = document.getElementById(containerId);
+  const publishers = data.publishers;
+
+  if (!publishers || publishers.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8">
+        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+          <i class="ri-inbox-line text-gray-400 text-xl"></i>
+        </div>
+        <p class="text-gray-500 text-sm">No publishers found</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = '';
+  publishers.forEach((publisher, index) => {
+    const item = document.createElement('div');
+    item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+
+    item.innerHTML = `
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-primary/10 text-primary text-sm font-bold rounded-lg flex items-center justify-center">
+          ${index + 1}
+        </div>
+        <div class="space-y-1">
+          <p class="font-medium text-gray-900 text-sm">${publisher._id}</p>
+          <p class="text-xs text-gray-500">${publisher.totalSold} books sold</p>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(item);
+  });
+}
+
 
   // Initial chart load
   updateSalesChart('30');

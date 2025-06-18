@@ -89,7 +89,7 @@ const createCoupon = async (req,res,next)=>{
         });
 
         await coupon.save();
-        res.redirect('/admin/coupons?created=true');
+        return res.status(200).json({ success: true });
     }catch(err){
         next(err);
     }

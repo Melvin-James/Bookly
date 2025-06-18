@@ -61,48 +61,107 @@ const addToCart = async (req, res, next) => {
     
 const updateCartQuantity = async (req, res, next) => {
     try {
-      const userId = req.session.user._id;
-      const productId = req.params.productId;
-      const { action } = req.body;
-  
-      const product = await Product.findById(productId);
-      if (!product || product.status !== 'Available' || product.quantity < 1) {
-        return res.status(400).json({ success: false, message: 'Product not available' });
-      }
-  
-      const user = await User.findById(userId);
-      const item = user.cart.find(item => item.product.toString() === productId);
-      if (!item) return res.status(404).json({ success: false });
-  
-      if (action === 'increase') {
-        if (item.quantity < 10) {
-          item.quantity += 1;
-        } else {
-          return res.json({ success: false, limitReached: true });
+        const userId = req.session.user._id;
+        const productId = req.params.productId;
+        const { action } = req.body;
+
+        // Validate product
+        const product = await Product.findById(productId);
+        if (!product || product.status !== 'Available' || product.quantity < 1) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Product not available or out of stock' 
+            });
         }
-      } else if (action === 'decrease' && item.quantity > 1) {
-        item.quantity -= 1;
-      }
-  
-      await user.save();
-      res.json({ success: true, newQuantity: item.quantity });
+
+        // Find user and cart item
+        const user = await User.findById(userId);
+        const item = user.cart.find(item => item.product.toString() === productId);
+        
+        if (!item) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Item not found in cart' 
+            });
+        }
+
+        // Update quantity based on action
+        if (action === 'increase') {
+            if (item.quantity < product.quantity) {
+                item.quantity += 1;
+            } else {
+                return res.json({ 
+                    success: false, 
+                    limitReached: true,
+                    message: 'Cannot add more items than available in stock',
+                    maxQuantity: product.quantity
+                });
+            }
+        } else if (action === 'decrease') {
+            if (item.quantity > 1) {
+                item.quantity -= 1;
+            } else {
+                return res.json({ 
+                    success: false, 
+                    message: 'Minimum quantity is 1. Use remove button to delete item.' 
+                });
+            }
+        } else {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid action. Use "increase" or "decrease"' 
+            });
+        }
+
+        await user.save();
+        
+        res.json({ 
+            success: true, 
+            newQuantity: item.quantity,
+            message: 'Cart updated successfully'
+        });
+        
     } catch (error) {
-      next(err);
+        console.error('Error updating cart quantity:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error while updating cart' 
+        });
     }
 };
-  
+
 const removeFromCart = async (req, res, next) => {
     try {
         const userId = req.session.user._id;
         const productId = req.params.productId;
 
+        // Verify item exists in cart before removal
+        const user = await User.findById(userId);
+        const itemExists = user.cart.some(item => item.product.toString() === productId);
+        
+        if (!itemExists) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Item not found in cart' 
+            });
+        }
+
+        // Remove item from cart
         await User.findByIdAndUpdate(userId, {
-        $pull: { cart: { product: productId } }
+            $pull: { cart: { product: productId } }
         });
 
-        res.json({ success: true });
+        res.json({ 
+            success: true,
+            message: 'Item removed from cart successfully'
+        });
+        
     } catch (error) {
-        next(err);
+        console.error('Error removing from cart:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error while removing item from cart' 
+        });
     }
 };
   

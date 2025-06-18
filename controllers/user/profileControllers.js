@@ -160,7 +160,7 @@ const postAddAddress = async(req,res,next)=>{
     }
 
     res.redirect('/user/profile/addresses');
-}catch(error){
+}catch(err){
     next(err);
 }
 };
@@ -468,7 +468,10 @@ const cancelOrder = async (req, res,next) => {
       let refundAmount = 0;
       for (const item of order.items) {
         if (item.status !== 'Cancelled') {
-          refundAmount += item.discountedPrice * item.quantity;
+          let discountTotal = order.items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
+          let itemTotal = item.discountedPrice * item.quantity;
+          let couponShare = (itemTotal / discountTotal) * order.couponDiscount;
+          refundAmount += (itemTotal - couponShare);
         }
       }
 
@@ -548,7 +551,13 @@ const cancelOrderItem = async (req, res, next) => {
     });
 
     if (order.paymentMethod === 'Online') {
-      const refundAmount = item.discountedPrice * item.quantity;
+      const totalDiscounted = order.items.reduce((sum, i) => sum + i.discountedPrice * i.quantity, 0);
+      const couponDiscount = order.couponDiscount || 0;
+
+      const itemTotal = item.discountedPrice * item.quantity;
+      const couponShare = (itemTotal / totalDiscounted) * couponDiscount;
+      const refundAmount = itemTotal - couponShare;
+
       await User.findByIdAndUpdate(userId, {
         $inc: { wallet: refundAmount },
         $push: {

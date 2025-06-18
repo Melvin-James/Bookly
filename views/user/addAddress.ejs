@@ -1,400 +1,663 @@
-<div class="w-full bg-white shadow-custom rounded-xl p-6">
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h2 class="text-2xl font-bold text-gray-900">
-        <%= address ? 'Edit Address' : 'Add New Address' %>
-      </h2>
-      <p class="text-gray-600 mt-1">
-        <%= address ? 'Update your delivery address details' : 'Add a new delivery address to your account' %>
-      </p>
-    </div>
-    <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-      <i class="fas fa-map-marker-alt text-primary text-xl"></i>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= address ? 'Edit Address' : 'Add New Address' %> - Bookly</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #007D8B;
+      --primary-hover: #005f66;
+      --primary-light: #e6f7f8;
+      --primary-dark: #004d56;
+    }
+
+    .shadow-custom {
+      box-shadow: 0 10px 25px rgba(0, 125, 139, 0.1);
+    }
+
+    .form-input {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .form-input:focus {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 125, 139, 0.15);
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form-group .form-input.error {
+      border-color: var(--primary-color);
+      background-color: rgba(0, 125, 139, 0.05);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 125, 139, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 125, 139, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.7;
+      transform: none;
+      cursor: not-allowed;
+    }
+
+    .icon-wrapper {
+      background: linear-gradient(135deg, var(--primary-light), #f0fdff);
+      border: 1px solid rgba(0, 125, 139, 0.1);
+    }
+
+    .error-message {
+      color: var(--primary-color);
+      font-weight: 500;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .success-message {
+      background: linear-gradient(135deg, #10b981, #059669);
+      animation: slideDown 0.3s ease;
+    }
+
+    .error-alert {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+      animation: slideDown 0.3s ease;
+    }
+
+    .form-section {
+      background: linear-gradient(135deg, #ffffff, #fafbfc);
+      border: 1px solid rgba(0, 125, 139, 0.1);
+    }
+
+    .loading-spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .input-icon {
+      color: var(--primary-color);
+      opacity: 0.7;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus + .input-icon,
+    .form-input:focus ~ .input-icon {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .header-gradient {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    }
+
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(0, 125, 139, 0.15);
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    
+    <!-- Enhanced Header Card -->
+    <div class="form-section shadow-custom rounded-2xl p-8 mb-8 card-hover">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex-1">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="icon-wrapper w-16 h-16 rounded-2xl flex items-center justify-center">
+              <i class="fas fa-map-marker-alt text-2xl" style="color: var(--primary-color);"></i>
+            </div>
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900">
+                <%= address ? 'Edit Address' : 'Add New Address' %>
+              </h1>
+              <p class="text-gray-600 mt-1 text-lg">
+                <%= address ? 'Update your delivery address details' : 'Add a new delivery address to your account' %>
+              </p>
+            </div>
+          </div>
+          
+          <!-- Progress Indicator -->
+          <div class="flex items-center gap-2 text-sm text-gray-500">
+            <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+            <span>Fill in all required fields to save your address</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="mb-6 p-4 rounded-xl error-alert text-white border border-red-200">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+              <i class="fas fa-exclamation-circle text-white"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold">Error</h4>
+              <p class="text-white/90"><%= error %></p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Main Form -->
+      <form id="addressForm" method="POST" action="<%= formAction %>" class="space-y-8">
+        
+        <!-- Personal Information Section -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-3 pb-4 border-b border-gray-200">
+            <div class="icon-wrapper w-10 h-10 rounded-xl flex items-center justify-center">
+              <i class="fas fa-user text-sm" style="color: var(--primary-color);"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">Personal Information</h3>
+              <p class="text-sm text-gray-500">Your name and address type</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Full Name -->
+            <div class="form-group">
+              <label for="name" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <i class="fas fa-user text-sm input-icon"></i>
+                Full Name *
+              </label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="name" 
+                  name="name" 
+                  value="<%= address?.name || '' %>" 
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all" 
+                  placeholder="Enter your full name"
+                />
+              </div>
+              <div id="nameError" class="error-message text-sm mt-2 hidden"></div>
+            </div>
+
+            <!-- Address Type -->
+            <div class="form-group">
+              <label for="addressType" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <i class="fas fa-tag text-sm input-icon"></i>
+                Address Type *
+              </label>
+              <div class="relative">
+                <select 
+                  id="addressType" 
+                  name="addressType" 
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all appearance-none"
+                >
+                  <option value="">Select address type</option>
+                  <option value="Home" <%= address?.addressType === 'Home' ? 'selected' : '' %>>🏠 Home</option>
+                  <option value="Work" <%= address?.addressType === 'Work' ? 'selected' : '' %>>🏢 Work</option>
+                  <option value="Other" <%= address?.addressType === 'Other' ? 'selected' : '' %>>📍 Other</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                  <i class="fas fa-chevron-down input-icon"></i>
+                </div>
+              </div>
+              <div id="addressTypeError" class="error-message text-sm mt-2 hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Location Details Section -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-3 pb-4 border-b border-gray-200">
+            <div class="icon-wrapper w-10 h-10 rounded-xl flex items-center justify-center">
+              <i class="fas fa-map text-sm" style="color: var(--primary-color);"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">Location Details</h3>
+              <p class="text-sm text-gray-500">Complete address information</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- City -->
+            <div class="form-group">
+              <label for="city" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <i class="fas fa-city text-sm input-icon"></i>
+                City *
+              </label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="city" 
+                  name="city" 
+                  value="<%= address?.city || '' %>" 
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all" 
+                  placeholder="Enter your city"
+                />
+              </div>
+              <div id="cityError" class="error-message text-sm mt-2 hidden"></div>
+            </div>
+
+            <!-- State -->
+            <div class="form-group">
+              <label for="state" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <i class="fas fa-map text-sm input-icon"></i>
+                State *
+              </label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="state" 
+                  name="state" 
+                  value="<%= address?.state || '' %>" 
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all" 
+                  placeholder="Enter your state"
+                />
+              </div>
+              <div id="stateError" class="error-message text-sm mt-2 hidden"></div>
+            </div>
+
+            <!-- Pincode -->
+            <div class="form-group">
+              <label for="pincode" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <i class="fas fa-mail-bulk text-sm input-icon"></i>
+                Pincode *
+              </label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="pincode" 
+                  name="pincode" 
+                  value="<%= address?.pincode || '' %>" 
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all" 
+                  placeholder="Enter 6-digit pincode"
+                  maxlength="6"
+                />
+              </div>
+              <div id="pincodeError" class="error-message text-sm mt-2 hidden"></div>
+            </div>
+
+            <!-- Landmark -->
+            <div class="form-group">
+              <label for="landmark" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <i class="fas fa-landmark text-sm input-icon"></i>
+                Landmark *
+              </label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="landmark" 
+                  name="landmark" 
+                  value="<%= address?.landmark || '' %>" 
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all" 
+                  placeholder="Enter nearby landmark"
+                />
+              </div>
+              <div id="landmarkError" class="error-message text-sm mt-2 hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-3 pb-4 border-b border-gray-200">
+            <div class="icon-wrapper w-10 h-10 rounded-xl flex items-center justify-center">
+              <i class="fas fa-phone text-sm" style="color: var(--primary-color);"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">Contact Information</h3>
+              <p class="text-sm text-gray-500">Phone numbers for delivery coordination</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Phone -->
+            <div class="form-group">
+              <label for="phone" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <i class="fas fa-phone text-sm input-icon"></i>
+                Phone Number *
+              </label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="phone" 
+                  name="phone" 
+                  value="<%= address?.phone || '' %>" 
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all" 
+                  placeholder="Enter 10-digit phone number"
+                  maxlength="10"
+                />
+              </div>
+              <div id="phoneError" class="error-message text-sm mt-2 hidden"></div>
+            </div>
+
+            <!-- Alt Phone -->
+            <div class="form-group">
+              <label for="altPhone" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <i class="fas fa-phone-alt text-sm input-icon"></i>
+                Alternate Phone 
+              </label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="altPhone" 
+                  name="altPhone" 
+                  value="<%= address?.altPhone || '' %>" 
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all" 
+                  placeholder="Enter alternate phone number"
+                  maxlength="10"
+                />
+              </div>
+              <div id="altPhoneError" class="error-message text-sm mt-2 hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-6 border-t border-gray-200">
+          <div class="flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <button 
+              type="button" 
+              class="flex items-center gap-2 text-gray-600 hover:text-[#007D8B] transition-colors font-medium px-4 py-2 rounded-lg hover:bg-gray-100"
+              onclick="window.history.back()"
+            >
+              <i class="fas fa-arrow-left"></i>
+              Cancel
+            </button>
+            
+            <button 
+              type="submit" 
+              id="submitBtn"
+              class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 min-w-[200px]"
+            >
+              <i class="fas fa-save"></i>
+              <%= address ? 'Update Address' : 'Save Address' %>
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 
-  <% if (typeof error !== 'undefined' && error) { %>
-    <div class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-      <div class="flex items-center">
-        <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-        <span class="text-red-700"><%= error %></span>
-      </div>
-    </div>
-  <% } %>
-
-  <form id="addressForm" method="POST" action="<%= formAction %>" class="space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('addressForm');
+      const submitBtn = document.getElementById('submitBtn');
       
-      <!-- Full Name -->
-      <div class="form-group">
-        <label for="name" class="block font-medium text-gray-700 mb-1">Full Name</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-user text-gray-400"></i>
-          </div>
-          <input 
-            type="text" 
-            id="name" 
-            name="name" 
-            value="<%= address?.name || '' %>" 
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-            placeholder="Enter full name"
-          />
-        </div>
-        <div id="nameError" class="text-primary text-sm mt-1 hidden"></div>
-      </div>
-
-      <!-- Address Type -->
-      <div class="form-group">
-        <label for="addressType" class="block font-medium text-gray-700 mb-1">Address Type</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-tag text-gray-400"></i>
-          </div>
-          <select 
-            id="addressType" 
-            name="addressType" 
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all appearance-none bg-white"
-          >
-            <option value="">Select address type</option>
-            <option value="Home" <%= address?.addressType === 'Home' ? 'selected' : '' %>>🏠 Home</option>
-            <option value="Work" <%= address?.addressType === 'Work' ? 'selected' : '' %>>🏢 Work</option>
-            <option value="Other" <%= address?.addressType === 'Other' ? 'selected' : '' %>>📍 Other</option>
-          </select>
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <i class="fas fa-chevron-down text-gray-400"></i>
-          </div>
-        </div>
-        <div id="addressTypeError" class="text-primary text-sm mt-1 hidden"></div>
-      </div>
-
-      <!-- City -->
-      <div class="form-group">
-        <label for="city" class="block font-medium text-gray-700 mb-1">City</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-city text-gray-400"></i>
-          </div>
-          <input 
-            type="text" 
-            id="city" 
-            name="city" 
-            value="<%= address?.city || '' %>" 
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-            placeholder="Enter city"
-          />
-        </div>
-        <div id="cityError" class="text-primary text-sm mt-1 hidden"></div>
-      </div>
-
-      <!-- State -->
-      <div class="form-group">
-        <label for="state" class="block font-medium text-gray-700 mb-1">State</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-map text-gray-400"></i>
-          </div>
-          <input 
-            type="text" 
-            id="state" 
-            name="state" 
-            value="<%= address?.state || '' %>" 
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-            placeholder="Enter state"
-          />
-        </div>
-        <div id="stateError" class="text-primary text-sm mt-1 hidden"></div>
-      </div>
-
-      <!-- Pincode -->
-      <div class="form-group">
-        <label for="pincode" class="block font-medium text-gray-700 mb-1">Pincode</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-mail-bulk text-gray-400"></i>
-          </div>
-          <input 
-            type="text" 
-            id="pincode" 
-            name="pincode" 
-            value="<%= address?.pincode || '' %>" 
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-            placeholder="Enter 6-digit pincode"
-            maxlength="6"
-          />
-        </div>
-        <div id="pincodeError" class="text-primary text-sm mt-1 hidden"></div>
-      </div>
-
-      <!-- Landmark -->
-      <div class="form-group">
-        <label for="landmark" class="block font-medium text-gray-700 mb-1">Landmark</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-landmark text-gray-400"></i>
-          </div>
-          <input 
-            type="text" 
-            id="landmark" 
-            name="landmark" 
-            value="<%= address?.landmark || '' %>" 
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-            placeholder="Enter nearby landmark"
-          />
-        </div>
-        <div id="landmarkError" class="text-primary text-sm mt-1 hidden"></div>
-      </div>
-
-      <!-- Phone -->
-      <div class="form-group">
-        <label for="phone" class="block font-medium text-gray-700 mb-1">Phone Number</label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-phone text-gray-400"></i>
-          </div>
-          <input 
-            type="text" 
-            id="phone" 
-            name="phone" 
-            value="<%= address?.phone || '' %>" 
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-            placeholder="Enter 10-digit phone number"
-            maxlength="10"
-          />
-        </div>
-        <div id="phoneError" class="text-primary text-sm mt-1 hidden"></div>
-      </div>
-
-      <!-- Alt Phone -->
-      <div class="form-group">
-        <label for="altPhone" class="block font-medium text-gray-700 mb-1">Alternate Phone <span class="text-gray-400">(Optional)</span></label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-phone-alt text-gray-400"></i>
-          </div>
-          <input 
-            type="text" 
-            id="altPhone" 
-            name="altPhone" 
-            value="<%= address?.altPhone || '' %>" 
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-            placeholder="Enter alternate phone number"
-            maxlength="10"
-          />
-        </div>
-        <div id="altPhoneError" class="text-primary text-sm mt-1 hidden"></div>
-      </div>
-    </div>
-
-    <!-- Set as Default -->
-    <div class="flex items-center">
+      // Input elements
+      const nameInput = document.getElementById('name');
+      const addressTypeInput = document.getElementById('addressType');
+      const cityInput = document.getElementById('city');
+      const stateInput = document.getElementById('state');
+      const pincodeInput = document.getElementById('pincode');
+      const landmarkInput = document.getElementById('landmark');
+      const phoneInput = document.getElementById('phone');
+      const altPhoneInput = document.getElementById('altPhone');
       
-    </div>
-
-    <div class="pt-4 flex items-center justify-between">
-      <button type="button" class="text-gray-600 hover:text-gray-800 transition-colors" onclick="window.history.back()">
-        <i class="fas fa-arrow-left mr-1"></i> Cancel
-      </button>
-      <button 
-        type="submit" 
-        id="submitBtn"
-        class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg transition-all flex items-center justify-center"
-      >
-        <i class="fas fa-save mr-2"></i>
-        <%= address ? 'Update Address' : 'Save Address' %>
-      </button>
-    </div>
-  </form>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('addressForm');
-  const submitBtn = document.getElementById('submitBtn');
-  
-  // Input elements
-  const nameInput = document.getElementById('name');
-  const addressTypeInput = document.getElementById('addressType');
-  const cityInput = document.getElementById('city');
-  const stateInput = document.getElementById('state');
-  const pincodeInput = document.getElementById('pincode');
-  const landmarkInput = document.getElementById('landmark');
-  const phoneInput = document.getElementById('phone');
-  const altPhoneInput = document.getElementById('altPhone');
-  
-  // Error elements
-  const nameError = document.getElementById('nameError');
-  const addressTypeError = document.getElementById('addressTypeError');
-  const cityError = document.getElementById('cityError');
-  const stateError = document.getElementById('stateError');
-  const pincodeError = document.getElementById('pincodeError');
-  const landmarkError = document.getElementById('landmarkError');
-  const phoneError = document.getElementById('phoneError');
-  const altPhoneError = document.getElementById('altPhoneError');
-  
-  // Validation patterns
-  const namePattern = /^[a-zA-Z\s]{2,50}$/;
-  const cityStatePattern = /^[a-zA-Z\s]{2,30}$/;
-  const pincodePattern = /^[0-9]{6}$/;
-  const phonePattern = /^[0-9]{10}$/;
-  
-  // Validation functions
-  function validateName() {
-    if (!nameInput.value.trim()) {
-      showError(nameError, 'Name is required');
-      return false;
-    } else if (!namePattern.test(nameInput.value.trim())) {
-      showError(nameError, 'Please enter a valid name (2-50 characters, letters only)');
-      return false;
-    } else {
-      hideError(nameError);
-      return true;
-    }
-  }
-  
-  function validateAddressType() {
-    if (!addressTypeInput.value) {
-      showError(addressTypeError, 'Please select an address type');
-      return false;
-    } else {
-      hideError(addressTypeError);
-      return true;
-    }
-  }
-  
-  function validateCity() {
-    if (!cityInput.value.trim()) {
-      showError(cityError, 'City is required');
-      return false;
-    } else if (!cityStatePattern.test(cityInput.value.trim())) {
-      showError(cityError, 'Please enter a valid city name');
-      return false;
-    } else {
-      hideError(cityError);
-      return true;
-    }
-  }
-  
-  function validateState() {
-    if (!stateInput.value.trim()) {
-      showError(stateError, 'State is required');
-      return false;
-    } else if (!cityStatePattern.test(stateInput.value.trim())) {
-      showError(stateError, 'Please enter a valid state name');
-      return false;
-    } else {
-      hideError(stateError);
-      return true;
-    }
-  }
-  
-  function validatePincode() {
-    if (!pincodeInput.value.trim()) {
-      showError(pincodeError, 'Pincode is required');
-      return false;
-    } else if (!pincodePattern.test(pincodeInput.value.trim())) {
-      showError(pincodeError, 'Please enter a valid 6-digit pincode');
-      return false;
-    } else {
-      hideError(pincodeError);
-      return true;
-    }
-  }
-  
-  function validateLandmark() {
-    if (!landmarkInput.value.trim()) {
-      showError(landmarkError, 'Landmark is required');
-      return false;
-    } else {
-      hideError(landmarkError);
-      return true;
-    }
-  }
-  
-  function validatePhone() {
-    if (!phoneInput.value.trim()) {
-      showError(phoneError, 'Phone number is required');
-      return false;
-    } else if (!phonePattern.test(phoneInput.value.trim())) {
-      showError(phoneError, 'Please enter a valid 10-digit phone number');
-      return false;
-    } else {
-      hideError(phoneError);
-      return true;
-    }
-  }
-  
-  function validateAltPhone() {
-    if (altPhoneInput.value.trim() && !phonePattern.test(altPhoneInput.value.trim())) {
-      showError(altPhoneError, 'Please enter a valid 10-digit phone number');
-      return false;
-    } else {
-      hideError(altPhoneError);
-      return true;
-    }
-  }
-  
-  function showError(element, message) {
-    element.textContent = message;
-    element.classList.remove('hidden');
-    element.parentElement.querySelector('input, select').classList.add('border-primary');
-  }
-  
-  function hideError(element) {
-    element.textContent = '';
-    element.classList.add('hidden');
-    element.parentElement.querySelector('input, select').classList.remove('border-primary');
-  }
-  
-  // Event listeners
-  nameInput.addEventListener('blur', validateName);
-  addressTypeInput.addEventListener('change', validateAddressType);
-  cityInput.addEventListener('blur', validateCity);
-  stateInput.addEventListener('blur', validateState);
-  pincodeInput.addEventListener('blur', validatePincode);
-  landmarkInput.addEventListener('blur', validateLandmark);
-  phoneInput.addEventListener('blur', validatePhone);
-  altPhoneInput.addEventListener('blur', validateAltPhone);
-  
-  // Only allow numbers for pincode and phone
-  pincodeInput.addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '');
-  });
-  
-  phoneInput.addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '');
-  });
-  
-  altPhoneInput.addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '');
-  });
-  
-  // Form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const validations = [
-      validateName(),
-      validateAddressType(),
-      validateCity(),
-      validateState(),
-      validatePincode(),
-      validateLandmark(),
-      validatePhone(),
-      validateAltPhone()
-    ];
-    
-    if (validations.every(v => v === true)) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
-      this.submit();
-    } else {
-      // Scroll to first error
-      const firstError = document.querySelector('.text-primary:not(.hidden)');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Error elements
+      const nameError = document.getElementById('nameError');
+      const addressTypeError = document.getElementById('addressTypeError');
+      const cityError = document.getElementById('cityError');
+      const stateError = document.getElementById('stateError');
+      const pincodeError = document.getElementById('pincodeError');
+      const landmarkError = document.getElementById('landmarkError');
+      const phoneError = document.getElementById('phoneError');
+      const altPhoneError = document.getElementById('altPhoneError');
+      
+      // Validation patterns
+      const namePattern = /^[a-zA-Z\s]{2,50}$/;
+      const cityStatePattern = /^[a-zA-Z\s]{2,30}$/;
+      const pincodePattern = /^[0-9]{6}$/;
+      const phonePattern = /^[0-9]{10}$/;
+      
+      // Enhanced validation functions with better UX
+      function validateName() {
+        const value = nameInput.value.trim();
+        if (!value) {
+          showError(nameInput, nameError, 'Name is required');
+          return false;
+        } else if (!namePattern.test(value)) {
+          showError(nameInput, nameError, 'Please enter a valid name (2-50 characters, letters only)');
+          return false;
+        } else {
+          hideError(nameInput, nameError);
+          return true;
+        }
       }
-    }
-  });
-});
-</script>
+      
+      function validateAddressType() {
+        if (!addressTypeInput.value) {
+          showError(addressTypeInput, addressTypeError, 'Please select an address type');
+          return false;
+        } else {
+          hideError(addressTypeInput, addressTypeError);
+          return true;
+        }
+      }
+      
+      function validateCity() {
+        const value = cityInput.value.trim();
+        if (!value) {
+          showError(cityInput, cityError, 'City is required');
+          return false;
+        } else if (!cityStatePattern.test(value)) {
+          showError(cityInput, cityError, 'Please enter a valid city name');
+          return false;
+        } else {
+          hideError(cityInput, cityError);
+          return true;
+        }
+      }
+      
+      function validateState() {
+        const value = stateInput.value.trim();
+        if (!value) {
+          showError(stateInput, stateError, 'State is required');
+          return false;
+        } else if (!cityStatePattern.test(value)) {
+          showError(stateInput, stateError, 'Please enter a valid state name');
+          return false;
+        } else {
+          hideError(stateInput, stateError);
+          return true;
+        }
+      }
+      
+      function validatePincode() {
+        const value = pincodeInput.value.trim();
+        if (!value) {
+          showError(pincodeInput, pincodeError, 'Pincode is required');
+          return false;
+        } else if (!pincodePattern.test(value)) {
+          showError(pincodeInput, pincodeError, 'Please enter a valid 6-digit pincode');
+          return false;
+        } else {
+          hideError(pincodeInput, pincodeError);
+          return true;
+        }
+      }
+      
+      function validateLandmark() {
+        const value = landmarkInput.value.trim();
+        if (!value) {
+          showError(landmarkInput, landmarkError, 'Landmark is required');
+          return false;
+        } else {
+          hideError(landmarkInput, landmarkError);
+          return true;
+        }
+      }
+      
+      function validatePhone() {
+        const value = phoneInput.value.trim();
+        if (!value) {
+          showError(phoneInput, phoneError, 'Phone number is required');
+          return false;
+        } else if (!phonePattern.test(value)) {
+          showError(phoneInput, phoneError, 'Please enter a valid 10-digit phone number');
+          return false;
+        } else {
+          hideError(phoneInput, phoneError);
+          return true;
+        }
+      }
+      
+      function validateAltPhone() {
+        const value = altPhoneInput.value.trim();
+        if (value && !phonePattern.test(value)) {
+          showError(altPhoneInput, altPhoneError, 'Please enter a valid 10-digit phone number');
+          return false;
+        } else {
+          hideError(altPhoneInput, altPhoneError);
+          return true;
+        }
+      }
+      
+      function showError(input, errorElement, message) {
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+        input.classList.add('error');
+        input.style.borderColor = '#007D8B';
+        input.style.backgroundColor = 'rgba(0, 125, 139, 0.05)';
+      }
+      
+      function hideError(input, errorElement) {
+        errorElement.textContent = '';
+        errorElement.classList.add('hidden');
+        input.classList.remove('error');
+        input.style.borderColor = '';
+        input.style.backgroundColor = '';
+      }
+      
+      // Enhanced event listeners with real-time feedback
+      nameInput.addEventListener('blur', validateName);
+      nameInput.addEventListener('input', function() {
+        if (this.value.trim()) validateName();
+      });
+      
+      addressTypeInput.addEventListener('change', validateAddressType);
+      
+      cityInput.addEventListener('blur', validateCity);
+      cityInput.addEventListener('input', function() {
+        if (this.value.trim()) validateCity();
+      });
+      
+      stateInput.addEventListener('blur', validateState);
+      stateInput.addEventListener('input', function() {
+        if (this.value.trim()) validateState();
+      });
+      
+      pincodeInput.addEventListener('blur', validatePincode);
+      pincodeInput.addEventListener('input', function() {
+        if (this.value.trim()) validatePincode();
+      });
+      
+      landmarkInput.addEventListener('blur', validateLandmark);
+      landmarkInput.addEventListener('input', function() {
+        if (this.value.trim()) validateLandmark();
+      });
+      
+      phoneInput.addEventListener('blur', validatePhone);
+      phoneInput.addEventListener('input', function() {
+        if (this.value.trim()) validatePhone();
+      });
+      
+      altPhoneInput.addEventListener('blur', validateAltPhone);
+      altPhoneInput.addEventListener('input', function() {
+        if (this.value.trim()) validateAltPhone();
+      });
+      
+      // Only allow numbers for pincode and phone
+      pincodeInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+      });
+      
+      phoneInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+      });
+      
+      altPhoneInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+      });
+      
+      // Enhanced form submission with better UX
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const validations = [
+          validateName(),
+          validateAddressType(),
+          validateCity(),
+          validateState(),
+          validatePincode(),
+          validateLandmark(),
+          validatePhone(),
+          validateAltPhone()
+        ];
+        
+        if (validations.every(v => v === true)) {
+          // Show loading state
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner loading-spinner mr-2"></i> Saving Address...';
+          submitBtn.style.opacity = '0.7';
+          
+          // Submit form
+          this.submit();
+        } else {
+          // Scroll to first error with smooth animation
+          const firstError = document.querySelector('.error-message:not(.hidden)');
+          if (firstError) {
+            firstError.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+          }
+          
+          // Add shake animation to submit button
+          submitBtn.style.animation = 'shake 0.5s ease-in-out';
+          setTimeout(() => {
+            submitBtn.style.animation = '';
+          }, 500);
+        }
+      });
+      
+      // Add shake animation keyframes
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+      `;
+      document.head.appendChild(style);
+    });
+  </script>
+</body>
+</html>

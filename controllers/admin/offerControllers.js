@@ -1,20 +1,82 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 
-const getOfferPage = async (req, res,next) => {
+
+const getOfferPage = async (req, res, next) => {
   try {
-    const [products, categories] = await Promise.all([
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const productSearch = req.query.productSearch || '';
+    const categorySearch = req.query.categorySearch || '';
+
+    const productQuery = productSearch 
+      ? { name: { $regex: productSearch, $options: 'i' } }
+      : {};
+    
+    const categoryQuery = categorySearch 
+      ? { name: { $regex: categorySearch, $options: 'i' } }
+      : {};
+
+    const [
+      products,
+      totalProducts,
+      categories,
+      totalCategories,
+      productOffersCount,
+      categoryOffersCount
+    ] = await Promise.all([
+      Product.find(productQuery)
+        .sort({ name: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Product.countDocuments(productQuery),
+      Category.find(categoryQuery)
+        .sort({ name: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Category.countDocuments(categoryQuery),
+      Product.countDocuments({ productOffer: { $gt: 0 } }),
+      Category.countDocuments({ categoryOffer: { $gt: 0 } })
+    ]);
+
+    const totalPages = Math.ceil(Math.max(totalProducts, totalCategories) / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    const [allProducts, allCategories] = await Promise.all([
       Product.find().sort({ name: 1 }).lean(),
       Category.find().sort({ name: 1 }).lean()
     ]);
-    
+
     res.render('layout', {
       body: 'adminOffers',
       admin: req.session.admin,
       products,
       categories,
+      allProducts, 
+      allCategories,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalProducts,
+        totalCategories,
+        limit,
+        hasNextPage,
+        hasPrevPage,
+        productSearch,
+        categorySearch
+      },
+      stats: {
+        productOffersCount,
+        categoryOffersCount
+      }
     });
   } catch (err) {
+    console.error('Error in getOfferPage:', err);
     next(err);
   }
 };
