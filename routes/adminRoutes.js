@@ -36,7 +36,7 @@ router.post('/category-add',adminAuth,categoryControllers.addCategory);
 
 router.get('/products',adminAuth,productControllers.productInfo);
 router.patch('/product/:id',adminAuth,productControllers.toggleBlockStatusProduct);
-router.get('/search-product',adminAuth,productControllers.searchProducts);
+router.get('/product/search',adminAuth,productControllers.searchProducts);
 router.get('/product-pagination',adminAuth,productControllers.getPaginatedProducts);
 router.get('/product-add',adminAuth,productControllers.getAddProduct);
 router.post('/product-add',adminAuth,uploadProductImage.array('productImage', 3),productControllers.addProduct);

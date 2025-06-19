@@ -1,5 +1,4 @@
 <div class="min-h-screen bg-gray-50">
-  <!-- Page Header -->
   <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
     <div class="px-4 sm:px-6 lg:px-8 py-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -13,7 +12,6 @@
           <p class="mt-1 text-sm text-gray-500">Manage your product catalog and inventory</p>
         </div>
         
-        <!-- Search Form -->
         <div class="flex-shrink-0">
           <form id="searchForm" class="flex flex-col sm:flex-row gap-2" onsubmit="return false;">
             <div class="relative">
@@ -49,9 +47,7 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="px-4 sm:px-6 lg:px-8 pb-8">
-    <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex items-center">
@@ -99,7 +95,6 @@
       </div>
     </div>
 
-    <!-- Products Table -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -213,7 +208,6 @@
         </table>
       </div>
       
-      <!-- Empty State -->
       <div id="emptyState" class="hidden text-center py-12">
         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <i class="ri-book-2-line text-gray-400 text-2xl"></i>
@@ -223,7 +217,6 @@
       </div>
     </div>
 
-    <!-- Pagination -->
     <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="text-sm text-gray-500">
       </div>
@@ -322,7 +315,7 @@
 
   function performSearch() {
     const query = document.getElementById('searchInput').value;
-    fetch(`/admin/search-product?query=${encodeURIComponent(query)}`)
+    fetch(`/admin/product/search?query=${encodeURIComponent(query)}`)
       .then(res => res.json())
       .then(data => {
         renderProducts(data.products);
@@ -422,7 +415,6 @@
     
     if (totalPages <= 1) return;
     
-    // Previous button
     if (currentPage > 1) {
       const prevBtn = document.createElement('button');
       prevBtn.innerHTML = '<i class="ri-arrow-left-s-line"></i>';
@@ -431,7 +423,6 @@
       container.appendChild(prevBtn);
     }
     
-    // Page numbers
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
         const btn = document.createElement('button');
@@ -451,7 +442,6 @@
       }
     }
     
-    // Next button
     if (currentPage < totalPages) {
       const nextBtn = document.createElement('button');
       nextBtn.innerHTML = '<i class="ri-arrow-right-s-line"></i>';
@@ -488,7 +478,7 @@
     document.getElementById('totalProducts').textContent = rows.length;
     document.getElementById('activeProducts').textContent = activeCount;
     document.getElementById('blockedProducts').textContent = blockedCount;
-    document.getElementById('lowStock').textContent = '0'; // This would come from backend
+    document.getElementById('lowStock').textContent = '0'; 
   }
 
   window.onload = () => {

@@ -364,12 +364,12 @@
   }
 
   function updateStats(orders) {
-    const totalOrders = orders.length;
-    const pendingOrders = orders.filter(order => ['Pending', 'Placed'].includes(order.status)).length;
+    const rows = document.querySelectorAll('#orderBody tr');
+    const pendingOrders = orders.filter(order => ['Placed'].includes(order.status)).length;
     const deliveredOrders = orders.filter(order => order.status === 'Delivered').length;
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
-    document.getElementById('totalOrders').textContent = totalOrders;
+    document.getElementById('totalOrders').textContent = rows.length;
     document.getElementById('pendingOrders').textContent = pendingOrders;
     document.getElementById('deliveredOrders').textContent = deliveredOrders;
     document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toFixed(2)}`;

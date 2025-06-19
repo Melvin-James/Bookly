@@ -1,257 +1,734 @@
 <%- include("../partials/userHead") %>
 
-<div class="max-w-7xl mx-auto px-4 py-8">
-
-<h1 class="text-3xl font-bold text-primary mb-8">Checkout</h1>
-<form id="placeOrderForm" action="/user/place-order" method="POST">
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-    <!-- Left: Address and Payment -->
-    <div class="md:col-span-2 space-y-8">
-
-      <!-- Address Selection -->
-      <div class="bg-white p-6 rounded-lg shadow">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold">Select Delivery Address</h2>
-          <a href="/user/checkout/addAddress" class="bg-[#007D8B] text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
-            + Add Address
-          </a>
-        </div>
-      
-        <% if (addressData.length) { %>
-          <input type="hidden" name="razorpay_payment_id" id="razorpayPaymentId" />
-          <input type="hidden" name="razorpay_order_id" id="razorpayOrderId" />
-          <div class="space-y-4">
-            <% addressData.forEach(addr => { %>
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input type="radio" name="addressId" value="<%= addr._id %>" class="mt-1" required />
-                <div>
-                  <p class="font-medium"><%= addr.name %> - <%= addr.addressType %></p>
-                  <p class="text-sm text-gray-600">
-                    <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %><br>
-                    <%= addr.phone %> | Alt: <%= addr.altPhone %>
-                  </p>
-                </div>
-              </label>
-            <% }) %>
+<!-- Main Checkout Content -->
+<main class="bg-gray-50 min-h-screen pt-4 pb-8">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Progress Indicator -->
+    <div class="mb-6 sm:mb-8">
+      <div class="flex items-center justify-center space-x-2 sm:space-x-4 text-xs sm:text-sm">
+        <div class="flex items-center text-gray-400">
+          <div class="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-medium text-xs sm:text-sm">
+            <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
           </div>
-        <% } else { %>
-          <p class="text-gray-500">No saved addresses.</p>
-        <% } %>
+          <span class="ml-1 sm:ml-2 font-medium text-green-600 hidden sm:inline">Cart</span>
+        </div>
+        <div class="w-8 sm:w-16 h-0.5 bg-green-500"></div>
+        <div class="flex items-center text-primary">
+          <div class="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center text-white font-medium text-xs sm:text-sm">2</div>
+          <span class="ml-1 sm:ml-2 font-medium">Checkout</span>
+        </div>
+        <div class="w-8 sm:w-16 h-0.5 bg-gray-300"></div>
+        <div class="flex items-center text-gray-400">
+          <div class="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-medium text-xs sm:text-sm">3</div>
+          <span class="ml-1 sm:ml-2 hidden sm:inline">Payment</span>
+        </div>
       </div>
-      
+    </div>
 
-      <!-- Payment Method -->
-      <div class="bg-white p-6 rounded-2xl shadow-lg">
-        <h2 class="text-2xl font-semibold mb-6 text-gray-800">Select Payment Method</h2>
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
+      <a href="/user/shop" class="hover:text-primary transition-colors">Shop</a>
+      <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+      </svg>
+      <a href="/user/cart" class="hover:text-primary transition-colors">Cart</a>
+      <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+      </svg>
+      <span class="text-gray-900 font-medium">Secure Checkout</span>
+    </nav>
+
+    <!-- Page Title -->
+    <div class="text-center mb-6 sm:mb-8">
+      <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-2">Secure Checkout</h1>
+      <div class="flex items-center justify-center space-x-2 text-xs sm:text-sm text-gray-600">
+        <svg class="w-3 h-3 sm:w-4 sm:h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+        </svg>
+        <span>SSL Secured Payment</span>
+      </div>
+    </div>
+
+    <!-- Main Form -->
+    <form id="placeOrderForm" action="/user/place-order" method="POST">
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         
-        <div class="space-y-4">
-          <label class="flex items-center justify-between p-4 border rounded-xl hover:border-primary transition cursor-pointer">
-            <div class="flex items-center gap-4">
-              <input type="radio" name="paymentMethod" value="COD" checked required class="accent-primary w-5 h-5" />
-              <span class="text-lg text-gray-700">Cash on Delivery (COD)</span>
-            </div>
-            <span class="text-sm text-gray-500">Pay on arrival</span>
-          </label>
-      
-          <label class="flex items-center justify-between p-4 border rounded-xl hover:border-primary transition cursor-pointer">
-            <div class="flex items-center gap-4">
-              <input type="radio" name="paymentMethod" value="Online" required class="accent-primary w-5 h-5" />
-              <span class="text-lg text-gray-700">Online Payment</span>
-            </div>
-            <span class="text-sm text-gray-500">Pay securely with Razorpay</span>
-          </label>
-        </div>
-      </div>
-      
-
-    </div>
-
-    <!-- Right: Order Summary -->
-    <div class="bg-white p-6 rounded-lg shadow space-y-6">
-
-      <!-- Coupon Box -->
-      <div class="space-y-2">
-        <h2 class="text-xl font-semibold mb-2">Have a Coupon?</h2>
-        <% if (validCoupons && validCoupons.length) { %>
-          <div class="bg-green-50 border border-green-300 p-4 rounded-md mt-4 shadow-sm">
-            <h3 class="text-sm font-semibold text-green-800 mb-2">Available Coupons</h3>
-            <div class="space-y-2">
-              <% validCoupons.forEach(coupon => { %>
-                <div class="bg-white border border-dashed border-green-400 p-3 rounded flex justify-between items-center">
-                  <div>
-                    <span class="font-bold text-green-700"><%= coupon.code %></span>
-                    <p class="text-sm text-gray-600">
-                      <%= coupon.discountType === 'Flat' 
-                        ? '₹' + coupon.discountAmount + ' off' 
-                        : coupon.discountAmount + '% off' %>
-                      (Min. ₹<%= coupon.minCartAmount %>)
-                    </p>
+        <!-- Left Column: Address and Payment -->
+        <div class="xl:col-span-2 space-y-6">
+          
+          <!-- Delivery Address Section -->
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-primary via-primary to-primary-dark p-4 sm:p-6 text-white relative overflow-hidden">
+              <div class="absolute inset-0 bg-black opacity-5"></div>
+              <div class="relative z-10">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 class="text-lg sm:text-xl font-semibold">Delivery Address</h2>
+                      <p class="text-xs sm:text-sm opacity-90">Where should we deliver your order?</p>
+                    </div>
                   </div>
-                  <button 
-                    type="button" 
-                    onclick="document.getElementById('couponCode').value='<%= coupon.code %>'" 
-                    class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded transition">
-                    Apply
-                  </button>
+                  <a href="/user/checkout/addAddress" 
+                     class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium backdrop-blur-sm border border-white border-opacity-20 text-center">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Add New
+                  </a>
                 </div>
-              <% }) %>
+              </div>
+            </div>
+
+            <div class="p-4 sm:p-6">
+              <% if (addressData.length) { %>
+                <input type="hidden" name="razorpay_payment_id" id="razorpayPaymentId" />
+                <input type="hidden" name="razorpay_order_id" id="razorpayOrderId" />
+                
+                <!-- Default Address Display -->
+                <% 
+                  const defaultAddress = addressData.find(addr => addr.isDefault) || addressData[0];
+                  const otherAddresses = addressData.filter(addr => addr._id.toString() !== defaultAddress._id.toString());
+                %>
+                
+                <div class="space-y-4">
+                  <!-- Selected Address Card -->
+                  <div class="relative border-2 border-primary bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg sm:rounded-xl p-4 sm:p-5 shadow-sm" id="selectedAddressCard">
+                    <input type="hidden" name="addressId" value="<%= defaultAddress._id %>" id="selectedAddressId" required />
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
+                      <div class="flex-1 pr-0 sm:pr-4">
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary text-white">
+                            <%= defaultAddress.addressType %>
+                          </span>
+                          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Selected
+                          </span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2" id="selectedAddressName">
+                          <%= defaultAddress.name %>
+                        </h3>
+                        <div class="text-sm sm:text-base text-gray-600 leading-relaxed" id="selectedAddressDetails">
+                          <p class="mb-1"><%= defaultAddress.landmark %>, <%= defaultAddress.city %></p>
+                          <p class="mb-2"><%= defaultAddress.state %> - <%= defaultAddress.pincode %></p>
+                          <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0 text-xs sm:text-sm">
+                            <span class="flex items-center">
+                              <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                              </svg>
+                              <%= defaultAddress.phone %>
+                            </span>
+                            <% if (defaultAddress.altPhone) { %>
+                              <span class="flex items-center text-gray-500">
+                                <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                                Alt: <%= defaultAddress.altPhone %>
+                              </span>
+                            <% } %>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <% if (otherAddresses.length > 0) { %>
+                        <div class="flex-shrink-0">
+                          <button type="button" 
+                                  class="text-primary hover:text-primary-dark text-xs sm:text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-white hover:bg-opacity-50 transition-all duration-200 flex items-center space-x-1 w-full sm:w-auto justify-center"
+                                  onclick="toggleAddressDropdown()">
+                            <span>Change Address</span>
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 transform transition-transform duration-200" id="dropdownIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                          </button>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+
+                  <!-- Address Dropdown -->
+                  <% if (otherAddresses.length > 0) { %>
+                    <div class="hidden transition-all duration-300" id="addressDropdown">
+                      <div class="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200">
+                        <h4 class="text-xs sm:text-sm font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center">
+                          <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 100-4 2 2 0 000 4zm0 0v4a2 2 0 002 2h6a2 2 0 002-2v-4"/>
+                          </svg>
+                          Choose a different address
+                        </h4>
+                        <div class="space-y-3 max-h-48 sm:max-h-64 overflow-y-auto custom-scrollbar">
+                          <% otherAddresses.forEach(addr => { %>
+                            <div class="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 cursor-pointer hover:border-primary hover:shadow-md transition-all duration-200 address-option group"
+                                 data-address-id="<%= addr._id %>"
+                                 data-address-name="<%= addr.name %>"
+                                 data-address-type="<%= addr.addressType %>"
+                                 data-address-details="<p class='mb-1'><%= addr.landmark %>, <%= addr.city %></p><p class='mb-2'><%= addr.state %> - <%= addr.pincode %></p><div class='flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0 text-xs sm:text-sm'><span class='flex items-center'><svg class='w-3 h-3 sm:w-4 sm:h-4 mr-1.5 text-gray-400 flex-shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'/></svg><%= addr.phone %></span><% if (addr.altPhone) { %><span class='flex items-center text-gray-500'><svg class='w-3 h-3 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'/></svg>Alt: <%= addr.altPhone %></span><% } %></div>"
+                                 onclick="selectAddress(this)">
+                              <div class="flex items-start justify-between">
+                                <div class="flex-1 pr-3">
+                                  <div class="flex items-center space-x-2 mb-2">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 group-hover:bg-primary group-hover:text-white transition-colors">
+                                      <%= addr.addressType %>
+                                    </span>
+                                  </div>
+                                  <h5 class="font-semibold text-gray-900 mb-1 text-sm sm:text-base"><%= addr.name %></h5>
+                                  <p class="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                                    <%= addr.landmark %>, <%= addr.city %><br>
+                                    <%= addr.state %> - <%= addr.pincode %><br>
+                                    <span class="font-medium">Phone:</span> <%= addr.phone %>
+                                    <% if (addr.altPhone) { %>
+                                      | <span class="font-medium">Alt:</span> <%= addr.altPhone %>
+                                    <% } %>
+                                  </p>
+                                </div>
+                                <div class="text-primary opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+                          <% }) %>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                </div>
+              <% } else { %>
+                <div class="text-center py-8 sm:py-12">
+                  <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                  </div>
+                  <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Delivery Address</h3>
+                  <p class="text-gray-600 mb-4 sm:mb-6 max-w-sm mx-auto text-sm sm:text-base">Add a delivery address to continue with your order and get your items delivered.</p>
+                  <a href="/user/checkout/addAddress" 
+                     class="inline-flex items-center bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-lg hover:shadow-xl text-sm sm:text-base">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Add Delivery Address
+                  </a>
+                </div>
+              <% } %>
             </div>
           </div>
-        <% } %>
-        <div class="flex gap-2">
-          <input type="text" id="couponCode" class="border rounded-md px-4 py-2 w-full" placeholder="Enter Coupon Code" />
-          <button type="button" id="applyCouponBtn" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition">
-            Apply
-          </button>
-          <button type="button" id="removeCouponBtn" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition hidden">
-            Remove
-          </button>
+
+          <!-- Payment Method Section -->
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-primary via-primary to-primary-dark p-4 sm:p-6 text-white relative overflow-hidden">
+              <div class="absolute inset-0 bg-black opacity-5"></div>
+              <div class="relative z-10 flex items-center space-x-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg sm:text-xl font-semibold">Payment Method</h2>
+                  <p class="text-xs sm:text-sm opacity-90">Choose how you'd like to pay</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 sm:p-6">
+              <div class="space-y-3 sm:space-y-4">
+                <label class="payment-option flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 border-2 border-gray-200 rounded-lg sm:rounded-xl hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group space-y-3 sm:space-y-0">
+                  <div class="flex items-center space-x-3 sm:space-x-4">
+                    <input type="radio" name="paymentMethod" value="COD" checked required class="w-4 h-4 sm:w-5 sm:h-5 text-primary focus:ring-primary focus:ring-offset-0 flex-shrink-0" />
+                    <div class="flex items-center space-x-3 sm:space-x-4">
+                      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-50 group-hover:bg-green-100 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors flex-shrink-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="text-base sm:text-lg font-semibold text-gray-900">Cash on Delivery</div>
+                        <div class="text-xs sm:text-sm text-gray-600">Pay when your order arrives at your doorstep</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start sm:items-end space-y-1 ml-7 sm:ml-0">
+                    <span class="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2.5 sm:px-3 py-1 rounded-full font-medium">
+                      No extra charges
+                    </span>
+                    <span class="text-xs text-gray-400">Available for orders under ₹1000</span>
+                  </div>
+                </label>
+
+                <label class="payment-option flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 border-2 border-gray-200 rounded-lg sm:rounded-xl hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group space-y-3 sm:space-y-0">
+                  <div class="flex items-center space-x-3 sm:space-x-4">
+                    <input type="radio" name="paymentMethod" value="Online" required class="w-4 h-4 sm:w-5 sm:h-5 text-primary focus:ring-primary focus:ring-offset-0 flex-shrink-0" />
+                    <div class="flex items-center space-x-3 sm:space-x-4">
+                      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 group-hover:bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors flex-shrink-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="text-base sm:text-lg font-semibold text-gray-900">Online Payment</div>
+                        <div class="text-xs sm:text-sm text-gray-600">Pay securely using UPI, Cards, Net Banking</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start sm:items-end space-y-1 ml-7 sm:ml-0">
+                    <span class="text-xs sm:text-sm text-green-600 bg-green-100 px-2.5 sm:px-3 py-1 rounded-full font-medium">
+                      Instant & Secure
+                    </span>
+                    <div class="flex items-center space-x-1">
+                      <span class="text-xs text-gray-400">Powered by Razorpay</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Order Summary -->
+        <div class="xl:col-span-1">
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 sticky top-20 sm:top-24 overflow-hidden">
+            
+            <!-- Order Items Header -->
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+              <h3 class="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                Order Summary
+              </h3>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="p-4 sm:p-6 border-b border-gray-200">
+              <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <h4 class="font-medium text-gray-900 text-sm sm:text-base">Items (<span id="itemCount"><%= cartItems.reduce((sum, item) => sum + item.quantity, 0) %></span>)</h4>
+                <button type="button" class="text-xs sm:text-sm text-primary hover:text-primary-dark transition-colors flex items-center space-x-1" onclick="toggleCartItems()">
+                  <span id="toggleText">Show Details</span>
+                  <svg class="w-3 h-3 sm:w-4 sm:h-4 transform transition-transform" id="toggleIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <div class="hidden" id="cartItemsDetails">
+                <div class="space-y-3 sm:space-y-4 max-h-48 sm:max-h-64 overflow-y-auto custom-scrollbar">
+                  <% cartItems.forEach(item => { %>
+                    <div class="flex items-center space-x-3 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
+                      <div class="w-10 h-10 sm:w-14 sm:h-14 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                             alt="<%= item.product.name %>" 
+                             class="w-full h-full object-cover">
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <h5 class="text-xs sm:text-sm font-medium text-gray-900 truncate"><%= item.product.name %></h5>
+                        <div class="flex items-center space-x-2 mt-1">
+                          <span class="text-xs sm:text-sm font-semibold text-primary">₹<%= item.product.discountedPrice %></span>
+                          <% if (item.product.price > item.product.discountedPrice) { %>
+                            <span class="text-xs text-gray-500 line-through">₹<%= item.product.price.toFixed(2) %></span>
+                          <% } %>
+                        </div>
+                        <div class="text-xs text-gray-600 mt-1">Qty: <%= item.quantity %></div>
+                      </div>
+                      <div class="text-right flex-shrink-0">
+                        <div class="text-xs sm:text-sm font-semibold text-gray-900">₹<%= (item.product.discountedPrice * item.quantity).toFixed(2) %></div>
+                        <% if (item.product.price > item.product.discountedPrice) { %>
+                          <div class="text-xs text-green-600">Save ₹<%= ((item.product.price - item.product.discountedPrice) * item.quantity).toFixed(2) %></div>
+                        <% } %>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coupon Section -->
+            <div class="p-4 sm:p-6 border-b border-gray-200">
+              <h4 class="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center text-sm sm:text-base">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.934 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732L9.854 7.2l1.179-4.456A1 1 0 0112 2z" clip-rule="evenodd"/>
+                </svg>
+                Coupons & Offers
+              </h4>
+              
+              <% if (validCoupons && validCoupons.length) { %>
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                  <h5 class="text-xs sm:text-sm font-semibold text-green-800 mb-2 sm:mb-3 flex items-center">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Available Offers
+                  </h5>
+                  <div class="space-y-2 max-h-24 sm:max-h-32 overflow-y-auto custom-scrollbar">
+                    <% validCoupons.forEach(coupon => { %>
+                      <div class="bg-white border border-dashed border-green-300 rounded-lg p-2.5 sm:p-3 flex justify-between items-center">
+                        <div class="flex-1 min-w-0 pr-2">
+                          <div class="font-bold text-green-700 text-xs sm:text-sm truncate"><%= coupon.code %></div>
+                          <div class="text-xs text-gray-600">
+                            <%= coupon.discountType === 'Flat' 
+                              ? '₹' + coupon.discountAmount + ' off' 
+                              : coupon.discountAmount + '% off' %>
+                            (Min. ₹<%= coupon.minCartAmount %>)
+                          </div>
+                        </div>
+                        <button 
+                          type="button" 
+                          onclick="applyCouponCode('<%= coupon.code %>')" 
+                          class="bg-green-500 hover:bg-green-600 text-white text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full transition-colors font-medium flex-shrink-0">
+                          Apply
+                        </button>
+                      </div>
+                    <% }) %>
+                  </div>
+                </div>
+              <% } %>
+
+              <div class="flex space-x-2">
+                <input type="text" 
+                       id="couponCode" 
+                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors" 
+                       placeholder="Enter coupon code" />
+                <button type="button" 
+                        id="applyCouponBtn" 
+                        class="bg-primary text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg hover:bg-primary-dark transition-colors text-xs sm:text-sm font-medium flex-shrink-0">
+                  Apply
+                </button>
+                <button type="button" 
+                        id="removeCouponBtn" 
+                        class="bg-red-500 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg hover:bg-red-600 transition-colors text-xs sm:text-sm font-medium hidden flex-shrink-0">
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="p-4 sm:p-6">
+              <input type="hidden" id="originalTotal" value="<%= cartTotal.toFixed(2) %>" />
+              
+              <div class="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Subtotal</span>
+                  <span class="font-medium">₹<%= cartTotal.toFixed(2) %></span>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Shipping</span>
+                  <span class="font-medium text-green-600">FREE</span>
+                </div>
+                
+                <div class="flex justify-between hidden" id="discountSection">
+                  <span class="text-gray-600">Coupon Discount</span>
+                  <span class="font-medium text-green-600" id="discountAmount">- ₹0</span>
+                </div>
+                
+                <hr class="border-gray-200">
+                
+                <div class="flex justify-between text-base sm:text-lg font-bold">
+                  <span>Total Amount</span>
+                  <span class="text-primary" id="totalPayable">₹<%= cartTotal.toFixed(2) %></span>
+                </div>
+                
+                <div class="text-xs text-gray-500 text-center">
+                  Inclusive of all taxes
+                </div>
+              </div>
+
+              <!-- Place Order Button -->
+              <button type="button" 
+                      onclick="handlePlaceOrder()" 
+                      class="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 sm:py-4 rounded-lg sm:rounded-xl hover:from-primary-dark hover:to-primary transition-all duration-300 font-semibold text-sm sm:text-lg mt-4 sm:mt-6 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                <span class="relative flex items-center justify-center space-x-2">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>Place Order Securely</span>
+                </span>
+              </button>
+
+              <!-- Security & Trust Indicators -->
+              <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100">
+                <div class="grid grid-cols-3 gap-2 sm:gap-4 text-xs text-gray-500">
+                  <div class="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-1 text-center sm:text-left">
+                    <svg class="w-3 h-3 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>SSL Secured</span>
+                  </div>
+                  <div class="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-1 text-center sm:text-left">
+                    <svg class="w-3 h-3 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Safe Payment</span>
+                  </div>
+                  <div class="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-1 text-center sm:text-left">
+                    <svg class="w-3 h-3 text-purple-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Easy Returns</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Cart Items -->
-      <div class="space-y-3 border-t pt-4">
-        <% 
-          const cartTotalDisplay = cartTotal;
-        %>
-      <input type="hidden" id="originalTotal" value="<%= cartTotal.toFixed(2) %>" />
-      </div>
-
-      <!-- Total Summary -->
-      <div class="border-t pt-4 text-gray-800 space-y-2">
-        <div class="flex justify-between font-medium">
-          <span>Subtotal:</span>
-          <span>₹<%= cartTotalDisplay.toFixed(2) %></span>
-        </div>
-
-        <div class="flex justify-between text-sm text-green-600" id="discountSection" style="display: none;">
-          <span>Coupon Discount:</span>
-          <span id="discountAmount">- ₹0</span>
-        </div>
-
-        <div class="flex justify-between text-lg font-bold">
-          <span>Total Payable:</span>
-          <span id="totalPayable">₹<%= cartTotalDisplay.toFixed(2) %></span>
-        </div>
-      </div>
-
-      <!-- Place Order Button -->
-      <div class="pt-6">
-        <button type="button" onclick="handlePlaceOrder()" class="w-full bg-primary text-white py-3 rounded-md hover:bg-primary-dark transition">
-          Place Order
-        </button>        
-      </div>
-    </div>
-
-</form>
-
+    </form>
   </div>
-
-</div>
+</main>
 
 <%- include("../partials/userFooter") %>
 
-<!-- SweetAlert2 -->
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-<!-- Coupon JS -->
+<style>
+  .payment-option:has(input:checked) {
+    border-color: #007D8B;
+    background-color: rgba(0, 125, 139, 0.05);
+  }
+  
+  .address-option:hover .opacity-0 {
+    opacity: 1;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #007D8B;
+    border-radius: 2px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #005F66;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    .sticky {
+      top: 4rem;
+    }
+  }
+</style>
+
 <script>
-  document.getElementById('applyCouponBtn').addEventListener('click', async () => {
+  // Toggle cart items visibility
+  function toggleCartItems() {
+    const details = document.getElementById('cartItemsDetails');
+    const toggleText = document.getElementById('toggleText');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (details.classList.contains('hidden')) {
+      details.classList.remove('hidden');
+      toggleText.textContent = 'Hide Details';
+      toggleIcon.style.transform = 'rotate(180deg)';
+    } else {
+      details.classList.add('hidden');
+      toggleText.textContent = 'Show Details';
+      toggleIcon.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  // Address dropdown functionality
+  function toggleAddressDropdown() {
+    const dropdown = document.getElementById('addressDropdown');
+    const icon = document.getElementById('dropdownIcon');
+    
+    if (dropdown.classList.contains('hidden')) {
+      dropdown.classList.remove('hidden');
+      icon.style.transform = 'rotate(180deg)';
+    } else {
+      dropdown.classList.add('hidden');
+      icon.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  // Select address
+  function selectAddress(element) {
+    const addressId = element.dataset.addressId;
+    const addressName = element.dataset.addressName;
+    const addressType = element.dataset.addressType;
+    const addressDetails = element.dataset.addressDetails;
+    
+    // Update selected address
+    document.getElementById('selectedAddressId').value = addressId;
+    document.getElementById('selectedAddressName').textContent = addressName;
+    document.getElementById('selectedAddressDetails').innerHTML = addressDetails;
+    
+    // Update address type badge
+    const badge = document.querySelector('#selectedAddressCard .bg-primary');
+    badge.textContent = addressType;
+    
+    // Close dropdown
+    toggleAddressDropdown();
+    
+    // Show success message
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Address updated successfully',
+      showConfirmButton: false,
+      timer: 2000,
+      background: '#f0fdf4',
+      color: '#166534'
+    });
+  }
+
+  // Apply coupon code directly
+  function applyCouponCode(code) {
+    document.getElementById('couponCode').value = code;
+    applyCoupon();
+  }
+
+  // Apply coupon
+  async function applyCoupon() {
     const code = document.getElementById('couponCode').value.trim();
-    const originalTotal = parseFloat(document.getElementById('originalTotal').value);
+    
     if (!code) {
       Swal.fire({
         icon: 'info',
-        title: 'Enter a coupon code first!',
+        title: 'Enter a coupon code',
+        text: 'Please enter a coupon code to apply discount.',
         confirmButtonColor: '#007D8B',
       });
       return;
     }
 
-    const response = await fetch('/user/apply-coupon', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ couponCode: code })
-    });
-
-    const data = await response.json();
-    if (data.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Coupon Applied!',
-        text: data.message,
-        confirmButtonColor: '#007D8B',
+    try {
+      const response = await fetch('/user/apply-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ couponCode: code })
       });
-      document.getElementById('discountSection').style.display = 'flex';
-      document.getElementById('discountAmount').innerText = `- ₹${data.couponDiscount.toFixed(2)}`;
-      document.getElementById('totalPayable').innerText = `₹${data.finalTotal.toFixed(2)}`;
-      document.getElementById('applyCouponBtn').classList.add('hidden');
-      document.getElementById('removeCouponBtn').classList.remove('hidden');
-    } else {
+
+      const data = await response.json();
+      
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Coupon Applied!',
+          text: data.message,
+          confirmButtonColor: '#007D8B',
+          timer: 3000
+        });
+        
+        document.getElementById('discountSection').classList.remove('hidden');
+        document.getElementById('discountAmount').innerText = `- ₹${data.couponDiscount.toFixed(2)}`;
+        document.getElementById('totalPayable').innerText = `₹${data.finalTotal.toFixed(2)}`;
+        document.getElementById('applyCouponBtn').classList.add('hidden');
+        document.getElementById('removeCouponBtn').classList.remove('hidden');
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Coupon Invalid',
+          text: data.message,
+          confirmButtonColor: '#007D8B',
+        });
+      }
+    } catch (error) {
       Swal.fire({
         icon: 'error',
-        title: 'Failed!',
-        text: data.message,
+        title: 'Error',
+        text: 'Failed to apply coupon. Please try again.',
         confirmButtonColor: '#007D8B',
       });
     }
-  });
+  }
 
-  document.getElementById('removeCouponBtn').addEventListener('click', async () => {
-    const response = await fetch('/user/remove-coupon', { method: 'POST' });
-    const data = await response.json();
-    if (data.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Coupon Removed!',
-        text: data.message,
-        confirmButtonColor: '#007D8B',
-      });
-      document.getElementById('discountSection').style.display = 'none';
-      document.getElementById('discountAmount').innerText = '- ₹0';
-      document.getElementById('totalPayable').innerText = '₹' + parseFloat(document.getElementById('originalTotal').value).toFixed(2);
-      document.getElementById('applyCouponBtn').classList.remove('hidden');
-      document.getElementById('removeCouponBtn').classList.add('hidden');
-    } else {
+  // Remove coupon
+  async function removeCoupon() {
+    try {
+      const response = await fetch('/user/remove-coupon', { method: 'POST' });
+      const data = await response.json();
+      
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Coupon Removed',
+          text: data.message,
+          confirmButtonColor: '#007D8B',
+          timer: 2000
+        });
+        
+        document.getElementById('discountSection').classList.add('hidden');
+        document.getElementById('discountAmount').innerText = '- ₹0';
+        document.getElementById('totalPayable').innerText = '₹' + parseFloat(document.getElementById('originalTotal').value).toFixed(2);
+        document.getElementById('applyCouponBtn').classList.remove('hidden');
+        document.getElementById('removeCouponBtn').classList.add('hidden');
+        document.getElementById('couponCode').value = '';
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.message,
+          confirmButtonColor: '#007D8B',
+        });
+      }
+    } catch (error) {
       Swal.fire({
         icon: 'error',
-        title: 'Failed!',
-        text: data.message,
+        title: 'Error',
+        text: 'Failed to remove coupon. Please try again.',
         confirmButtonColor: '#007D8B',
       });
     }
-  });
-</script>
+  }
 
-
-<script>
+  // Place order functionality
   async function handlePlaceOrder() {
-    event.preventDefault();
-    const addressRadio = document.querySelector('input[name="addressId"]:checked');
-    if (!addressRadio) {
+    const addressId = document.getElementById('selectedAddressId')?.value;
+    if (!addressId) {
       Swal.fire({
         icon: 'warning',
-        title: 'Select a delivery address',
-        text: 'Please choose an address before placing your order.',
-        confirmButtonColor:'#007D8B',
+        title: 'Select Delivery Address',
+        text: 'Please choose a delivery address to continue.',
+        confirmButtonColor: '#007D8B',
       });
       return;
     }
-
-    const addressId = addressRadio.value;
-
 
     const form = document.getElementById('placeOrderForm');
     const paymentMethod = form.querySelector('input[name="paymentMethod"]:checked').value;
 
     if (paymentMethod === 'COD') {
-      form.submit(); 
+      // Show loading
+      Swal.fire({
+        title: 'Processing Order...',
+        text: 'Please wait while we process your order.',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      setTimeout(() => {
+        form.submit();
+      }, 1000);
     } else if (paymentMethod === 'Online') {
-      const amountText = document.getElementById('totalPayable').innerText.replace('₹', '').trim();
+      const amountText = document.getElementById('totalPayable').innerText.replace('₹', '').replace(',', '').trim();
       const amount = Math.round(parseFloat(amountText));
 
       try {
@@ -265,29 +742,40 @@
         if (!data.success) {
           Swal.fire({
             icon: 'error',
-            title: 'Payment Failed',
-            text: result.message,
+            title: 'Payment Setup Failed',
+            text: data.message || 'Unable to setup payment. Please try again.',
             confirmButtonColor: '#007D8B',
           }).then(() => {
-          window.location.href = '/user/order-failure';
-        });
-       }
-
+            window.location.href = '/user/order-failure';
+          });
+          return;
+        }
 
         const razorpayOptions = {
           key: '<%= process.env.RAZORPAY_KEY_ID %>',
           amount: data.order.amount,
           currency: "INR",
           name: "Bookly",
-          description: "Order Payment",
+          description: "Secure Payment for Your Order",
           order_id: data.order.id,
-          theme: {
-              color: "#007D8B" 
+          theme: { 
+            color: "#007D8B",
+            backdrop_color: "rgba(0, 125, 139, 0.1)"
           },
           handler: function (response) {
             document.getElementById('razorpayPaymentId').value = response.razorpay_payment_id;
             document.getElementById('razorpayOrderId').value = response.razorpay_order_id;
-            form.submit();
+            
+            Swal.fire({
+              title: 'Payment Successful!',
+              text: 'Processing your order...',
+              icon: 'success',
+              allowOutsideClick: false,
+              showConfirmButton: false,
+              timer: 2000
+            }).then(() => {
+              form.submit();
+            });
           },
           modal: {
             ondismiss: function () {
@@ -297,38 +785,75 @@
                 body: JSON.stringify({
                   paymentMethod: 'Online',
                   status: 'Failed',
-                  addressId: document.querySelector('input[name="addressId"]').value
+                  addressId: addressId
                 })
               }).then(() => {
                 window.location.href = '/user/order-failure';
               }).catch(() => {
-                alert('Failed to log failed order.');
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Payment Cancelled',
+                  text: 'Your payment was cancelled. You can try again.',
+                  confirmButtonColor: '#007D8B',
+                });
               });
             }
+          },
+          prefill: {
+            name: "<%= userData.name %>",
+            email: "<%= userData.email %>",
+            contact: "<%= userData.phone %>"
           }
-        }
+        };
+        
         const rzp = new Razorpay(razorpayOptions);
         rzp.open();
 
       } catch (err) {
+        console.error('Payment error:', err);
         Swal.fire({
           icon: 'error',
           title: 'Payment Error',
-          text: err.message,
+          text: 'Something went wrong with the payment. Please try again.',
           confirmButtonColor: '#007D8B',
-        }).then(() => {
-  window.location.href = '/user/order-failure';
-});
-
+        });
       }
     }
   }
+
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    // Apply coupon button
+    document.getElementById('applyCouponBtn').addEventListener('click', applyCoupon);
+    
+    // Remove coupon button
+    document.getElementById('removeCouponBtn').addEventListener('click', removeCoupon);
+    
+    // Enter key on coupon input
+    document.getElementById('couponCode').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyCoupon();
+      }
+    });
+
+    // Mobile menu toggle (if needed)
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', function() {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+  });
 </script>
+
 <% if (typeof codLimitError !== 'undefined') { %>
 <script>
   Swal.fire({
     icon: 'warning',
-    title: 'COD Not Allowed',
+    title: 'COD Not Available',
     text: '<%= codLimitError %>',
     confirmButtonColor: '#007D8B',
   });
