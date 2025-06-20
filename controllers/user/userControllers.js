@@ -402,7 +402,7 @@ const forgotPassword = async (req, res, next) => {
     req.session.resetEmail = email
     req.session.resetTokenExpiration = Date.now() + 3600000 
 
-    const resetLink = `http://localhost:3000/user/reset-password?token=${resetToken}`
+    const resetLink = `${process.env.RESET_LINK}?token=${resetToken}`
     const mailOptions = {
       from: process.env.NODEMAILER_EMAIL,
       to: email,
