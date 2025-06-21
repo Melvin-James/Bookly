@@ -15,7 +15,7 @@ const uploadProfileImage = uploadTo('profileImages');
 
 router.get('/signup',userControllers.loadSignup);
 router.post('/signup',userControllers.signupStep1);
-router.post("/google-signin", userControllers.googleSignIn)
+router.post("/google-signin", userControllers.googleSignIn);
 router.post('/verify-otp', userControllers.verifyOtp);
 router.post('/resendOtp',userControllers.resendOtp);
 
