@@ -3,8 +3,8 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true, unique: true, default:'0000000000' },
+    email: { type: String, required: true, unique: true, sparse: true },
+    phone: { type: String, required: true},
     password: { type: String, required: true },
     wallet: {
       type: Number,
@@ -54,7 +54,7 @@ const userSchema = new Schema({
       of: Number,
       default: {}
     },
-    referralCode: { type: String, unique: true },
+    referralCode: { type: String, unique: true, sparse: true },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true });
 
