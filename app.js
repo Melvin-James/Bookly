@@ -22,7 +22,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false, 
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: false,
         httpOnly: true,
         maxAge: 72 * 60 * 60 * 1000,
         sameSite: 'lax' 
@@ -31,9 +31,6 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-
-app.use(errorHandler);
 
 app.use(flash());
 
@@ -54,6 +51,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
