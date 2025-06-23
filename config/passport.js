@@ -17,6 +17,9 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+const isProd = process.env.NODE_ENV === 'production';
+const callbackURL = isProd ? process.env.GOOGLE_CALLBACK_PROD : process.env.GOOGLE_CALLBACK_DEV;
+
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
