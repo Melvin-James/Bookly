@@ -8,7 +8,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Google Sign-In API -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <style>
         .spinner {
@@ -340,31 +339,14 @@
             <div class="step" data-step="2">2</div>
         </div>
         
-        <div class="form-container">
-            <!-- Social Login -->
+        <div class="form-container">        
             <div class="social-login">
-                <div id="g_id_onload"
-                     data-client_id="<%= googleClientId %>"
-                     data-context="signup"
-                     data-ux_mode="popup"
-                     data-callback="handleGoogleSignIn"
-                     data-auto_prompt="false">
-                </div>
-                
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-shape="rectangular"
-                     data-theme="outline"
-                     data-text="signup_with"
-                     data-size="large"
-                     data-logo_alignment="center"
-                     data-width="100%">
-                </div>
+                <a href="/user/google" class="google-btn">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google Icon">
+                    Sign up with Google
+                </a>
             </div>
-            
-            <div class="divider">
-                <span>or sign up with email</span>
-            </div>
+
             
             <form id="signupForm" enctype="multipart/form-data">
                 <!-- Personal Details Section -->
@@ -586,44 +568,7 @@
         });
         
         // Google Sign-In callback
-        function handleGoogleSignIn(response) {
-            // Decode the JWT token to get user info
-            const base64Url = response.credential.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-
-            const { name, email, picture } = JSON.parse(jsonPayload);
-            
-            // Send the Google sign-in data to your backend
-            $.ajax({
-                url: '/user/google-signin',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ name, email, picture }),
-                success: function(res) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Google Sign-in Successful!',
-                        text: 'Redirecting to dashboard...',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.location.href = '/user/home';
-                    });
-                },
-                error: function(xhr) {
-                    const response = xhr.responseJSON;
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Sign-in Failed',
-                        text: response?.error || 'Something went wrong during Google sign-in.',
-                        confirmButtonColor: '#007D8B'
-                    });
-                }
-            });
-        }
+        
     </script>
 </body>
 </html>

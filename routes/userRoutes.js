@@ -1,4 +1,5 @@
 const express = require('express');
+const passport = require('passport');
 const router = express.Router();
 
 const userControllers=require('../controllers/user/userControllers');
@@ -15,7 +16,17 @@ const uploadProfileImage = uploadTo('profileImages');
 
 router.get('/signup',userControllers.loadSignup);
 router.post('/signup',userControllers.signupStep1);
-router.post("/google-signin", userControllers.googleSignIn);
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get('/google/callback', passport.authenticate('google', {
+  failureRedirect: '/user/login',
+  failureFlash: true
+}), (req, res) => {
+  console.log('Google login success, user in session:', req.user); // <--
+  res.redirect('/user/home');
+});
+
+
 router.post('/verify-otp', userControllers.verifyOtp);
 router.post('/resendOtp',userControllers.resendOtp);
 
