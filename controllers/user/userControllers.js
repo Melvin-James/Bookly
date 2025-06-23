@@ -441,7 +441,6 @@ const logout = (req, res) => {
 module.exports = {
   loadSignup,
   signupStep1,
-  googleSignIn,
   verifyOtp,
   homePage,
   pageNotFound,
