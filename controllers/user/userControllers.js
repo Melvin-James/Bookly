@@ -119,54 +119,6 @@ const signupStep1 = async (req, res, next) => {
   }
 }
 
-const googleSignIn = async (req, res, next) => {
-  try {
-    const { name, email, picture } = req.body
-
-    if (!name || !email) {
-      return res.status(400).json({ error: "Name and email are required from Google" })
-    }
-
-    const user = await User.findOne({ email })
-
-    if (user) {
-      if (user.isBlocked) {
-        return res.status(403).json({ error: "Your account has been blocked by the admin." })
-      }
-
-      req.session.user = {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-      }
-
-      return res.json({ success: true, message: "Login successful", redirect: "/user/home" })
-    } else {
-      const newUser = await User.create({
-        name,
-        email,
-        phone:"0000000000",
-        password: await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10),
-        isGoogleUser: true,
-        profilePicture: picture || "",
-        isVerified: true, 
-      })
-
-      req.session.user = {
-        _id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        phone: newUser.phone,
-      }
-
-      return res.json({ success: true, message: "Account created successfully", redirect: "/user/home" })
-    }
-  } catch (err) {
-    next(err);
-  }
-}
-
 const verifyOtp = async (req, res, next) => {
   const { otp } = req.body
   const { tempUser } = req.session
