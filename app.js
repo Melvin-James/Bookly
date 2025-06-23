@@ -1,4 +1,6 @@
 require('dotenv').config();
+const passport = require('passport');
+require('./config/passport');
 const morgan = require('morgan');
 const express = require("express");
 const session = require('express-session');
@@ -26,6 +28,10 @@ app.use(session({
         sameSite: 'lax' 
     }
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 app.use(errorHandler);
 
