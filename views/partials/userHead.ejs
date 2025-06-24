@@ -79,13 +79,9 @@
           <% if (userData) { %>
             <!-- Logged-in User Navigation -->
             <a href="/user/shop" class="text-sm font-medium hover:text-primary transition-colors">Shop</a>
-            <a href="/user/categories" class="text-sm font-medium hover:text-primary transition-colors">Categories</a>
-            <a href="/user/contact" class="text-sm font-medium hover:text-primary transition-colors">Contact</a>
           <% } else { %>
             <!-- Guest Navigation with Alert -->
             <a href="javascript:void(0);" onclick="guestPrompt()" class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">Shop</a>
-            <a href="javascript:void(0);" onclick="guestPrompt()" class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">Categories</a>
-            <a href="javascript:void(0);" onclick="guestPrompt()" class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">Contact</a>
           <% } %>
         </nav>
 
@@ -134,12 +130,11 @@
     <div id="mobile-menu" class="md:hidden hidden bg-white border-b border-gray-100">
       <div class="container mx-auto px-4 py-4 space-y-3">
           <% if (userData) { %>
-            <a href="/user/cart">Cart</a>
-            <a href="/user/profile">Profile</a>
-            <a href="/user/logout">Logout</a>
+            <a href="/user/home">Home</a>
+            <a href="/user/shop">Shop</a>
           <% } else { %>
-            <a href="/user/login">Login</a>
-            <a href="/user/signup">Sign Up</a>
+            <a href="/user/home">Home</a>
+            <a href="/user/shop">Shop</a>
           <% } %>
       </div>
     </div>
