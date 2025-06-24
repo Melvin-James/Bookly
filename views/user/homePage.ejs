@@ -8,12 +8,23 @@
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-balance">Discover your next favorite book</h1>
           <p class="text-lg text-gray-600 max-w-md">Curated collection of books across four genres at unbeatable prices with free shipping.</p>
           <div class="flex flex-wrap gap-4">
-            <a href="/user/shop" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-              Browse Collection
-            </a>
-            <a href="/user/shop" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-              Explore Categories
-            </a>
+            <% if (userData) { %>
+              <!-- Logged-in user -->
+              <a href="/user/shop" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                Browse Collection
+              </a>
+              <a href="/user/shop" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                Explore Categories
+              </a>
+            <% } else { %>
+              <!-- Guest -->
+              <a href="/user/signup" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                Join Bookly Free
+              </a>
+              <a href="/user/login" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                Login to Browse
+              </a>
+            <% } %>
           </div>
         </div>
         <div class="relative">
@@ -60,9 +71,10 @@
         <h2 class="text-3xl font-bold">Browse by Category</h2>
         <p class="text-gray-600 mt-2">Find your perfect read from our curated collections</p>
       </div>
-      
+
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <a href="/user/shop" class="group">
+        <!-- Sci-Fi -->
+        <a href="<%= userData ? '/user/shop?category=Sci-Fi' : '/user/signup' %>" class="group">
           <div class="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col items-center justify-center">
             <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
               <i class="fas fa-rocket"></i>
@@ -70,7 +82,9 @@
             <h3 class="font-medium">Sci-Fi</h3>
           </div>
         </a>
-        <a href="/user/shop" class="group">
+
+        <!-- Fantasy -->
+        <a href="<%= userData ? '/user/shop?category=Fantasy' : '/user/signup' %>" class="group">
           <div class="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col items-center justify-center">
             <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
               <i class="fas fa-dragon"></i>
@@ -78,7 +92,9 @@
             <h3 class="font-medium">Fantasy</h3>
           </div>
         </a>
-        <a href="/user/shop" class="group">
+
+        <!-- Horror -->
+        <a href="<%= userData ? '/user/shop?category=Horror' : '/user/signup' %>" class="group">
           <div class="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col items-center justify-center">
             <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
               <i class="fas fa-ghost"></i>
@@ -86,7 +102,9 @@
             <h3 class="font-medium">Horror</h3>
           </div>
         </a>
-        <a href="/user/shop" class="group">
+
+        <!-- Humor -->
+        <a href="<%= userData ? '/user/shop?category=Humor' : '/user/signup' %>" class="group">
           <div class="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col items-center justify-center">
             <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
               <i class="fas fa-laugh"></i>
@@ -95,8 +113,15 @@
           </div>
         </a>
       </div>
+
+      <% if (!userData) { %>
+        <p class="text-center text-sm text-gray-500 mt-6">
+          <a href="/user/login" class="text-primary underline">Login</a> or <a href="/user/signup" class="text-primary underline">sign up</a> to browse categories.
+        </p>
+      <% } %>
     </div>
   </section>
+
 
   <!-- Best Sellers Section -->
   <section class="py-16 bg-gray-50">
@@ -110,8 +135,8 @@
           <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 group relative">
       
             <!-- Wishlist Heart Icon -->
-            <form method="POST" action="/user/wishlist/<%= product._id %>" class="absolute top-2 right-2 z-10">
-              <!-- Wishlist Heart Icon (AJAX version) -->
+            <% if (userData) { %>
+              <!-- ✅ Logged-in: Heart Button with AJAX toggle -->
               <button 
                 type="button"
                 id="wishlist-<%= product._id %>"
@@ -119,20 +144,39 @@
                 class="wishlist-btn absolute top-2 right-2 z-10 bg-white p-1 rounded-full shadow hover:bg-red-500 hover:text-white transition"
               >
                 <%- userData?.wishlist?.includes(product._id) 
-                    ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4 
-                        8.28 4 10 5.5 12 7.09 14 5.5 15.72 4 17.5 4 
-                        20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                      </svg>` 
-                    : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                        d="M4.318 6.318a4.414 4.414 0 015.364-.364L12 7.414l2.318-2.318a4.414 
-                        4.414 0 015.364.364c1.562 1.562 1.562 4.096 0 5.657L12 21 
-                        4.318 11.975a4 4 0 010-5.657z" />
-                      </svg>` %>
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4 
+                      8.28 4 10 5.5 12 7.09 14 5.5 15.72 4 17.5 4 
+                      20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>` 
+                  : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M4.318 6.318a4.414 4.414 0 015.364-.364L12 7.414l2.318-2.318a4.414 
+                      4.414 0 015.364.364c1.562 1.562 1.562 4.096 0 5.657L12 21 
+                      4.318 11.975a4 4 0 010-5.657z" />
+                    </svg>` %>
               </button>
-            </form>
-      
+            <% } else { %>
+              <!-- ❌ Guest: Show SweetAlert instead -->
+              <button 
+                type="button"
+                onclick="guestPrompt({
+                  title: 'Login Required',
+                  text: 'Please log in to add items to your wishlist.',
+                  confirmText: 'Login',
+                  confirmRedirect: '/user/login'
+                })"
+                class="absolute top-2 right-2 z-10 bg-white p-1 rounded-full shadow hover:bg-red-500 hover:text-white transition"
+              >
+                <!-- Empty heart icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M4.318 6.318a4.414 4.414 0 015.364-.364L12 7.414l2.318-2.318a4.414 
+                    4.414 0 015.364.364c1.562 1.562 1.562 4.096 0 5.657L12 21 
+                    4.318 11.975a4 4 0 010-5.657z" />
+                </svg>
+              </button>
+            <% } %>
             <!-- Product Image and Hover Actions -->
             <div class="relative">
               <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.name %>" class="w-full h-64 object-cover" />
@@ -151,11 +195,21 @@
                 </a>
                 
                 <% if (product.status === 'Available' && product.quantity > 0) { %>
-                  <button 
-                      class="add-to-cart-btn bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition" 
-                      data-product-id="<%= product._id %>">
+                  <% if (userData) { %>
+                    <!-- Logged-in: Show Add to Cart -->
+                    <button 
+                        class="add-to-cart-btn bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition" 
+                        data-product-id="<%= product._id %>">
+                        Add to Cart
+                    </button>
+                  <% } else { %>
+                    <!-- Guest: Show SweetAlert -->
+                    <button 
+                      class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-dark transition"
+                      onclick="showSignupAlert()">
                       Add to Cart
-                  </button>
+                    </button>
+                  <% } %>
                 <% } else { %>
                   <button 
                     disabled
@@ -534,6 +588,22 @@
       }
     });
   });
+  function showSignupAlert() {
+    Swal.fire({
+      title: "Please Sign Up",
+      text: "You need an account to add items to your cart.",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: '#007D8B',
+      cancelButtonColor: '#007D8B',
+      confirmButtonText: 'Sign Up',
+      cancelButtonText: 'Maybe Later'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/user/signup";
+      }
+    });
+  }
 </script>
 
 

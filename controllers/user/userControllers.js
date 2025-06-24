@@ -211,16 +211,19 @@ const pageNotFound = async (req, res, next) => {
 const homePage = async (req, res, next) => {
   try {
     const products = await Product.find({ isBlocked: false })
-    .populate('category')
-    .sort({
-      createdAt: -1,
-    })
-    .limit(4)
-    const user = await User.findById(req.session.user._id);
-    
+      .populate('category')
+      .sort({ createdAt: -1 })
+      .limit(4);
+
+    const isLoggedIn = !!req.session.user;
+    let user = null;
+
+    if (isLoggedIn) {
+      user = await User.findById(req.session.user._id);
+    }
+
     for (let product of products) {
       const basePrice = Number(product.price);
-
 
       if (!basePrice || isNaN(basePrice)) {
         console.error(`Invalid price for product: ${product._id}`);
@@ -228,25 +231,29 @@ const homePage = async (req, res, next) => {
       }
 
       const productOffer = Number(product.productOffer) || 0;
-      const categoryOffer = Number(product.category.categoryOffer) || 0;
+      const categoryOffer = Number(product.category?.categoryOffer) || 0;
 
       const maxOffer = Math.max(productOffer, categoryOffer);
 
       const discount = Math.round((basePrice * maxOffer) / 100);
       const finalPrice = basePrice - discount;
 
-
       product.appliedOffer = isNaN(maxOffer) ? 0 : maxOffer;
       product.discountedPrice = isNaN(finalPrice) ? basePrice : finalPrice;
 
       await product.save();
-  }
+    }
 
-    res.render("homePage", { products, userData: user })
+    res.render("homePage", {
+      products,
+      userData: user,  
+      isLoggedIn       
+    });
+
   } catch (err) {
     next(err);
   }
-}
+};
 
 const loadLogin = async (req, res, next) => {
   try {

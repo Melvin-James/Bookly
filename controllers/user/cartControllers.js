@@ -165,14 +165,26 @@ const removeFromCart = async (req, res, next) => {
     }
 };
   
-const getItemsInCartCount = async (req,res, next)=>{
+const getItemsInCartCount = async (req, res, next) => {
+  try {
+    if (!req.session || !req.session.user) {
+      return res.status(200).json({ success: true, value: 0 });
+    }
+
     const userId = req.session.user._id;
-    let value =0
-    if(!userId)  return res.status(404).json({success:false,value})
-    const userCart = await User.findById(userId).select('cart -_id')
-    value  = userCart.cart.length;
-    return res.status(200).json({success:true,value})
-}
+    if (!userId) {
+      return res.status(404).json({ success: false, value: 0 });
+    }
+
+    const userCart = await User.findById(userId).select('cart -_id');
+    const value = userCart?.cart?.length || 0;
+
+    return res.status(200).json({ success: true, value });
+  } catch (error) {
+    next(error)
+  }
+};
+
 
 module.exports ={
     getCartPage,

@@ -17,20 +17,29 @@ const uploadProfileImage = uploadTo('profileImages');
 router.get('/signup',userControllers.loadSignup);
 router.post('/signup',userControllers.signupStep1);
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
 router.get('/google/callback', passport.authenticate('google', {
   failureRedirect: '/user/login',
   failureFlash: true
 }), (req, res) => {
-  console.log('Google login success, user in session:', req.user); // <--
+  req.session.user = {
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    isAdmin: req.user.isAdmin,
+  };
+
+  console.log('Google login success, session user set:', req.session.user);
   res.redirect('/user/home');
 });
+
 
 
 router.post('/verify-otp', userControllers.verifyOtp);
 router.post('/resendOtp',userControllers.resendOtp);
 
-router.get('/home',userAuth,userControllers.homePage);
+router.get('/home', userControllers.homePage);
+router.get('/', userControllers.homePage);      
+
 
 router.get('/login',userControllers.loadLogin);
 router.post('/login',userControllers.login);
@@ -44,7 +53,7 @@ router.post('/reset-password',userControllers.resetPassword);
 router.get('/logout',userAuth,userControllers.logout);
 
 router.get('/shop',userAuth,homeControllers.getShopProducts);
-router.get('/product-details/:id',userAuth,homeControllers.getProductDetails);
+router.get('/product-details/:id',homeControllers.getProductDetails);
 
 router.get('/profile',userAuth,profileControllers.getProfilePage);
 router.get('/profile/edit',userAuth,profileControllers.getEditProfile);
