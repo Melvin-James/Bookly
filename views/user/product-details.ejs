@@ -25,30 +25,58 @@
         <div class="space-y-4">
           <!-- Main Image Container -->
           <div class="relative">
-            <!-- Wishlist Button -->
-            <button 
-              type="button"
-              id="wishlist-<%= product._id %>"
-              onclick="toggleWishlist('<%= product._id %>')"
-              class="absolute top-3 right-3 z-20 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:bg-white hover:scale-110 transition-all duration-200"
-            >
-              <% 
-                let isInWishlist = false;
-                if (userData && userData.wishlist && Array.isArray(userData.wishlist)) {
-                  isInWishlist = userData.wishlist.some(item => item.toString() === product._id.toString());
-                }
-              %>
-              <% if (isInWishlist) { %>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4 8.28 4 10 5.5 12 7.09 14 5.5 15.72 4 17.5 4 20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-              <% } else { %>
+            <% if (userData) { %>
+              <!-- ✅ Logged-in: functional wishlist button -->
+              <button 
+                type="button"
+                id="wishlist-<%= product._id %>"
+                onclick="toggleWishlist('<%= product._id %>')"
+                class="absolute top-3 right-3 z-20 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:bg-white hover:scale-110 transition-all duration-200"
+              >
+                <% 
+                  let isInWishlist = false;
+                  if (userData?.wishlist?.length) {
+                    isInWishlist = userData.wishlist.some(item => item.toString() === product._id.toString());
+                  }
+                %>
+                <% if (isInWishlist) { %>
+                  <!-- Filled Heart -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4 
+                      8.28 4 10 5.5 12 7.09 14 5.5 15.72 4 17.5 4 
+                      20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                <% } else { %>
+                  <!-- Empty Heart -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M4.318 6.318a4.414 4.414 0 015.364-.364L12 7.414l2.318-2.318a4.414 
+                      4.414 0 015.364.364c1.562 1.562 1.562 4.096 0 5.657L12 21 
+                      4.318 11.975a4 4 0 010-5.657z" />
+                  </svg>
+                <% } %>
+              </button>
+            <% } else { %>
+              <!-- ❌ Guest: show SweetAlert -->
+              <button 
+                type="button"
+                onclick="guestPrompt({ 
+                  title: 'Login Required', 
+                  text: 'Please log in to add items to your wishlist.', 
+                  confirmText: 'Login', 
+                  confirmRedirect: '/user/login' 
+                })"
+                class="absolute top-3 right-3 z-20 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:bg-white hover:scale-110 transition-all duration-200"
+              >
+                <!-- Empty Heart -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.414 4.414 0 015.364-.364L12 7.414l2.318-2.318a4.414 4.414 0 015.364.364c1.562 1.562 1.562 4.096 0 5.657L12 21 4.318 11.975a4 4 0 010-5.657z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M4.318 6.318a4.414 4.414 0 015.364-.364L12 7.414l2.318-2.318a4.414 
+                    4.414 0 015.364.364c1.562 1.562 1.562 4.096 0 5.657L12 21 
+                    4.318 11.975a4 4 0 010-5.657z" />
                 </svg>
-              <% } %>
-            </button>
-
+              </button>
+            <% } %>
             <!-- Main Image with Enhanced Zoom -->
             <div class="relative overflow-hidden rounded-lg bg-gray-100 border border-gray-200" id="image-container">
               <img 
@@ -145,22 +173,43 @@
               </div>
             <% } %>
           </div>
-
           <!-- Action Buttons -->
           <div class="space-y-3">
             <% if (product.status === 'Available' && product.quantity > 0) { %>
-              <button 
-                class="add-to-cart-btn w-full bg-[#007D8B] hover:bg-[#006B7A] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
-                data-product-id="<%= product._id %>"
-              >
-                <div class="flex items-center justify-center space-x-2">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                  </svg>
-                  <span>Add to Cart</span>
-                </div>
-              </button>
+              <% if (userData) { %>
+                <!-- ✅ Logged-in user: Show real Add to Cart button -->
+                <button 
+                  class="add-to-cart-btn w-full bg-[#007D8B] hover:bg-[#006B7A] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
+                  data-product-id="<%= product._id %>"
+                >
+                  <div class="flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                    </svg>
+                    <span>Add to Cart</span>
+                  </div>
+                </button>
+              <% } else { %>
+                <!-- ❌ Guest user: Show SweetAlert on click -->
+                <button 
+                  class="w-full bg-[#007D8B] hover:bg-[#006B7A] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
+                  onclick="guestPrompt({
+                    title: 'Login Required',
+                    text: 'Please log in to add items to your cart.',
+                    confirmText: 'Login',
+                    confirmRedirect: '/user/login'
+                  })"
+                >
+                  <div class="flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                    </svg>
+                    <span>Add to Cart</span>
+                  </div>
+                </button>
+              <% } %>
             <% } else { %>
+              <!-- ❌ Product not available -->
               <button 
                 disabled
                 class="w-full bg-gray-300 text-gray-500 font-semibold py-3 px-6 rounded-lg cursor-not-allowed"
@@ -174,6 +223,7 @@
               </button>
             <% } %>
           </div>
+
 
           <!-- Product Details -->
           <div class="border-t pt-6">
@@ -255,17 +305,36 @@
               <!-- Hover Overlay -->
               <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <div class="space-y-2">
+                  <!-- Always show View Details -->
                   <a href="/user/product-details/<%= book._id %>" class="block bg-white text-gray-900 px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-100 transition-colors text-center">
                     View Details
                   </a>
-                  <button 
-                    class="add-to-cart-btn block w-full bg-[#007D8B] text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-[#006B7A] transition-colors" 
-                    data-product-id="<%= book._id %>"
-                  >
-                    Add to Cart
-                  </button>
+
+                  <% if (userData) { %>
+                    <!-- Logged-in: Add to Cart -->
+                    <button 
+                      class="add-to-cart-btn block w-full bg-[#007D8B] text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-[#006B7A] transition-colors" 
+                      data-product-id="<%= book._id %>"
+                    >
+                      Add to Cart
+                    </button>
+                  <% } else { %>
+                    <!-- Guest: Trigger SweetAlert -->
+                    <button 
+                      onclick="guestPrompt({
+                        title: 'Login Required',
+                        text: 'Please login to add this item to your cart.',
+                        confirmText: 'Login',
+                        confirmRedirect: '/user/login'
+                      })"
+                      class="block w-full bg-[#007D8B] text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-[#006B7A] transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  <% } %>
                 </div>
               </div>
+
             </div>
 
             <!-- Book Info -->
@@ -586,6 +655,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+function guestPrompt(options = {}) {
+    const {
+      title = "Please Sign In",
+      text = "You need an account to continue.",
+      icon = "info",
+      confirmText = "Login",
+      confirmRedirect = "/user/login"
+    } = options;
+
+    Swal.fire({
+      title,
+      text,
+      icon,
+      showCancelButton: true,
+      confirmButtonColor: '#007D8B',
+      cancelButtonColor: '#d33',
+      confirmButtonText: confirmText,
+      cancelButtonText: 'Later'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = confirmRedirect;
+      }
+    });
+  }
+
 </script>
 
 <style>

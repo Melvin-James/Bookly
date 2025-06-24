@@ -1,7 +1,6 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Customers = require('../../models/userSchema');
-const category = require('../../models/categorySchema');
 
 const getShopProducts = async function(req, res,next) {
   try {
@@ -156,23 +155,38 @@ const getShopProducts = async function(req, res,next) {
 }
 
 const getProductDetails = async (req, res) => {
-  const userId = req.session.user._id;
-  const product = await Product.findById(req.params.id).populate('category');
-  const relatedProducts = await Product.find({
-    _id: { $ne: product._id },
-    isBlocked: false,
-    category: product.category._id,
-    status: 'Available'
-  }).limit(4);
+  try {
+    const product = await Product.findById(req.params.id).populate('category');
+    if (!product) {
+      return res.status(404).render('404'); // or your custom not-found page
+    }
 
-  const user = await Customers.findById(userId).populate('wishlist');
+    const relatedProducts = await Product.find({
+      _id: { $ne: product._id },
+      isBlocked: false,
+      category: product.category._id,
+      status: 'Available'
+    }).limit(4);
 
-  res.render('product-details', 
-    { product, 
-      relatedProducts, 
-      userData:req.session.user,
+    let user = null;
+
+    if (req.session?.user?._id) {
+      const userId = req.session.user._id;
+      user = await Customers.findById(userId).populate('wishlist');
+    }
+
+    res.render('product-details', {
+      product,
+      relatedProducts,
+      userData: user, // this will be null for guests
     });
+
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+    res.status(500).render('error', { message: 'Server error' });
+  }
 };
+
 
 const account = async(req,res,next)=>{
   try{
