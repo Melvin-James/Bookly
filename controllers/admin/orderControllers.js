@@ -106,42 +106,35 @@ const updateOrderStatus = async (req, res, next) => {
       return res.status(400).json({ message: `Cannot modify an order that is already ${order.status}.` });
     }
 
-      for(let item of order.items){
-        if(item.status === 'Cancelled'){
-          item.status = 'Cancelled';
-        }
-        else{
-          item.status = status
-        }
-      }
-      
-      const statusCount = {};
+    for (let item of order.items) {
+      if (item.status === 'Cancelled') continue;
+      item.status = status;
+    }
+    const itemStatuses = order.items.map(item => item.status);
 
-      order.items.forEach(item => {
-        const status = item.status;
-        statusCount[status] = (statusCount[status] || 0) + 1;
-      });
+    if (itemStatuses.every(s => s === 'Delivered')) {
+      order.status = 'Delivered';
+    } else if (itemStatuses.every(s => s === 'Cancelled')) {
+      order.status = 'Cancelled';
+    } else if (itemStatuses.includes('Delivered')) {
+      order.status = 'Delivered';
+    } else if (itemStatuses.includes('Out for Delivery')) {
+      order.status = 'Out for Delivery';
+    } else if (itemStatuses.includes('Shipped')) {
+      order.status = 'Shipped';
+    } else {
+      order.status = status;
+    }
 
-      let mostFrequentStatus = '';
-      let maxCount = 0;
-
-      for (const status in statusCount) {
-        if (statusCount[status] > maxCount) {
-          mostFrequentStatus = status;
-          maxCount = statusCount[status];
-        }
-      }
-
-      order.status = mostFrequentStatus;
-      await order.save();
-
-      return res.status(200).json({ message: 'Order status updated.' });
-
+    await order.save();
+    return res.status(200).json({ message: 'Order status updated.' });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 const approveReturnRequest = async (req, res, next) => {
   try {
