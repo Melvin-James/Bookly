@@ -352,11 +352,22 @@
           return;
         }
 
-        const formData = new FormData(this);
+        const formData = new FormData();
+
+        formData.append("name", $("#name").val());
+        formData.append("description", $("#description").val());
+        formData.append("publisher", $("#publisher").val());
+        formData.append("category", $("#category").val());
+        formData.append("price", $("#price").val());
+        formData.append("productOffer", $("#productOffer").val());
+        formData.append("quantity", $("#quantity").val());
+        formData.append("color", $("#color").val());
+        formData.append("status", $("#status").val());
 
         selectedImages.forEach((blob, i) => {
           formData.append("productImage", blob, `image${i}.jpg`);
         });
+
 
         $.ajax({
           url: "/admin/product-add",

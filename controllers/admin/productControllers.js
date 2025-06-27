@@ -236,15 +236,6 @@ const updateProduct = async (req, res, next) => {
 
     const imagesToDelete = currentProduct.productImage.filter(img => !finalImages.includes(img));
 
-    imagesToDelete.forEach(imageName => {
-      const imagePath = path.join(__dirname, '../public/uploads/product-images', imageName);
-      fs.unlink(imagePath, (err) => {
-        if (err) {
-          console.error('Error deleting image:', err);
-        }
-      });
-    });
-
     const updatedProduct = {
       name: name.trim(),
       description: description.trim(),

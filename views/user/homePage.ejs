@@ -179,7 +179,7 @@
             <% } %>
             <!-- Product Image and Hover Actions -->
             <div class="relative">
-              <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.name %>" class="w-full h-64 object-cover" />
+              <img src="<%= product.productImage[0] %>" alt="<%= product.name %>" class="w-full h-64 object-cover" />
               
               <% if (product.status !== 'Available' || product.quantity < 1) { %>
                 <div class="absolute inset-0 bg-[#007D8B] bg-opacity-60 flex items-center justify-center text-white font-semibold text-lg">

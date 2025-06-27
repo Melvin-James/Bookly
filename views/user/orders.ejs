@@ -90,7 +90,7 @@
               <% order.items.slice(0, 3).forEach(item => { %>
                 <div class="relative w-12 h-12 rounded-md overflow-hidden border border-gray-200">
                   <img 
-                    src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                    src="<%= item.product.productImage[0] %>" 
                     alt="<%= item.product.name %>"
                     class="w-full h-full object-cover"
                   >
