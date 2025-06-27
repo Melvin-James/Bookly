@@ -106,7 +106,7 @@ const addProduct = async (req, res,next) => {
       return res.status(400).json({ errors });
     }
 
-    const productImages = req.files.map(file => file.filename);
+    const productImages = req.files.map(file => file.path);
 
     const newProduct = new Product({
       name,
@@ -168,10 +168,8 @@ const updateProduct = async (req, res, next) => {
       existingImages
     } = req.body;
 
-    // Validation
     const errors = {};
 
-    // Basic field validation
     if (!name || name.trim().length < 2) {
       errors.name = 'Product name must be at least 2 characters';
     }
@@ -200,7 +198,6 @@ const updateProduct = async (req, res, next) => {
       errors.status = 'Please select a status';
     }
 
-    // Handle existing images
     let finalImages = [];
     if (existingImages) {
       try {
@@ -213,38 +210,22 @@ const updateProduct = async (req, res, next) => {
       }
     }
 
-    // Handle new uploaded images
     if (req.files && req.files.length > 0) {
-      const newImages = req.files.map(file => file.filename);
+      const newImages = req.files.map(file => file.path);
       finalImages = [...finalImages, ...newImages];
     }
 
-    // STRICT Image validation - EXACTLY 3 images required
     if (finalImages.length !== 3) {
       errors.productImage = 'Exactly 3 product images are required';
     }
 
-    // If there are validation errors, return them
-    if (Object.keys(errors).length > 0) {
-      // Clean up uploaded files if validation fails
-      if (req.files && req.files.length > 0) {
-        req.files.forEach(file => {
-          const filePath = path.join(__dirname, '../public/uploads/product-images', file.filename);
-          fs.unlink(filePath, (unlinkErr) => {
-            if (unlinkErr) {
-              console.error('Error cleaning up uploaded file:', unlinkErr);
-            }
-          });
-        });
-      }
-      
+    if (Object.keys(errors).length > 0) {      
       return res.status(400).json({
         success: false,
         errors: errors
       });
     }
 
-    // Get the current product to handle image cleanup
     const currentProduct = await Product.findById(productId);
     if (!currentProduct) {
       return res.status(404).json({
@@ -253,10 +234,8 @@ const updateProduct = async (req, res, next) => {
       });
     }
 
-    // Find images to delete (images that were in the original product but not in finalImages)
     const imagesToDelete = currentProduct.productImage.filter(img => !finalImages.includes(img));
 
-    // Delete removed images from filesystem
     imagesToDelete.forEach(imageName => {
       const imagePath = path.join(__dirname, '../public/uploads/product-images', imageName);
       fs.unlink(imagePath, (err) => {
@@ -266,7 +245,6 @@ const updateProduct = async (req, res, next) => {
       });
     });
 
-    // Prepare update object
     const updatedProduct = {
       name: name.trim(),
       description: description.trim(),

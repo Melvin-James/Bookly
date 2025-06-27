@@ -259,7 +259,7 @@ const postEditProfile = async (req, res,next) => {
       const userData = await User.findById(userId);
   
       const { name, email, phone } = req.body;
-      const userImage = req.file ? req.file.filename : userData.userImage?.[0];
+      const userImage = req.file ? req.file.path : userData.userImage?.[0];
   
       const emailChanged = email !== userData.email;
   
