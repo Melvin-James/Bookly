@@ -437,8 +437,7 @@ document.getElementById('createCouponForm').addEventListener('submit', async fun
     Swal.fire({
       icon: 'error',
       title: 'Network Error',
-      text: 'Please check your connection and try again',
-      confirmButtonColor: '#007D8B'
+      text: result.message,
     });
   } finally {
     // Reset button state
