@@ -63,7 +63,7 @@ const getPaginatedProducts = async (req, res,next) => {
     } catch (error) {
       next(err);
     }
-  };
+};
 
 const getAddProduct = async (req, res,next) => {
   try {
@@ -249,7 +249,6 @@ const updateProduct = async (req, res, next) => {
       productImage: finalImages
     };
 
-    // Update the product
     await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
 
     res.json({
@@ -261,7 +260,6 @@ const updateProduct = async (req, res, next) => {
   } catch (err) {
     console.error('Error updating product:', err);
     
-    // Clean up uploaded files if there's an error
     if (req.files && req.files.length > 0) {
       req.files.forEach(file => {
         const filePath = path.join(__dirname, '../public/uploads/product-images', file.filename);

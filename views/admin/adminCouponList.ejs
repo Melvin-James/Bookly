@@ -316,8 +316,8 @@ function validateForm() {
   if (!usageLimit || usageLimit < 1) {
     showError('usageLimit', 'Usage limit must be at least 1');
     isValid = false;
-  } else if (usageLimit > 10000) {
-    showError('usageLimit', 'Usage limit cannot exceed 10,000');
+  } else if (usageLimit > 5) {
+    showError('usageLimit', 'Usage limit cannot exceed 5');
     isValid = false;
   }
   
