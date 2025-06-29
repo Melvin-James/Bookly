@@ -155,7 +155,6 @@ const createCoupon = async (req, res, next) => {
   }
 };
 
-
 const deleteCoupon = async(req,res,next)=>{
     try{
         const couponId = req.params.id;
