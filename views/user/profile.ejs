@@ -8,7 +8,7 @@
         <div class="flex-shrink-0">
           <div class="relative group">
             <img 
-              src="/uploads/profileImages/<%= userData.userImage[0] %>" 
+              src="<%= userData.userImage[0] %>" 
               alt="Profile Image" 
               class="w-32 h-32 sm:w-36 sm:h-36 object-cover rounded-full border-4 border-primary shadow-lg transition-transform group-hover:scale-105"
             />
@@ -141,13 +141,11 @@
   </div>
 </div>
 
-<!-- Toast Notification -->
 <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transform translate-y-10 opacity-0 transition-all duration-300 z-50 hidden">
   <span id="toast-message"></span>
 </div>
 
 <script>
-  // Copy referral code function
   function copyReferralCode() {
     const input = document.getElementById("referralCode");
     input.select();
@@ -155,7 +153,6 @@
     showToast("Referral code copied!", "success");
   }
   
-  // Show toast notification
   function showToast(message, type = 'info') {
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
@@ -163,7 +160,6 @@
     if (toast && toastMessage) {
       toastMessage.textContent = message;
       
-      // Set background color based on type
       if (type === 'success') {
         toast.classList.add('bg-primary');
         toast.classList.remove('bg-gray-800', 'bg-red-600');
@@ -175,10 +171,8 @@
         toast.classList.remove('bg-primary', 'bg-red-600');
       }
       
-      // Show toast
       toast.classList.remove('hidden', 'translate-y-10', 'opacity-0');
       
-      // Hide toast after 3 seconds
       setTimeout(() => {
         toast.classList.add('translate-y-10', 'opacity-0');
         setTimeout(() => {
