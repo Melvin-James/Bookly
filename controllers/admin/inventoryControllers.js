@@ -75,7 +75,15 @@ const updateStock = async(req,res,next)=>{
     try {
         const productId = req.params.productId;
         const { quantity, status } = req.body;
-    
+
+        if (isNaN(quantity) || quantity < 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Quantity cannot be negative'
+          });
+
+        }
+
         await Product.findByIdAndUpdate(productId, {
           quantity,
           status,
