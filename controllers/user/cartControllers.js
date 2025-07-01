@@ -65,7 +65,6 @@ const updateCartQuantity = async (req, res, next) => {
         const productId = req.params.productId;
         const { action } = req.body;
 
-        // Validate product
         const product = await Product.findById(productId);
         if (!product || product.status !== 'Available' || product.quantity < 1) {
             return res.status(400).json({ 
@@ -74,7 +73,6 @@ const updateCartQuantity = async (req, res, next) => {
             });
         }
 
-        // Find user and cart item
         const user = await User.findById(userId);
         const item = user.cart.find(item => item.product.toString() === productId);
         
@@ -85,7 +83,6 @@ const updateCartQuantity = async (req, res, next) => {
             });
         }
 
-        // Update quantity based on action
         if (action === 'increase') {
             if (item.quantity < product.quantity) {
                 item.quantity += 1;
@@ -135,7 +132,6 @@ const removeFromCart = async (req, res, next) => {
         const userId = req.session.user._id;
         const productId = req.params.productId;
 
-        // Verify item exists in cart before removal
         const user = await User.findById(userId);
         const itemExists = user.cart.some(item => item.product.toString() === productId);
         
@@ -146,7 +142,6 @@ const removeFromCart = async (req, res, next) => {
             });
         }
 
-        // Remove item from cart
         await User.findByIdAndUpdate(userId, {
             $pull: { cart: { product: productId } }
         });
