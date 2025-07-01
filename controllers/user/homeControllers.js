@@ -158,7 +158,7 @@ const getProductDetails = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate('category');
     if (!product) {
-      return res.status(404).render('404'); // or your custom not-found page
+      return res.status(404).render('404');
     }
 
     const relatedProducts = await Product.find({
@@ -178,7 +178,7 @@ const getProductDetails = async (req, res) => {
     res.render('product-details', {
       product,
       relatedProducts,
-      userData: user, // this will be null for guests
+      userData: user, 
     });
 
   } catch (error) {

@@ -203,10 +203,8 @@ const placeOrder = async (req, res,next) => {
       );
 
       if (!updatedProduct) {
-        return res.status(400).json({
-          success: false,
-          message: `Insufficient stock for ${item.product.name || 'a product'}`
-        });
+        req.session.orderError = `Insufficient stock for ${item.productName || 'a product'}`;
+        return res.redirect('/user/order-failure');
       }
     }
 
@@ -225,9 +223,25 @@ const placeOrder = async (req, res,next) => {
   }
 }
 
-const createRazorpayOrder = async (req, res,next) => {
+const createRazorpayOrder = async (req, res, next) => {
   try {
+    const userId = req.session.user._id;
     const amount = req.body.amount;
+
+    const user = await User.findById(userId).populate('cart.product');
+    if (!user || user.cart.length === 0) {
+      return res.json({ success: false, message: 'Cart is empty!' });
+    }
+
+    for (let cartItem of user.cart) {
+      const product = cartItem.product;
+      if (!product || product.quantity < cartItem.quantity) {
+        return res.json({
+          success: false,
+          message: `Insufficient stock for ${product?.name || 'a product'}`
+        });
+      }
+    }
 
     const options = {
       amount: amount * 100,
@@ -237,10 +251,12 @@ const createRazorpayOrder = async (req, res,next) => {
 
     const order = await razorpay.orders.create(options);
     res.json({ success: true, order });
+
   } catch (err) {
     next(err);
   }
 };
+
 
 const getOrderSuccessPage = async (req, res,next) => {
   try {
@@ -252,16 +268,20 @@ const getOrderSuccessPage = async (req, res,next) => {
   }
 };
 
-const getOrderFailurePage = async (req, res,next) => {
+const getOrderFailurePage = async (req, res, next) => {
   try {
-    
+    const errorMessage = req.session.orderError;
+    delete req.session.orderError;
+
     res.render('order-failure', {
-      userData: req.session.user
+      userData: req.session.user,
+      orderError: errorMessage || null,
     });
   } catch (error) {
-    next(err);
+    next(error);
   }
 };
+
 
 const getaddAddress = async(req,res,next)=>{
   try{
