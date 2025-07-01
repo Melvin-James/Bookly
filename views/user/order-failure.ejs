@@ -22,4 +22,18 @@
   </div>
 </div>
 
+<% if (orderError) { %>
+<script>
+  Swal.fire({
+    icon: 'error',
+    title: 'Order Failed',
+    text: '<%= orderError %>',
+    confirmButtonColor: '#007D8B',
+  }).then(() => {
+    window.location.href = '/user/cart';
+  });
+</script>
+<% } %>
+
+
 <%- include('../partials/userFooter') %>
