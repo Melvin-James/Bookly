@@ -11,41 +11,148 @@ const loadEditCoupon = async (req,res,next)=>{
     }
 };
 
-const updateCoupon = async(req,res,next)=>{
-    try{
+const updateCoupon = async (req, res, next) => {
+  try {
+    const id = req.params.id
 
-        const id = req.params.id;
-        if (!id) throw new Error('Coupon ID is missing from request params');
+    if (!id) throw new Error("Coupon ID is missing from request params")
 
-        const {code, discountType, discountAmount, minCartAmount, maxDiscount, expiresAt, usageLimit} = req.body;
-        const errors = {};
+    const { code, discountType, discountAmount, minCartAmount, maxDiscount, expiresAt, usageLimit } = req.body
 
-        if(!code?.trim()) errors.code ='Code is required';
-        if(!discountType || !['Flat', 'Percentage'].includes(discountType)) errors.discountType = 'Invalid discount type';
-        if(!discountAmount || discountAmount <= 0) errors.discountAmount = 'Discount must be greater than 0';
-        if(!expiresAt || new Date(expiresAt) < new Date()) errors.expiresAt = 'Expiry must be in the future';
+    const errors = {}
 
-        if(discountType === 'Percentage' && (!maxDiscount || maxDiscount <=0)){
-            errors.maxDiscount = 'Max discount is required for percentage type';
+    if (!code?.trim()) {
+      errors.code = "Coupon code is required"
+    } else {
+      const trimmedCode = code.trim()
+      if (trimmedCode.length < 3) {
+        errors.code = "Coupon code must be at least 3 characters long"
+      } else if (trimmedCode.length > 20) {
+        errors.code = "Coupon code cannot exceed 20 characters"
+      } else if (!/^[A-Z0-9]+$/.test(trimmedCode)) {
+        errors.code = "Coupon code can only contain uppercase letters and numbers"
+      } else {
+        const existingCoupon = await Coupon.findOne({
+          code: trimmedCode.toUpperCase(),
+          _id: { $ne: id },
+        })
+        if (existingCoupon) {
+          errors.code = "This coupon code already exists"
         }
-
-        if(Object.keys(errors).length > 0) return res.status(400).json({success: false, errors});
-
-        await Coupon.findByIdAndUpdate(req.params.id,{
-            code:code.trim().toUpperCase(),
-            discountType,
-            discountAmount,
-            minCartAmount,
-            maxDiscount:discountType === 'Percentage' ? maxDiscount : undefined,
-            expiresAt,
-            usageLimit,
-        });
-
-        res.json({success:true});
-    }catch(err){
-        next(err);
+      }
     }
-};
+
+    if (!discountType || !["Flat", "Percentage"].includes(discountType)) {
+      errors.discountType = "Please select a valid discount type (Flat or Percentage)"
+    }
+
+    if (!discountAmount) {
+      errors.discountAmount = "Discount amount is required"
+    } else {
+      const amount = Number.parseFloat(discountAmount)
+      if (isNaN(amount) || amount <= 0) {
+        errors.discountAmount = "Discount amount must be greater than 0"
+      } else if (discountType === "Percentage") {
+        if (amount > 100) {
+          errors.discountAmount = "Percentage discount cannot exceed 100%"
+        } else if (amount < 1) {
+          errors.discountAmount = "Percentage discount must be at least 1%"
+        }
+      } else if (discountType === "Flat") {
+        if (amount > 50000) {
+          errors.discountAmount = "Flat discount cannot exceed ₹50,000"
+        } else if (amount < 1) {
+          errors.discountAmount = "Flat discount must be at least ₹1"
+        }
+      }
+    }
+
+    if (discountType === "Percentage") {
+      if (!maxDiscount) {
+        errors.maxDiscount = "Maximum discount amount is required for percentage type"
+      } else {
+        const maxDiscountAmount = Number.parseFloat(maxDiscount)
+        if (isNaN(maxDiscountAmount) || maxDiscountAmount <= 0) {
+          errors.maxDiscount = "Maximum discount must be greater than 0"
+        } else if (maxDiscountAmount > 50000) {
+          errors.maxDiscount = "Maximum discount cannot exceed ₹50,000"
+        } else if (minCartAmount && maxDiscountAmount >= Number.parseFloat(minCartAmount)) {
+          errors.maxDiscount = "Maximum discount should be less than minimum cart amount"
+        }
+      }
+    }
+
+    if (minCartAmount !== undefined && minCartAmount !== "") {
+      const minAmount = Number.parseFloat(minCartAmount)
+      if (isNaN(minAmount) || minAmount < 0) {
+        errors.minCartAmount = "Minimum cart amount cannot be negative"
+      } else if (minAmount > 100000) {
+        errors.minCartAmount = "Minimum cart amount cannot exceed ₹1,00,000"
+      } else if (discountType === "Flat" && minAmount <= Number.parseFloat(discountAmount)) {
+        errors.minCartAmount = "Minimum cart amount should be greater than flat discount amount"
+      }
+    }
+
+    if (!usageLimit) {
+      errors.usageLimit = "Usage limit is required"
+    } else {
+      const limit = Number.parseInt(usageLimit)
+      if (isNaN(limit) || limit < 1) {
+        errors.usageLimit = "Usage limit must be at least 1"
+      } else if (limit > 100000) {
+        errors.usageLimit = "Usage limit cannot exceed 1,00,000"
+      }
+    }
+
+    if (!expiresAt) {
+      errors.expiresAt = "Expiry date is required"
+    } else {
+      const expiryDate = new Date(expiresAt)
+      const currentDate = new Date()
+      const maxDate = new Date()
+      maxDate.setFullYear(currentDate.getFullYear() + 5) 
+
+      if (isNaN(expiryDate.getTime())) {
+        errors.expiresAt = "Please enter a valid date"
+      } else if (expiryDate <= currentDate) {
+        errors.expiresAt = "Expiry date must be in the future"
+      } else if (expiryDate > maxDate) {
+        errors.expiresAt = "Expiry date cannot be more than 5 years from now"
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ success: false, errors })
+    }
+
+    const updatedCoupon = await Coupon.findByIdAndUpdate(
+      req.params.id,
+      {
+        code: code.trim().toUpperCase(),
+        discountType,
+        discountAmount: Number.parseFloat(discountAmount),
+        minCartAmount: minCartAmount ? Number.parseFloat(minCartAmount) : undefined,
+        maxDiscount: discountType === "Percentage" ? Number.parseFloat(maxDiscount) : undefined,
+        expiresAt: new Date(expiresAt),
+        usageLimit: Number.parseInt(usageLimit),
+        updatedAt: new Date(),
+      },
+      { new: true },
+    )
+
+    if (!updatedCoupon) {
+      return res.status(404).json({ success: false, message: "Coupon not found" })
+    }
+
+    res.json({ success: true, message: "Coupon updated successfully", coupon: updatedCoupon })
+  } catch (err) {
+    console.error("Error updating coupon:", err)
+    if (err.name === "CastError") {
+      return res.status(400).json({ success: false, message: "Invalid coupon ID format" })
+    }
+    next(err)
+  }
+}
 
 const getCouponPage = async (req,res,next)=>{
     try{
@@ -170,23 +277,10 @@ const deleteCoupon = async(req,res,next)=>{
     }
 };
 
-const editCoupon = async(req,res,next)=>{
-    try{
-        const {id} = req.params;
-        const updateFields = req.body;
-
-        await Coupon.findByIdAndUpdate(id,updateFields,{runValidators:true});
-        res.redirect('/admin/coupons?updated=true');
-    }catch(err){
-        next(err);
-    }
-};
-
 module.exports ={
     getCouponPage,
     createCoupon,
     deleteCoupon,
     loadEditCoupon,
     updateCoupon,
-    editCoupon,
 }

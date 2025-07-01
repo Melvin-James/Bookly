@@ -59,63 +59,103 @@
         
         <div class="p-6">
           <form id="editCouponForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Coupon Code -->
             <div class="space-y-2">
-              <label for="code" class="block text-sm font-medium text-gray-700">Coupon Code *</label>
+              <label for="code" class="block text-sm font-medium text-gray-700">
+                Coupon Code *
+                <span class="text-xs text-gray-500 ml-1">(3-20 characters, A-Z and 0-9 only)</span>
+              </label>
               <input type="text" id="code" name="code" value="<%= coupon.code %>" 
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm uppercase font-mono">
-              <div id="codeError" class="text-sm text-primary hidden"></div>
+                     maxlength="20"
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm uppercase font-mono"
+                     placeholder="Enter coupon code">
+              <div id="codeError" class="text-sm hidden" style="color: #007D8B;"></div>
             </div>
 
+            <!-- Discount Type -->
             <div class="space-y-2">
               <label for="discountType" class="block text-sm font-medium text-gray-700">Discount Type *</label>
               <select id="discountType" name="discountType" 
                       class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm bg-white">
+                <option value="">Select discount type</option>
                 <option value="Flat" <%= coupon.discountType === 'Flat' ? 'selected' : '' %>>Flat Amount (₹)</option>
                 <option value="Percentage" <%= coupon.discountType === 'Percentage' ? 'selected' : '' %>>Percentage (%)</option>
               </select>
-              <div id="discountTypeError" class="text-sm text-primary hidden"></div>
+              <div id="discountTypeError" class="text-sm hidden" style="color: #007D8B;"></div>
             </div>
 
+            <!-- Discount Amount -->
             <div class="space-y-2">
-              <label for="discountAmount" class="block text-sm font-medium text-gray-700">Discount Amount *</label>
+              <label for="discountAmount" class="block text-sm font-medium text-gray-700">
+                Discount Amount *
+                <span class="text-xs text-gray-500 ml-1" id="discountAmountHint">
+                  <%= coupon.discountType === 'Percentage' ? '(1-100%)' : '(₹1-₹50,000)' %>
+                </span>
+              </label>
               <div class="relative">
-                <input type="number" id="discountAmount" name="discountAmount" step="0.01" min="0" value="<%= coupon.discountAmount %>" 
-                       class="w-full px-3 py-2.5 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
+                <input type="number" id="discountAmount" name="discountAmount" 
+                       step="0.01" min="0" value="<%= coupon.discountAmount %>" 
+                       class="w-full px-3 py-2.5 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+                       placeholder="Enter discount amount">
                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   <span id="discountSymbol" class="text-gray-400 text-sm"><%= coupon.discountType === 'Percentage' ? '%' : '₹' %></span>
                 </div>
               </div>
-              <div id="discountAmountError" class="text-sm text-primary hidden"></div>
+              <div id="discountAmountError" class="text-sm hidden" style="color: #007D8B;"></div>
             </div>
 
+            <!-- Max Discount (for Percentage type) -->
             <div class="space-y-2" id="maxDiscountField" style="display: '<%= coupon.discountType === 'Percentage' ? 'block' : 'none' %>';">
-              <label for="maxDiscount" class="block text-sm font-medium text-gray-700">Max Discount (₹)</label>
-              <input type="number" id="maxDiscount" name="maxDiscount" step="0.01" min="0" value="<%= coupon.maxDiscount || '' %>" 
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
-              <div id="maxDiscountError" class="text-sm text-primary hidden"></div>
+              <label for="maxDiscount" class="block text-sm font-medium text-gray-700">
+                Max Discount (₹) *
+                <span class="text-xs text-gray-500 ml-1">(Required for percentage discount)</span>
+              </label>
+              <input type="number" id="maxDiscount" name="maxDiscount" 
+                     step="0.01" min="0" max="50000" value="<%= coupon.maxDiscount || '' %>" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+                     placeholder="Enter maximum discount amount">
+              <div id="maxDiscountError" class="text-sm hidden" style="color: #007D8B;"></div>
             </div>
 
+            <!-- Minimum Cart Amount -->
             <div class="space-y-2">
-              <label for="minCartAmount" class="block text-sm font-medium text-gray-700">Minimum Cart Amount (₹)</label>
-              <input type="number" id="minCartAmount" name="minCartAmount" step="0.01" min="0" value="<%= coupon.minCartAmount || '' %>" 
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
-              <div id="minCartAmountError" class="text-sm text-primary hidden"></div>
+              <label for="minCartAmount" class="block text-sm font-medium text-gray-700">
+                Minimum Cart Amount (₹)
+                <span class="text-xs text-gray-500 ml-1">(Optional, max ₹1,00,000)</span>
+              </label>
+              <input type="number" id="minCartAmount" name="minCartAmount" 
+                     step="0.01" min="0" max="100000" value="<%= coupon.minCartAmount || '' %>" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+                     placeholder="Enter minimum cart amount (optional)">
+              <div id="minCartAmountError" class="text-sm hidden" style="color: #007D8B;"></div>
             </div>
 
+            <!-- Usage Limit -->
             <div class="space-y-2">
-              <label for="usageLimit" class="block text-sm font-medium text-gray-700">Usage Limit *</label>
-              <input type="number" id="usageLimit" name="usageLimit" min="1" value="<%= coupon.usageLimit %>" 
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
-              <div id="usageLimitError" class="text-sm text-primary hidden"></div>
+              <label for="usageLimit" class="block text-sm font-medium text-gray-700">
+                Usage Limit *
+                <span class="text-xs text-gray-500 ml-1">(1-1,00,000 uses)</span>
+              </label>
+              <input type="number" id="usageLimit" name="usageLimit" 
+                     min="1" max="100000" value="<%= coupon.usageLimit %>" 
+                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+                     placeholder="Enter usage limit">
+              <div id="usageLimitError" class="text-sm hidden" style="color: #007D8B;"></div>
             </div>
 
+            <!-- Expiry Date -->
             <div class="space-y-2">
-              <label for="expiresAt" class="block text-sm font-medium text-gray-700">Expiry Date *</label>
-              <input type="date" id="expiresAt" name="expiresAt" value="<%= coupon.expiresAt.toISOString().split('T')[0] %>" 
+              <label for="expiresAt" class="block text-sm font-medium text-gray-700">
+                Expiry Date *
+                <span class="text-xs text-gray-500 ml-1">(Must be future date, max 5 years)</span>
+              </label>
+              <input type="date" id="expiresAt" name="expiresAt" 
+                     value="<%= coupon.expiresAt.toISOString().split('T')[0] %>" 
                      class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm">
-              <div id="expiresAtError" class="text-sm text-primary hidden"></div>
+              <div id="expiresAtError" class="text-sm hidden" style="color: #007D8B;"></div>
             </div>
 
+            <!-- Submit Button -->
             <div class="md:col-span-2">
               <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-hover transition-all duration-200 font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2">
                 <i class="ri-save-line text-lg"></i>
@@ -161,109 +201,214 @@
 </div>
 
 <script>
-// Validation functions
+// Enhanced Validation Functions
 function showError(fieldId, message) {
   const errorElement = document.getElementById(fieldId + 'Error');
   const inputElement = document.getElementById(fieldId);
   
-  errorElement.textContent = message;
-  errorElement.classList.remove('hidden');
-  inputElement.classList.add('border-primary', 'ring-2', 'ring-primary/30');
+  if (errorElement && inputElement) {
+    errorElement.textContent = message;
+    errorElement.classList.remove('hidden');
+    inputElement.classList.add('border-primary', 'ring-2', 'ring-primary/30');
+  }
 }
 
 function clearError(fieldId) {
   const errorElement = document.getElementById(fieldId + 'Error');
   const inputElement = document.getElementById(fieldId);
   
-  errorElement.classList.add('hidden');
-  inputElement.classList.remove('border-primary', 'ring-2', 'ring-primary/30');
+  if (errorElement && inputElement) {
+    errorElement.classList.add('hidden');
+    inputElement.classList.remove('border-primary', 'ring-2', 'ring-primary/30');
+  }
 }
 
+// Real-time validation functions
+function validateCode(code) {
+  if (!code.trim()) {
+    return 'Coupon code is required';
+  }
+  if (code.length < 3) {
+    return 'Coupon code must be at least 3 characters long';
+  }
+  if (code.length > 20) {
+    return 'Coupon code cannot exceed 20 characters';
+  }
+  if (!/^[A-Z0-9]+$/.test(code)) {
+    return 'Coupon code can only contain uppercase letters and numbers';
+  }
+  return null;
+}
+
+function validateDiscountType(discountType) {
+  if (!discountType) {
+    return 'Please select a discount type';
+  }
+  if (!['Flat', 'Percentage'].includes(discountType)) {
+    return 'Please select a valid discount type';
+  }
+  return null;
+}
+
+function validateDiscountAmount(amount, discountType) {
+  if (!amount) {
+    return 'Discount amount is required';
+  }
+  const numAmount = parseFloat(amount);
+  if (isNaN(numAmount) || numAmount <= 0) {
+    return 'Discount amount must be greater than 0';
+  }
+  if (discountType === 'Percentage') {
+    if (numAmount > 100) {
+      return 'Percentage discount cannot exceed 100%';
+    }
+    if (numAmount < 1) {
+      return 'Percentage discount must be at least 1%';
+    }
+  } else if (discountType === 'Flat') {
+    if (numAmount > 50000) {
+      return 'Flat discount cannot exceed ₹50,000';
+    }
+    if (numAmount < 1) {
+      return 'Flat discount must be at least ₹1';
+    }
+  }
+  return null;
+}
+
+function validateMaxDiscount(maxDiscount, discountType, minCartAmount) {
+  if (discountType === 'Percentage') {
+    if (!maxDiscount) {
+      return 'Maximum discount is required for percentage type';
+    }
+    const numMaxDiscount = parseFloat(maxDiscount);
+    if (isNaN(numMaxDiscount) || numMaxDiscount <= 0) {
+      return 'Maximum discount must be greater than 0';
+    }
+    if (numMaxDiscount > 50000) {
+      return 'Maximum discount cannot exceed ₹50,000';
+    }
+    if (minCartAmount && numMaxDiscount >= parseFloat(minCartAmount)) {
+      return 'Maximum discount should be less than minimum cart amount';
+    }
+  }
+  return null;
+}
+
+function validateMinCartAmount(minCartAmount, discountType, discountAmount) {
+  if (minCartAmount !== undefined && minCartAmount !== '') {
+    const numMinCart = parseFloat(minCartAmount);
+    if (isNaN(numMinCart) || numMinCart < 0) {
+      return 'Minimum cart amount cannot be negative';
+    }
+    if (numMinCart > 100000) {
+      return 'Minimum cart amount cannot exceed ₹1,00,000';
+    }
+    if (discountType === 'Flat' && discountAmount && numMinCart <= parseFloat(discountAmount)) {
+      return 'Minimum cart amount should be greater than flat discount amount';
+    }
+  }
+  return null;
+}
+
+function validateUsageLimit(usageLimit) {
+  if (!usageLimit) {
+    return 'Usage limit is required';
+  }
+  const numLimit = parseInt(usageLimit);
+  if (isNaN(numLimit) || numLimit < 1) {
+    return 'Usage limit must be at least 1';
+  }
+  if (numLimit > 100000) {
+    return 'Usage limit cannot exceed 1,00,000';
+  }
+  return null;
+}
+
+function validateExpiryDate(expiresAt) {
+  if (!expiresAt) {
+    return 'Expiry date is required';
+  }
+  const expiryDate = new Date(expiresAt);
+  const currentDate = new Date();
+  const maxDate = new Date();
+  maxDate.setFullYear(currentDate.getFullYear() + 5);
+  
+  if (isNaN(expiryDate.getTime())) {
+    return 'Please enter a valid date';
+  }
+  if (expiryDate <= currentDate) {
+    return 'Expiry date must be in the future';
+  }
+  if (expiryDate > maxDate) {
+    return 'Expiry date cannot be more than 5 years from now';
+  }
+  return null;
+}
+
+// Comprehensive form validation
 function validateForm() {
   let isValid = true;
   
   // Clear all previous errors
   ['code', 'discountType', 'discountAmount', 'maxDiscount', 'minCartAmount', 'usageLimit', 'expiresAt'].forEach(clearError);
   
-  // Validate coupon code
+  // Get form values
   const code = document.getElementById('code').value.trim();
-  if (!code) {
-    showError('code', 'Coupon code is required');
-    isValid = false;
-  } else if (code.length < 3) {
-    showError('code', 'Coupon code must be at least 3 characters');
-    isValid = false;
-  } else if (!/^[A-Z0-9]+$/.test(code)) {
-    showError('code', 'Coupon code can only contain uppercase letters and numbers');
-    isValid = false;
-  }
-  
-  // Validate discount type
   const discountType = document.getElementById('discountType').value;
-  if (!discountType) {
-    showError('discountType', 'Please select a discount type');
-    isValid = false;
-  }
-  
-  // Validate discount amount
-  const discountAmount = parseFloat(document.getElementById('discountAmount').value);
-  if (!discountAmount || discountAmount <= 0) {
-    showError('discountAmount', 'Please enter a valid discount amount');
-    isValid = false;
-  } else if (discountType === 'Percentage' && discountAmount > 100) {
-    showError('discountAmount', 'Percentage discount cannot exceed 100%');
-    isValid = false;
-  } else if (discountType === 'Flat' && discountAmount > 10000) {
-    showError('discountAmount', 'Flat discount cannot exceed ₹10,000');
-    isValid = false;
-  }
-  
-  // Validate max discount for percentage type
-  if (discountType === 'Percentage') {
-    const maxDiscount = parseFloat(document.getElementById('maxDiscount').value);
-    if (maxDiscount && maxDiscount <= 0) {
-      showError('maxDiscount', 'Max discount must be greater than 0');
-      isValid = false;
-    }
-  }
-  
-  // Validate min cart amount
-  const minCartAmount = parseFloat(document.getElementById('minCartAmount').value);
-  if (minCartAmount && minCartAmount < 0) {
-    showError('minCartAmount', 'Minimum cart amount cannot be negative');
-    isValid = false;
-  }
-  
-  // Validate usage limit
-  const usageLimit = parseInt(document.getElementById('usageLimit').value);
-  if (!usageLimit || usageLimit < 1) {
-    showError('usageLimit', 'Usage limit must be at least 1');
-    isValid = false;
-  } else if (usageLimit > 10000) {
-    showError('usageLimit', 'Usage limit cannot exceed 10,000');
-    isValid = false;
-  }
-  
-  // Validate expiry date
+  const discountAmount = document.getElementById('discountAmount').value;
+  const maxDiscount = document.getElementById('maxDiscount').value;
+  const minCartAmount = document.getElementById('minCartAmount').value;
+  const usageLimit = document.getElementById('usageLimit').value;
   const expiresAt = document.getElementById('expiresAt').value;
-  if (!expiresAt) {
-    showError('expiresAt', 'Expiry date is required');
+  
+  // Validate each field
+  const codeError = validateCode(code);
+  if (codeError) {
+    showError('code', codeError);
     isValid = false;
-  } else {
-    const expiryDate = new Date(expiresAt);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (expiryDate <= today) {
-      showError('expiresAt', 'Expiry date must be in the future');
-      isValid = false;
-    }
+  }
+  
+  const discountTypeError = validateDiscountType(discountType);
+  if (discountTypeError) {
+    showError('discountType', discountTypeError);
+    isValid = false;
+  }
+  
+  const discountAmountError = validateDiscountAmount(discountAmount, discountType);
+  if (discountAmountError) {
+    showError('discountAmount', discountAmountError);
+    isValid = false;
+  }
+  
+  const maxDiscountError = validateMaxDiscount(maxDiscount, discountType, minCartAmount);
+  if (maxDiscountError) {
+    showError('maxDiscount', maxDiscountError);
+    isValid = false;
+  }
+  
+  const minCartAmountError = validateMinCartAmount(minCartAmount, discountType, discountAmount);
+  if (minCartAmountError) {
+    showError('minCartAmount', minCartAmountError);
+    isValid = false;
+  }
+  
+  const usageLimitError = validateUsageLimit(usageLimit);
+  if (usageLimitError) {
+    showError('usageLimit', usageLimitError);
+    isValid = false;
+  }
+  
+  const expiryDateError = validateExpiryDate(expiresAt);
+  if (expiryDateError) {
+    showError('expiresAt', expiryDateError);
+    isValid = false;
   }
   
   return isValid;
 }
 
-// Update preview
+// Update preview function
 function updatePreview() {
   const code = document.getElementById('code').value || 'COUPON';
   const discountType = document.getElementById('discountType').value;
@@ -292,37 +437,101 @@ function updatePreview() {
   }
 }
 
+// Event Listeners
+
 // Handle discount type change
 document.getElementById('discountType').addEventListener('change', function() {
   const discountType = this.value;
   const maxDiscountField = document.getElementById('maxDiscountField');
   const discountSymbol = document.getElementById('discountSymbol');
+  const discountAmountHint = document.getElementById('discountAmountHint');
+  const maxDiscountLabel = maxDiscountField.querySelector('label');
   
   if (discountType === 'Percentage') {
     maxDiscountField.style.display = 'block';
     discountSymbol.textContent = '%';
+    discountAmountHint.textContent = '(1-100%)';
+    maxDiscountLabel.innerHTML = 'Max Discount (₹) * <span class="text-xs text-gray-500 ml-1">(Required for percentage discount)</span>';
   } else {
     maxDiscountField.style.display = 'none';
     discountSymbol.textContent = '₹';
+    discountAmountHint.textContent = '(₹1-₹50,000)';
   }
   
   clearError('discountType');
+  clearError('maxDiscount');
   updatePreview();
 });
 
-// Handle coupon code input
+// Real-time validation for coupon code
 document.getElementById('code').addEventListener('input', function() {
   this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  clearError('code');
+  const error = validateCode(this.value);
+  if (error) {
+    showError('code', error);
+  } else {
+    clearError('code');
+  }
   updatePreview();
 });
 
-// Clear errors and update preview on input
-['discountAmount', 'maxDiscount', 'minCartAmount', 'usageLimit', 'expiresAt'].forEach(fieldId => {
-  document.getElementById(fieldId).addEventListener('input', function() {
-    clearError(fieldId);
-    updatePreview();
-  });
+// Real-time validation for discount amount
+document.getElementById('discountAmount').addEventListener('input', function() {
+  const discountType = document.getElementById('discountType').value;
+  const error = validateDiscountAmount(this.value, discountType);
+  if (error) {
+    showError('discountAmount', error);
+  } else {
+    clearError('discountAmount');
+  }
+  updatePreview();
+});
+
+// Real-time validation for max discount
+document.getElementById('maxDiscount').addEventListener('input', function() {
+  const discountType = document.getElementById('discountType').value;
+  const minCartAmount = document.getElementById('minCartAmount').value;
+  const error = validateMaxDiscount(this.value, discountType, minCartAmount);
+  if (error) {
+    showError('maxDiscount', error);
+  } else {
+    clearError('maxDiscount');
+  }
+  updatePreview();
+});
+
+// Real-time validation for min cart amount
+document.getElementById('minCartAmount').addEventListener('input', function() {
+  const discountType = document.getElementById('discountType').value;
+  const discountAmount = document.getElementById('discountAmount').value;
+  const error = validateMinCartAmount(this.value, discountType, discountAmount);
+  if (error) {
+    showError('minCartAmount', error);
+  } else {
+    clearError('minCartAmount');
+  }
+  updatePreview();
+});
+
+// Real-time validation for usage limit
+document.getElementById('usageLimit').addEventListener('input', function() {
+  const error = validateUsageLimit(this.value);
+  if (error) {
+    showError('usageLimit', error);
+  } else {
+    clearError('usageLimit');
+  }
+});
+
+// Real-time validation for expiry date
+document.getElementById('expiresAt').addEventListener('change', function() {
+  const error = validateExpiryDate(this.value);
+  if (error) {
+    showError('expiresAt', error);
+  } else {
+    clearError('expiresAt');
+  }
+  updatePreview();
 });
 
 // Form submission
@@ -396,8 +605,14 @@ document.getElementById('editCouponForm').addEventListener('submit', async funct
   }
 });
 
-// Set minimum date to today
-document.getElementById('expiresAt').min = new Date().toISOString().split('T')[0];
+// Set date constraints
+const today = new Date().toISOString().split('T')[0];
+const maxDate = new Date();
+maxDate.setFullYear(maxDate.getFullYear() + 5);
+const maxDateStr = maxDate.toISOString().split('T')[0];
+
+document.getElementById('expiresAt').min = today;
+document.getElementById('expiresAt').max = maxDateStr;
 
 // Initialize preview on page load
 window.onload = () => {

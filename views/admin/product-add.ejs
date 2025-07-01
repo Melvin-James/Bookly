@@ -15,27 +15,56 @@
     <link rel="icon" href="/images/favicon.ico" />
     <style>
       .error {
-        color: red;
-        font-size: 15px;
+        color: #007D8B;
+        font-size: 14px;
         text-align: left;
-        margin-left: 10px;
+        margin-top: 4px;
+        display: block;
       }
-
+      
+      .input-error {
+        border-color: #007D8B !important;
+        box-shadow: 0 0 0 2px rgba(0, 125, 139, 0.2) !important;
+      }
+      
       #preview-container {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
         margin-top: 10px;
       }
-
+      
       .thumbnail {
         width: 100px;
         height: 100px;
         object-fit: cover;
         border-radius: 5px;
         border: 1px solid #ccc;
+        position: relative;
       }
-
+      
+      .thumbnail-container {
+        position: relative;
+        display: inline-block;
+      }
+      
+      .remove-image {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #007D8B;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
       #cropModal {
         position: fixed;
         top: 0;
@@ -48,7 +77,7 @@
         align-items: center;
         z-index: 1000;
       }
-
+      
       #cropImageBox {
         background: white;
         padding: 20px;
@@ -57,10 +86,25 @@
         max-height: 80vh;
         overflow: auto;
       }
-
+      
       #cropImage {
         max-width: 100%;
         max-height: 70vh;
+      }
+      
+      .character-count {
+        font-size: 12px;
+        color: #666;
+        text-align: right;
+        margin-top: 2px;
+      }
+      
+      .character-count.warning {
+        color: #007D8B;
+      }
+      
+      .character-count.error {
+        color: #dc2626;
       }
     </style>
   </head>
@@ -75,7 +119,6 @@
         >
           ← Back to Products
         </a>
-
       </div>
     </nav>
 
@@ -88,16 +131,20 @@
       <form id="productForm" enctype="multipart/form-data" class="space-y-6">
         <!-- Product Name -->
         <div>
-          <label for="name" class="block text-sm font-medium text-gray-700 mb-1"
-            >Product Name</label
-          >
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+            Product Name *
+            <span class="text-xs text-gray-500 ml-1">(2-100 characters)</span>
+          </label>
           <input
             type="text"
             name="name"
             id="name"
+            maxlength="100"
             class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+            placeholder="Enter product name"
           />
-          <p class="error" id="error-name"></p>
+          <div class="character-count" id="name-count">0/100</div>
+          <span class="error" id="error-name"></span>
         </div>
 
         <!-- Description -->
@@ -105,15 +152,20 @@
           <label
             for="description"
             class="block text-sm font-medium text-gray-700 mb-1"
-            >Description</label
           >
+            Description *
+            <span class="text-xs text-gray-500 ml-1">(10-2000 characters)</span>
+          </label>
           <textarea
             name="description"
             id="description"
             rows="4"
+            maxlength="2000"
             class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+            placeholder="Enter detailed product description"
           ></textarea>
-          <p class="error" id="error-description"></p>
+          <div class="character-count" id="description-count">0/2000</div>
+          <span class="error" id="error-description"></span>
         </div>
 
         <!-- Publisher -->
@@ -121,15 +173,20 @@
           <label
             for="publisher"
             class="block text-sm font-medium text-gray-700 mb-1"
-            >Publisher</label
           >
+            Publisher *
+            <span class="text-xs text-gray-500 ml-1">(2-50 characters)</span>
+          </label>
           <input
             type="text"
             name="publisher"
             id="publisher"
+            maxlength="50"
             class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+            placeholder="Enter publisher name"
           />
-          <p class="error" id="error-publisher"></p>
+          <div class="character-count" id="publisher-count">0/50</div>
+          <span class="error" id="error-publisher"></span>
         </div>
 
         <!-- Category -->
@@ -137,8 +194,9 @@
           <label
             for="category"
             class="block text-sm font-medium text-gray-700 mb-1"
-            >Category</label
           >
+            Category *
+          </label>
           <select
             name="category"
             id="category"
@@ -149,71 +207,100 @@
             <option value="<%= cat._id %>"><%= cat.name %></option>
             <% }) %>
           </select>
-          <p class="error" id="error-category"></p>
+          <span class="error" id="error-category"></span>
         </div>
 
-        <!-- Price -->
-        <div>
-          <label
-            for="price"
-            class="block text-sm font-medium text-gray-700 mb-1"
-            >Price</label
-          >
-          <input
-            type="number"
-            name="price"
-            id="price"
-            class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
-          />
-          <p class="error" id="error-price"></p>
+        <!-- Price and Offer Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Price -->
+          <div>
+            <label
+              for="price"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Price (₹) *
+              <span class="text-xs text-gray-500 ml-1">(₹1 - ₹1,00,000)</span>
+            </label>
+            <input
+              type="number"
+              name="price"
+              id="price"
+              step="0.01"
+              min="1"
+              max="100000"
+              class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+              placeholder="Enter price"
+            />
+            <span class="error" id="error-price"></span>
+          </div>
+
+          <!-- Product Offer -->
+          <div>
+            <label
+              for="productOffer"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Product Offer (%) *
+              <span class="text-xs text-gray-500 ml-1">(0-90%)</span>
+            </label>
+            <input
+              type="number"
+              name="productOffer"
+              id="productOffer"
+              step="0.01"
+              min="0"
+              max="90"
+              class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+              placeholder="Enter offer percentage"
+            />
+            <div class="text-xs text-gray-500 mt-1" id="discounted-price"></div>
+            <span class="error" id="error-productOffer"></span>
+          </div>
         </div>
 
-        <!-- Offer -->
-        <div>
-          <label
-            for="productOffer"
-            class="block text-sm font-medium text-gray-700 mb-1"
-            >Product Offer (%)</label
-          >
-          <input
-            type="number"
-            name="productOffer"
-            id="productOffer"
-            class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
-          />
-          <p class="error" id="error-offer"></p>
-        </div>
+        <!-- Quantity and Color Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Quantity -->
+          <div>
+            <label
+              for="quantity"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Quantity *
+              <span class="text-xs text-gray-500 ml-1">(0-10,000)</span>
+            </label>
+            <input
+              type="number"
+              name="quantity"
+              id="quantity"
+              min="0"
+              max="10000"
+              class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+              placeholder="Enter quantity"
+            />
+            <span class="error" id="error-quantity"></span>
+          </div>
 
-        <!-- Quantity -->
-        <div>
-          <label
-            for="quantity"
-            class="block text-sm font-medium text-gray-700 mb-1"
-            >Quantity</label
-          >
-          <input
-            type="number"
-            name="quantity"
-            id="quantity"
-            class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
-          />
-          <p class="error" id="error-quantity"></p>
-        </div>
-
-        <!-- Color -->
-        <div>
-          <label
-            for="color"
-            class="block text-sm font-medium text-gray-700 mb-1"
-            >Color</label
-          >
-          <input
-            type="text"
-            name="color"
-            id="color"
-            class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
-          />
-          <p class="error" id="error-color"></p>
+          <!-- Color -->
+          <div>
+            <label
+              for="color"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Color *
+              <span class="text-xs text-gray-500 ml-1">(2-30 characters)</span>
+            </label>
+            <input
+              type="text"
+              name="color"
+              id="color"
+              maxlength="30"
+              class="w-full border px-4 py-2 rounded-md border-gray-300 focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
+              placeholder="Enter color"
+            />
+            <div class="character-count" id="color-count">0/30</div>
+            <span class="error" id="error-color"></span>
+          </div>
         </div>
 
         <!-- Status -->
@@ -221,8 +308,9 @@
           <label
             for="status"
             class="block text-sm font-medium text-gray-700 mb-1"
-            >Status</label
           >
+            Status *
+          </label>
           <select
             name="status"
             id="status"
@@ -233,7 +321,7 @@
             <option value="Out of Stock">Out of Stock</option>
             <option value="Discontinued">Discontinued</option>
           </select>
-          <p class="error" id="error-status"></p>
+          <span class="error" id="error-status"></span>
         </div>
 
         <!-- Image Upload -->
@@ -241,16 +329,21 @@
           <label
             for="productImage"
             class="block text-sm font-medium text-gray-700 mb-1"
-            >Product Images</label
           >
+            Product Images *
+            <span class="text-xs text-gray-500 ml-1">(Exactly 3 images required, max 5MB each)</span>
+          </label>
           <input
             type="file"
             id="productImage"
-            accept="image/*"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
             multiple
             class="w-full border px-4 py-2 rounded-md border-gray-300 focus:outline-none"
           />
-          <p class="error" id="error-productImage"></p>
+          <div class="text-xs text-gray-500 mt-1">
+            Supported formats: JPEG, PNG, WebP. Images will be cropped to square format.
+          </div>
+          <span class="error" id="error-productImage"></span>
           <div id="preview-container"></div>
         </div>
 
@@ -258,9 +351,11 @@
         <div class="flex justify-end">
           <button
             type="submit"
-            class="bg-[#007D8B] hover:bg-[#005f66] text-white px-6 py-2 rounded-md transition-colors shadow"
+            id="submitBtn"
+            class="bg-[#007D8B] hover:bg-[#005f66] text-white px-6 py-2 rounded-md transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Add Product
+            <span class="submit-text">Add Product</span>
+            <span class="loading-text hidden">Adding Product...</span>
           </button>
         </div>
       </form>
@@ -269,13 +364,20 @@
     <!-- Crop Modal -->
     <div id="cropModal">
       <div id="cropImageBox">
+        <h3 class="text-lg font-semibold mb-4">Crop Image</h3>
         <img id="cropImage" />
-        <div class="mt-4 text-right">
+        <div class="mt-4 flex justify-end gap-2">
+          <button
+            id="cropCancel"
+            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+          >
+            Cancel
+          </button>
           <button
             id="cropConfirm"
             class="bg-[#007D8B] hover:bg-[#005f66] text-white px-4 py-2 rounded"
           >
-            Crop
+            Crop & Add
           </button>
         </div>
       </div>
@@ -290,19 +392,356 @@
     <script>
       let selectedImages = [];
       let cropper;
+      let currentFileIndex = 0;
+      let filesToProcess = [];
+      
       const cropModal = $("#cropModal");
       const cropImage = $("#cropImage");
       const previewContainer = $("#preview-container");
 
-      $("#productImage").on("change", function () {
-        const files = this.files;
+      // Validation Functions
+      function showError(fieldId, message) {
+        const errorElement = $(`#error-${fieldId}`);
+        const inputElement = $(`#${fieldId}`);
+        
+        errorElement.text(message).show();
+        inputElement.addClass('input-error');
+      }
 
+      function clearError(fieldId) {
+        const errorElement = $(`#error-${fieldId}`);
+        const inputElement = $(`#${fieldId}`);
+        
+        errorElement.hide();
+        inputElement.removeClass('input-error');
+      }
+
+      function updateCharacterCount(fieldId, maxLength) {
+        const field = $(`#${fieldId}`);
+        const countElement = $(`#${fieldId}-count`);
+        const currentLength = field.val().length;
+        
+        countElement.text(`${currentLength}/${maxLength}`);
+        
+        if (currentLength > maxLength * 0.9) {
+          countElement.addClass('warning');
+        } else {
+          countElement.removeClass('warning');
+        }
+        
+        if (currentLength >= maxLength) {
+          countElement.addClass('error');
+        } else {
+          countElement.removeClass('error');
+        }
+      }
+
+      function updateDiscountedPrice() {
+        const price = parseFloat($('#price').val()) || 0;
+        const offer = parseFloat($('#productOffer').val()) || 0;
+        
+        if (price > 0 && offer >= 0) {
+          const discountedPrice = price - (price * offer / 100);
+          $('#discounted-price').text(`Final Price: ₹${discountedPrice.toFixed(2)}`);
+        } else {
+          $('#discounted-price').text('');
+        }
+      }
+
+      // Real-time Validation Functions
+      function validateName(name) {
+        if (!name.trim()) {
+          return 'Product name is required';
+        }
+        if (name.length < 2) {
+          return 'Product name must be at least 2 characters long';
+        }
+        if (name.length > 100) {
+          return 'Product name cannot exceed 100 characters';
+        }
+        if (!/^[a-zA-Z0-9\s\-_.,()&]+$/.test(name)) {
+          return 'Product name contains invalid characters';
+        }
+        return null;
+      }
+
+      function validateDescription(description) {
+        if (!description.trim()) {
+          return 'Product description is required';
+        }
+        if (description.length < 10) {
+          return 'Description must be at least 10 characters long';
+        }
+        if (description.length > 2000) {
+          return 'Description cannot exceed 2000 characters';
+        }
+        return null;
+      }
+
+      function validatePublisher(publisher) {
+        if (!publisher.trim()) {
+          return 'Publisher name is required';
+        }
+        if (publisher.length < 2) {
+          return 'Publisher name must be at least 2 characters long';
+        }
+        if (publisher.length > 50) {
+          return 'Publisher name cannot exceed 50 characters';
+        }
+        if (!/^[a-zA-Z0-9\s\-_.,()&]+$/.test(publisher)) {
+          return 'Publisher name contains invalid characters';
+        }
+        return null;
+      }
+
+      function validatePrice(price) {
+        if (!price) {
+          return 'Product price is required';
+        }
+        const numPrice = parseFloat(price);
+        if (isNaN(numPrice) || numPrice <= 0) {
+          return 'Price must be greater than 0';
+        }
+        if (numPrice < 1) {
+          return 'Price must be at least ₹1';
+        }
+        if (numPrice > 100000) {
+          return 'Price cannot exceed ₹1,00,000';
+        }
+        return null;
+      }
+
+      function validateProductOffer(offer, price) {
+        if (offer === undefined || offer === '') {
+          return 'Product offer percentage is required';
+        }
+        const numOffer = parseFloat(offer);
+        if (isNaN(numOffer) || numOffer < 0) {
+          return 'Offer percentage cannot be negative';
+        }
+        if (numOffer > 90) {
+          return 'Offer percentage cannot exceed 90%';
+        }
+        
+        // Cross-validation with price
+        if (price) {
+          const numPrice = parseFloat(price);
+          if (!isNaN(numPrice) && !isNaN(numOffer)) {
+            const discountedPrice = numPrice - (numPrice * numOffer / 100);
+            if (discountedPrice < 1) {
+              return 'Offer percentage is too high for this price';
+            }
+          }
+        }
+        return null;
+      }
+
+      function validateQuantity(quantity) {
+        if (quantity === undefined || quantity === '') {
+          return 'Product quantity is required';
+        }
+        const numQuantity = parseInt(quantity);
+        if (isNaN(numQuantity) || numQuantity < 0) {
+          return 'Quantity cannot be negative';
+        }
+        if (numQuantity > 10000) {
+          return 'Quantity cannot exceed 10,000';
+        }
+        if (!Number.isInteger(parseFloat(quantity))) {
+          return 'Quantity must be a whole number';
+        }
+        return null;
+      }
+
+      function validateColor(color) {
+        if (!color.trim()) {
+          return 'Product color is required';
+        }
+        if (color.length < 2) {
+          return 'Color must be at least 2 characters long';
+        }
+        if (color.length > 30) {
+          return 'Color name cannot exceed 30 characters';
+        }
+        if (!/^[a-zA-Z\s\-]+$/.test(color)) {
+          return 'Color name can only contain letters, spaces, and hyphens';
+        }
+        return null;
+      }
+
+      function validateForm() {
+        let isValid = true;
+        
+        // Clear all errors
+        ['name', 'description', 'publisher', 'category', 'price', 'productOffer', 'quantity', 'color', 'status', 'productImage'].forEach(clearError);
+        
+        // Validate each field
+        const name = $('#name').val();
+        const nameError = validateName(name);
+        if (nameError) {
+          showError('name', nameError);
+          isValid = false;
+        }
+        
+        const description = $('#description').val();
+        const descError = validateDescription(description);
+        if (descError) {
+          showError('description', descError);
+          isValid = false;
+        }
+        
+        const publisher = $('#publisher').val();
+        const pubError = validatePublisher(publisher);
+        if (pubError) {
+          showError('publisher', pubError);
+          isValid = false;
+        }
+        
+        const category = $('#category').val();
+        if (!category) {
+          showError('category', 'Please select a category');
+          isValid = false;
+        }
+        
+        const price = $('#price').val();
+        const priceError = validatePrice(price);
+        if (priceError) {
+          showError('price', priceError);
+          isValid = false;
+        }
+        
+        const offer = $('#productOffer').val();
+        const offerError = validateProductOffer(offer, price);
+        if (offerError) {
+          showError('productOffer', offerError);
+          isValid = false;
+        }
+        
+        const quantity = $('#quantity').val();
+        const quantityError = validateQuantity(quantity);
+        if (quantityError) {
+          showError('quantity', quantityError);
+          isValid = false;
+        }
+        
+        const color = $('#color').val();
+        const colorError = validateColor(color);
+        if (colorError) {
+          showError('color', colorError);
+          isValid = false;
+        }
+        
+        const status = $('#status').val();
+        if (!status) {
+          showError('status', 'Please select a product status');
+          isValid = false;
+        }
+        
+        if (selectedImages.length !== 3) {
+          showError('productImage', 'Please upload exactly 3 images');
+          isValid = false;
+        }
+        
+        return isValid;
+      }
+
+      // Event Listeners for Real-time Validation
+      $('#name').on('input', function() {
+        const error = validateName($(this).val());
+        if (error) {
+          showError('name', error);
+        } else {
+          clearError('name');
+        }
+        updateCharacterCount('name', 100);
+      });
+
+      $('#description').on('input', function() {
+        const error = validateDescription($(this).val());
+        if (error) {
+          showError('description', error);
+        } else {
+          clearError('description');
+        }
+        updateCharacterCount('description', 2000);
+      });
+
+      $('#publisher').on('input', function() {
+        const error = validatePublisher($(this).val());
+        if (error) {
+          showError('publisher', error);
+        } else {
+          clearError('publisher');
+        }
+        updateCharacterCount('publisher', 50);
+      });
+
+      $('#category').on('change', function() {
+        if ($(this).val()) {
+          clearError('category');
+        } else {
+          showError('category', 'Please select a category');
+        }
+      });
+
+      $('#price').on('input', function() {
+        const error = validatePrice($(this).val());
+        if (error) {
+          showError('price', error);
+        } else {
+          clearError('price');
+        }
+        updateDiscountedPrice();
+      });
+
+      $('#productOffer').on('input', function() {
+        const price = $('#price').val();
+        const error = validateProductOffer($(this).val(), price);
+        if (error) {
+          showError('productOffer', error);
+        } else {
+          clearError('productOffer');
+        }
+        updateDiscountedPrice();
+      });
+
+      $('#quantity').on('input', function() {
+        const error = validateQuantity($(this).val());
+        if (error) {
+          showError('quantity', error);
+        } else {
+          clearError('quantity');
+        }
+      });
+
+      $('#color').on('input', function() {
+        const error = validateColor($(this).val());
+        if (error) {
+          showError('color', error);
+        } else {
+          clearError('color');
+        }
+        updateCharacterCount('color', 30);
+      });
+
+      $('#status').on('change', function() {
+        if ($(this).val()) {
+          clearError('status');
+        } else {
+          showError('status', 'Please select a product status');
+        }
+      });
+
+      // Image handling
+      $("#productImage").on("change", function() {
+        const files = Array.from(this.files);
+        
         if (selectedImages.length + files.length > 3) {
           Swal.fire({
             toast: true,
             position: "top-end",
             icon: "error",
-            title: "you can only upload 3 images",
+            title: "You can only upload 3 images maximum",
             showConfirmButton: false,
             timer: 2000,
           });
@@ -310,17 +749,49 @@
           return;
         }
 
+        // Validate file types and sizes
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        
+        for (let file of files) {
+          if (!allowedTypes.includes(file.type)) {
+            showError('productImage', 'Only JPEG, PNG, and WebP images are allowed');
+            this.value = "";
+            return;
+          }
+          if (file.size > maxSize) {
+            showError('productImage', 'Each image must be less than 5MB');
+            this.value = "";
+            return;
+          }
+        }
+
         if (files.length > 0) {
-          showCropModal(files[0]);
+          filesToProcess = files;
+          currentFileIndex = 0;
+          processNextFile();
         }
       });
 
+      function processNextFile() {
+        if (currentFileIndex < filesToProcess.length) {
+          showCropModal(filesToProcess[currentFileIndex]);
+        } else {
+          $("#productImage").val("");
+          updateImageValidation();
+        }
+      }
+
       function showCropModal(file) {
         const reader = new FileReader();
-        reader.onload = function (e) {
+        reader.onload = function(e) {
           cropImage.attr("src", e.target.result);
           cropModal.show();
-
+          
+          if (cropper) {
+            cropper.destroy();
+          }
+          
           cropper = new Cropper(cropImage[0], {
             aspectRatio: 1,
             viewMode: 1,
@@ -330,44 +801,83 @@
         reader.readAsDataURL(file);
       }
 
-      $("#cropConfirm").on("click", function () {
+      $("#cropConfirm").on("click", function() {
         cropper.getCroppedCanvas().toBlob((blob) => {
           const url = URL.createObjectURL(blob);
           selectedImages.push(blob);
-
+          
+          const container = $('<div class="thumbnail-container"></div>');
           const img = $("<img>").attr("src", url).addClass("thumbnail");
-          previewContainer.append(img);
-
+          const removeBtn = $('<button class="remove-image" type="button">×</button>');
+          
+          removeBtn.on('click', function() {
+            const index = selectedImages.indexOf(blob);
+            if (index > -1) {
+              selectedImages.splice(index, 1);
+              container.remove();
+              URL.revokeObjectURL(url);
+              updateImageValidation();
+            }
+          });
+          
+          container.append(img).append(removeBtn);
+          previewContainer.append(container);
+          
           cropper.destroy();
           cropModal.hide();
-          $("#productImage").val("");
+          
+          currentFileIndex++;
+          processNextFile();
         });
       });
 
-      $("#productForm").submit(function (event) {
-        event.preventDefault();
+      $("#cropCancel").on("click", function() {
+        cropper.destroy();
+        cropModal.hide();
+        currentFileIndex = filesToProcess.length; // Skip remaining files
+        $("#productImage").val("");
+      });
 
-        if (selectedImages.length !== 3) {
-          $("#error-productImage").text("Please upload exactly 3 images.");
+      function updateImageValidation() {
+        if (selectedImages.length === 3) {
+          clearError('productImage');
+        } else if (selectedImages.length === 0) {
+          showError('productImage', 'Please upload exactly 3 images');
+        } else {
+          showError('productImage', `Please upload ${3 - selectedImages.length} more image(s)`);
+        }
+      }
+
+      // Form submission
+      $("#productForm").submit(function(event) {
+        event.preventDefault();
+        
+        if (!validateForm()) {
           return;
         }
 
+        const submitBtn = $('#submitBtn');
         const formData = new FormData();
-
-        formData.append("name", $("#name").val());
-        formData.append("description", $("#description").val());
-        formData.append("publisher", $("#publisher").val());
+        
+        // Add form data
+        formData.append("name", $("#name").val().trim());
+        formData.append("description", $("#description").val().trim());
+        formData.append("publisher", $("#publisher").val().trim());
         formData.append("category", $("#category").val());
         formData.append("price", $("#price").val());
         formData.append("productOffer", $("#productOffer").val());
         formData.append("quantity", $("#quantity").val());
-        formData.append("color", $("#color").val());
+        formData.append("color", $("#color").val().trim());
         formData.append("status", $("#status").val());
 
         selectedImages.forEach((blob, i) => {
           formData.append("productImage", blob, `image${i}.jpg`);
         });
 
+        // Show loading state
+        submitBtn.prop('disabled', true);
+        submitBtn.find('.submit-text').addClass('hidden');
+        submitBtn.find('.loading-text').removeClass('hidden');
 
         $.ajax({
           url: "/admin/product-add",
@@ -375,19 +885,13 @@
           data: formData,
           processData: false,
           contentType: false,
-          success: function (response) {
-            $(".error").text("");
-
-            if (response.errors) {
-              for (const field in response.errors) {
-                $(`#error-${field}`).text(response.errors[field]);
-              }
-            } else {
+          success: function(response) {
+            if (response.success) {
               Swal.fire({
                 toast: true,
                 position: "top-end",
                 icon: "success",
-                title: "New Product added",
+                title: "Product added successfully!",
                 showConfirmButton: false,
                 timer: 2000,
               }).then(() => {
@@ -395,7 +899,49 @@
               });
             }
           },
+          error: function(xhr) {
+            console.error('Error:', xhr);
+            
+            // Handle validation errors from server
+            if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+              // Clear all previous errors first
+              ['name', 'description', 'publisher', 'category', 'price', 'productOffer', 'quantity', 'color', 'status', 'productImage'].forEach(clearError);
+              
+              // Show server validation errors
+              Object.keys(xhr.responseJSON.errors).forEach(field => {
+                showError(field, xhr.responseJSON.errors[field]);
+              });
+              
+              // Scroll to first error
+              const firstError = Object.keys(xhr.responseJSON.errors)[0];
+              if (firstError) {
+                $(`#${firstError}`)[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            } else {
+              // Handle other errors
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON?.message || 'Failed to add product. Please try again.',
+                confirmButtonColor: '#007D8B'
+              });
+            }
+          },
+          complete: function() {
+            // Reset button state
+            submitBtn.prop('disabled', false);
+            submitBtn.find('.submit-text').removeClass('hidden');
+            submitBtn.find('.loading-text').addClass('hidden');
+          }
         });
+      });
+
+      // Initialize character counts
+      $(document).ready(function() {
+        updateCharacterCount('name', 100);
+        updateCharacterCount('description', 2000);
+        updateCharacterCount('publisher', 50);
+        updateCharacterCount('color', 30);
       });
     </script>
   </body>
