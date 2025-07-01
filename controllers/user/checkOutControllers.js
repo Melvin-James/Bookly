@@ -190,10 +190,24 @@ const placeOrder = async (req, res,next) => {
 
     await newOrder.save();
 
-    for(let item of items){
-      await Product.findByIdAndUpdate(item.product,{
-        $inc:{quantity:-item.quantity}
-      });
+    for (let item of items) {
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: item.product,
+          quantity: { $gte: item.quantity } 
+        },
+        {
+          $inc: { quantity: -item.quantity }
+        },
+        { new: true }
+      );
+
+      if (!updatedProduct) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for ${item.product.name || 'a product'}`
+        });
+      }
     }
 
     user.wishlist = user.wishlist.filter(productId =>

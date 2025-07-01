@@ -81,7 +81,6 @@ const updateStock = async(req,res,next)=>{
             success: false,
             message: 'Quantity cannot be negative'
           });
-
         }
 
         await Product.findByIdAndUpdate(productId, {
