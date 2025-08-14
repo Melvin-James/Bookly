@@ -16,24 +16,16 @@ const uploadProfileImage = uploadTo('profileImages');
 
 router.get('/signup',userControllers.loadSignup);
 router.post('/signup',userControllers.signupStep1);
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/google/callback', passport.authenticate('google', {
-  failureRedirect: '/user/login',
-  failureFlash: true
-}), (req, res) => {
-  req.session.user = {
-    _id: req.user._id,
-    name: req.user.name,
-    email: req.user.email,
-    isAdmin: req.user.isAdmin,
-  };
-
-  console.log('Google login success, session user set:', req.session.user);
-  res.redirect('/user/home');
-});
-
-
-
+router.get('/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+router.get('/google/callback',
+  passport.authenticate('google', { failureRedirect: '/user/login' }),
+  (req, res) => {
+    req.session.user = req.user; 
+    res.redirect('/user/home');
+  }
+);
 router.post('/verify-otp', userControllers.verifyOtp);
 router.post('/resendOtp',userControllers.resendOtp);
 

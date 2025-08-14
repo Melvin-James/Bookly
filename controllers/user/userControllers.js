@@ -218,6 +218,12 @@ const homePage = async (req, res, next) => {
     const isLoggedIn = !!req.session.user;
     let user = null;
 
+    if (req.user) {
+      user = req.user;
+    } else if (req.session.user) {
+      user = await User.findById(req.session.user._id);
+    }
+
     if (isLoggedIn) {
       user = await User.findById(req.session.user._id);
     }
