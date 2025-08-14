@@ -1,21 +1,20 @@
 const User = require('../models/userSchema');
 
-const userAuth =async (req, res, next) => {
-    if (!req.session.user) {
-        return res.redirect('/user/login');
+const userAuth = async (req, res, next) => {
+    if (req.user || req.session.user) {
+        return next();
     }
-    next();
+    return res.redirect('/user/login');
 };
 
-const adminAuth = (req,res,next)=>{
-    if (!req.session.admin) {
-        return res.redirect('/admin/login');
+const adminAuth = (req, res, next) => {
+    if (req.session.admin) {
+        return next();
     }
-    next();
-}
+    return res.redirect('/admin/login');
+};
 
-
-module.exports={
+module.exports = {
     userAuth,
     adminAuth
-}
+};
