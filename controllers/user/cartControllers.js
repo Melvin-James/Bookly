@@ -45,8 +45,15 @@ const addToCart = async (req, res, next) => {
       }
   
       const user = await User.findById(userId);
+
+      const wishlistExists = user.wishlist.find(pid=>pid.toString() === productId);
+
+      if(wishlistExists){
+        user.wishlist = user.wishlist.filter(pid => pid.toString() !== productId);
+      }
+      
       const itemExists = user.cart.some(item => item.product.toString() === productId);
-  
+      
       if (itemExists) {
         return res.json({ success: true, alreadyInCart: true });
       } else {
