@@ -43,6 +43,7 @@
               <% } else if (order.status === 'Delivered') { %> bg-green-100 text-green-800 border border-green-200
               <% } else if (order.status === 'Failed') { %> bg-gray-100 text-gray-800 border border-gray-200
               <% } else if (order.status === 'Cancelled') { %> bg-red-100 text-red-800 border border-red-200
+              <% } else if (order.status === 'Return Requested') { %> bg-yellow-100 text-yellow-800 border border-yellow-200
               <% } else if (order.status === 'Returned') { %> bg-orange-100 text-orange-800 border border-orange-200 <% } %>">
               <div class="w-2 h-2 rounded-full
                 <% if (order.status === 'Placed') { %> bg-blue-500
@@ -51,6 +52,7 @@
                 <% } else if (order.status === 'Delivered') { %> bg-green-500
                 <% } else if (order.status === 'Failed') { %> bg-gray-500
                 <% } else if (order.status === 'Cancelled') { %> bg-red-500
+                <% } else if (order.status === 'Return Requested') { %> bg-yellow-500
                 <% } else if (order.status === 'Returned') { %> bg-orange-500 <% } %>"></div>
               <%= order.status %>
             </span>
@@ -185,6 +187,7 @@
                       'Out for Delivery': 'text-indigo-600',
                       'Delivered': 'text-green-600',
                       'Cancelled': 'text-red-600',
+                      'Return Requested': 'text-yellow-600',
                       'Returned': 'text-orange-600'
                     };
                     const itemStatusClass = itemStatusColors[item.status] || 'text-gray-600';
@@ -195,6 +198,33 @@
                   </span>
                 </div>
             </div>
+              <% if (item.isReturnRequested && item.status === 'Return Requested') { %>
+                <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div class="flex items-center gap-2 mb-3">
+                    <i class="ri-alert-line text-yellow-600"></i>
+                    <h4 class="font-medium text-yellow-800">Return Request Pending for Item <%= item.productName %></h4>
+                  </div>
+                  <p class="text-sm text-yellow-700 mb-4">
+                    This item has a pending return request that requires your attention.
+                  </p>
+                  <div class="flex flex-col sm:flex-row gap-3">
+                    <form method="POST" action="/admin/orders/approve-return/<%= order._id %>/<%=item._id%>" class="flex-1">
+                      <button type="submit"
+                        class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center justify-center gap-2">
+                        <i class="ri-check-line text-sm"></i>
+                        Approve Return
+                      </button>
+                    </form>
+                    <form method="POST" action="/admin/orders/reject-return/<%= order._id %>/<%=item._id%>" class="flex-1">
+                      <button type="submit"
+                        class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center justify-center gap-2">
+                        <i class="ri-close-line text-sm"></i>
+                        Reject Return
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              <% } %>
           </div>
         <% }) %>
       </div>
@@ -228,37 +258,11 @@
 
             <button id="updateStatusBtn" 
               class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-hover transition-all duration-200 font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2
-              <%= ['Delivered', 'Cancelled', 'Returned', 'Failed'].includes(order.status) ? 'opacity-50 cursor-not-allowed' : '' %>"
-              <%= ['Delivered', 'Cancelled', 'Returned', 'Failed'].includes(order.status) ? 'disabled' : '' %>>
+              <%= ['Delivered', 'Cancelled', 'Returned', 'Failed','Return Requested'].includes(order.status) ? 'opacity-50 cursor-not-allowed' : '' %>"
+              <%= ['Delivered', 'Cancelled', 'Returned', 'Failed','Return Requested'].includes(order.status) ? 'disabled' : '' %>>
               <i class="ri-refresh-line text-sm"></i>
               Update Order Status
             </button>
-
-            <% if (order.isReturnRequested && order.status === 'Delivered') { %>
-              <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div class="flex items-center gap-2 mb-3">
-                  <i class="ri-alert-line text-yellow-600"></i>
-                  <h4 class="font-medium text-yellow-800">Return Request Pending</h4>
-                </div>
-                <p class="text-sm text-yellow-700 mb-4">This order has a pending return request that requires your attention.</p>
-                <div class="flex flex-col sm:flex-row gap-3">
-                  <form method="POST" action="/admin/orders/<%= order._id %>/approve-return" class="flex-1">
-                    <button type="submit" 
-                      class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center justify-center gap-2">
-                      <i class="ri-check-line text-sm"></i>
-                      Approve Return
-                    </button>
-                  </form>
-                  <form method="POST" action="/admin/orders/<%= order._id %>/reject-return" class="flex-1">
-                    <button type="submit" 
-                      class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center justify-center gap-2">
-                      <i class="ri-close-line text-sm"></i>
-                      Reject Return
-                    </button>
-                  </form>
-                </div>
-              </div>
-            <% } %>
           </div>
         </div>
       </div>

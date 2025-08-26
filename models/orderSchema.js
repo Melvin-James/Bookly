@@ -24,12 +24,20 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
       type: String,
-      enum: ['Placed', 'Cancelled', 'Returned','Delivered','Out for Delivery','Shipped','Failed'],
+      enum: ['Placed', 'Cancelled', 'Returned','Return Requested','Delivered','Out for Delivery','Shipped','Failed'],
     },
     originalPrice: Number,
     discountedPrice: Number,
     productName: String,
     productImage: String,
+    returnReason: { 
+      type: String,
+      default: null
+    },
+    isReturnRequested: {
+      type: Boolean,
+      default: false
+    }
   }],  
   address: {
     addressType:String,
@@ -49,17 +57,8 @@ const orderSchema = new mongoose.Schema({
   totalAmount: {type:Number, required: true},
   status: {
     type: String,
-    enum: ["Placed", "Shipped", "Delivered", "Cancelled","Out for Delivery","Returned","Failed"],
+    enum: ["Placed", "Shipped", "Delivered",'Return Requested',"Cancelled","Out for Delivery","Returned","Failed"],
   },
-  returnReason: {
-    type: String,
-    default: null
-  },
-  isReturnRequested: {
-    type: Boolean,
-    default: false
-  },
-  isReturnApproved: { type: Boolean, default: false },
   couponApplied:{type:String},
   couponDiscount: {
     type: Number,

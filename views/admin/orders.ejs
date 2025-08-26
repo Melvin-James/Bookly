@@ -183,6 +183,7 @@
                       <% } else if (order.status === 'Out for Delivery') { %> bg-purple-100 text-purple-800 border border-purple-200
                       <% } else if (order.status === 'Delivered') { %> bg-green-100 text-green-800 border border-green-200
                       <% } else if (order.status === 'Failed') { %> bg-gray-100 text-gray-800 border border-gray-200
+                      <% } else if (order.status === 'Return Requested') { %> bg-yellow-100 text-yellow-800 border border-yellow-200
                       <% } else if (order.status === 'Returned') { %> bg-orange-100 text-orange-800 border border-orange-200
                       <% } else if (order.status === 'Cancelled') { %> bg-red-100 text-red-800 border border-red-200 <% } %>">
                       <div class="w-1.5 h-1.5 rounded-full
@@ -192,6 +193,7 @@
                         <% } else if (order.status === 'Out for Delivery') { %> bg-purple-500
                         <% } else if (order.status === 'Delivered') { %> bg-green-500
                         <% } else if (order.status === 'Failed') { %> bg-gray-500
+                        <% } else if (order.status === 'Return Requested') { %> bg-yellow-500
                         <% } else if (order.status === 'Returned') { %> bg-orange-500
                         <% } else if (order.status === 'Cancelled') { %> bg-red-500 <% } %>"></div>
                       <%= order.status %>
@@ -250,6 +252,7 @@
           'Out for Delivery': 'bg-purple-100 text-purple-800 border border-purple-200',
           'Delivered': 'bg-green-100 text-green-800 border border-green-200',
           'Failed': 'bg-gray-100 text-gray-800 border border-gray-200',
+          'Return Requested': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
           'Returned': 'bg-orange-100 text-orange-800 border border-orange-200',
           'Cancelled': 'bg-red-100 text-red-800 border border-red-200'
         };
@@ -261,6 +264,7 @@
           'Out for Delivery': 'bg-purple-500',
           'Delivered': 'bg-green-500',
           'Failed': 'bg-gray-500',
+          'Return Requested': 'bg-yellow-500',
           'Returned': 'bg-orange-500',
           'Cancelled': 'bg-red-500'
         };

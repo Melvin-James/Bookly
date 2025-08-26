@@ -20,7 +20,8 @@
         'Delivered': 'bg-green-100 text-green-800 border-green-200',
         'Cancelled': 'bg-red-100 text-red-800 border-red-200',
         'Returned': 'bg-orange-100 text-orange-800 border-orange-200',
-        'Failed': 'bg-gray-100 text-gray-800 border-gray-200'
+        'Failed': 'bg-gray-100 text-gray-800 border-gray-200',
+        'Return Requested': 'bg-yellow-100 text-yellow-800 border-yellow-200'
       };
       let statusClass = statusColors[order.status] || 'bg-gray-100 text-gray-800 border-gray-200'; 
     %>
@@ -60,50 +61,6 @@
         </div>
         
         <!-- Order Timeline -->
-        <div class="mt-6 md:mt-0 md:ml-6 md:border-l md:border-gray-100 md:pl-6">
-          <h3 class="text-sm font-semibold text-gray-900 mb-3">Order Timeline</h3>
-          <div class="relative pl-6 space-y-3">
-            <% 
-              const timeline = [];
-              timeline.push({ status: 'Placed', date: new Date(order.createdAt) });
-              
-              if (order.status === 'Shipped' || order.status === 'Out for Delivery' || order.status === 'Delivered') {
-                timeline.push({ status: 'Shipped', date: new Date(order.createdAt.getTime() + 86400000) });
-              }
-              
-              if (order.status === 'Out for Delivery' || order.status === 'Delivered') {
-                timeline.push({ status: 'Out for Delivery', date: new Date(order.createdAt.getTime() + 172800000) });
-              }
-              
-              if (order.status === 'Delivered') {
-                timeline.push({ status: 'Delivered', date: new Date(order.createdAt.getTime() + 259200000) });
-              }
-              
-              if (order.status === 'Cancelled') {
-                timeline.push({ status: 'Cancelled', date: new Date(order.updatedAt) });
-              }
-              
-              if (order.status === 'Returned') {
-                timeline.push({ status: 'Returned', date: new Date(order.updatedAt) });
-              }
-              
-              if (order.status === 'Failed') {
-                timeline.push({ status: 'Failed', date: new Date(order.updatedAt) });
-              }
-            %>
-            
-            <!-- Timeline Line -->
-            <div class="absolute left-0 top-1 bottom-0 w-0.5 bg-gray-200"></div>
-            
-            <% timeline.forEach((item, index) => { %>
-              <div class="relative">
-                <div class="absolute -left-6 mt-1 w-3 h-3 rounded-full <%= index === 0 ? 'bg-primary' : 'bg-gray-300' %>"></div>
-                <div class="text-xs text-gray-500"><%= item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></div>
-                <div class="text-sm font-medium text-gray-900"><%= item.status %></div>
-              </div>
-            <% }) %>
-          </div>
-        </div>
       </div>
     </div>
     
@@ -233,9 +190,17 @@
                   class="mt-3 text-sm text-red-600 hover:text-red-800 flex items-center"
                 >
                   <i class="fas fa-times-circle mr-1"></i>
-                  Cancel Item
+                  Cancel Book
                 </button>
-              <% } else { %>
+              <% } else if (item.status === "Delivered" && !item.isReturnRequested) { %>
+                <button
+                  onclick="confirmReturn('<%= order._id%>','<%= item._id %>')"
+                  class="mt-3 text-sm text-yellow-600 hover:text-red-800 flex items-center"
+                >
+                  <i class="fas fa-undo-alt mr-2"></i>
+                  Return Book
+                </button>
+              <% } else{ %>
                 <div class="mt-3 text-sm">
                   <%
                     const itemStatusColors = {
@@ -244,7 +209,8 @@
                       'Out for Delivery': 'text-indigo-600',
                       'Delivered': 'text-green-600',
                       'Cancelled': 'text-red-600',
-                      'Returned': 'text-orange-600'
+                      'Returned': 'text-orange-600',
+                      'Return Requested' : 'text-yellow-600'
                     };
                     const itemStatusClass = itemStatusColors[item.status] || 'text-gray-600';
                   %>
@@ -271,21 +237,6 @@
         <i class="fas fa-ban mr-2"></i>
         Cancel Order
       </button>
-    <% } %>
-    
-    <% if (order.status === "Delivered" && !order.isReturnRequested) { %>
-      <button
-        onclick="confirmReturn('<%= order._id %>')"
-        class="flex items-center px-5 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all"
-      >
-        <i class="fas fa-undo-alt mr-2"></i>
-        Return Order
-      </button>
-    <% } else if (order.isReturnRequested) { %>
-      <div class="flex items-center px-5 py-2.5 bg-yellow-100 text-yellow-800 rounded-lg">
-        <i class="fas fa-info-circle mr-2"></i>
-        Return Requested: <%= order.returnReason %>
-      </div>
     <% } %>
     
     <% if (order.status === "Failed") { %>
@@ -381,7 +332,7 @@
     });
   }
 
-  function confirmReturn(orderId) {
+  function confirmReturn(orderId,itemId) {
     Swal.fire({
       title: "Return Order",
       html: `
@@ -418,7 +369,7 @@
           }
         });
         
-        fetch(`/user/profile/orders/${orderId}/return`, {
+        fetch(`/user/profile/orders/return-item/${orderId}/${itemId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ reason: result.value }),
