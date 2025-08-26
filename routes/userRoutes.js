@@ -67,7 +67,7 @@ router.post('/profile/addresses/delete/:addressId',userAuth,profileControllers.d
 router.get('/profile/orders',userAuth,profileControllers.getOrdersPage);
 router.get('/profile/orders/:id',userAuth,profileControllers.getOrderDetails);
 router.post('/profile/orders/:id/cancel',userAuth,profileControllers.cancelOrder);
-router.post('/profile/orders/:id/return', userAuth, profileControllers.returnOrder);
+router.post('/profile/orders/return-item/:orderId/:productId', userAuth, profileControllers.returnOrderItem);
 router.post('/profile/orders/cancel-item/:orderId/:productId', userAuth, profileControllers.cancelOrderItem);
 router.get('/profile/orders/:id/invoice',userAuth,profileControllers.downloadInvoice);
 

@@ -137,74 +137,65 @@ const updateOrderStatus = async (req, res, next) => {
 
 const approveReturnRequest = async (req, res, next) => {
   try {
-    const orderId = req.params.id;
+    const { orderId, productId } = req.params;
     const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
 
-    if (!order || !order.isReturnRequested || order.isReturnApproved) {
-      return res.status(400).json({ success: false, message: 'Invalid return request.' });
+    const item = order.items.id(productId);
+    if (!item || !item.isReturnRequested || item.status !== 'Return Requested') {
+      return res.status(400).json({ success: false, message: 'Invalid item return request.' });
     }
 
     const user = await User.findById(order.user);
+    const itemTotal = item.discountedPrice * item.quantity;
+    const discountTotal = order.items.reduce((sum, i) => sum + i.discountedPrice * i.quantity, 0);
+    const couponShare = (itemTotal / discountTotal) * order.couponDiscount;
+    const refundAmount = itemTotal - couponShare;
 
-    let refundAmount = 0;
-    for (const item of order.items) {
-      if (item.status !== 'Cancelled') {
-        let discountTotal = order.items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
-        let itemTotal = item.discountedPrice * item.quantity;
-        let couponShare = (itemTotal / discountTotal) * order.couponDiscount;
-        refundAmount += (itemTotal - couponShare);
-      }
-    }
     user.wallet = (user.wallet || 0) + refundAmount;
-
-
-    const walletTransaction = {
+    user.walletTransactions.push({
       type: "credit",
       amount: refundAmount,
-      description: `Return approved for order ${order.orderId}`,
-      orderId: order.orderId 
-    };
-    user.walletTransactions.push(walletTransaction);
-
+      description: `Return approved for item ${item.productName} in order ${order.orderId}`,
+      orderId: order.orderId
+    });
     await user.save();
 
-    for (let item of order.items) {
-      if(item.status === 'Cancelled'){
-        item.status = 'Cancelled';
-      }
-      else{
-        item.status = 'Returned'
-        await Product.findByIdAndUpdate(item.product, { $inc: { quantity: item.quantity } });
-      }
-    }
+    item.status = 'Returned';
+    item.isReturnRequested = false;
+    await Product.findByIdAndUpdate(item.product, { $inc: { quantity: item.quantity } });
 
-    order.isReturnApproved = true;
-    order.status = 'Returned';
+    const allItemsReturned = order.items.every(item=>item.status === 'Returned');
+      if(allItemsReturned){
+        order.status = 'Returned';
+      }
+
     await order.save();
-
     res.redirect(`/admin/orders/${orderId}?returnStatus=approved`);
-    
   } catch (err) {
-    next(err)
+    next(err);
   }
 };
 
-const rejectReturnRequest = async (req, res,next) => {
+const rejectReturnRequest = async (req, res, next) => {
   try {
-    const orderId = req.params.id;
+    const { orderId, productId } = req.params;
     const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
 
-    if (!order || !order.isReturnRequested || order.isReturnApproved) {
-      return res.status(400).json({ success: false, message: 'Invalid return request.' });
+    const item = order.items.id(productId);
+    if (!item || !item.isReturnRequested || item.status !== 'Return Requested') {
+      return res.status(400).json({ success: false, message: 'Invalid item return request.' });
     }
 
-    order.isReturnRequested = false;
-    order.returnReason = null;
+    item.isReturnRequested = false;
+    item.returnReason = null;
+    item.status='Delivered'
     await order.save();
 
     res.redirect(`/admin/orders/${orderId}?returnStatus=rejected`);
   } catch (error) {
-    next(err);
+    next(error);
   }
 };
 
