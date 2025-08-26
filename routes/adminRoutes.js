@@ -49,8 +49,8 @@ router.get('/search-order', adminAuth, orderControllers.searchOrder);
 router.get('/order-pagination', adminAuth,orderControllers.getPaginatedOrder);
 router.get('/orders/:id', adminAuth, orderControllers.getAdminOrderDetails);
 router.post('/orders/:orderId/status', adminAuth, orderControllers.updateOrderStatus);
-router.post('/orders/:id/approve-return', adminAuth, orderControllers.approveReturnRequest);
-router.post('/orders/:id/reject-return', adminAuth, orderControllers.rejectReturnRequest);
+router.post('/orders/approve-return/:orderId/:productId', adminAuth, orderControllers.approveReturnRequest);
+router.post('/orders/reject-return/:orderId/:productId', adminAuth, orderControllers.rejectReturnRequest);
 
 router.get('/inventory', adminAuth, inventoryControllers.getInventoryPage);
 router.get('/search-stock', adminAuth, inventoryControllers.searchStock);
