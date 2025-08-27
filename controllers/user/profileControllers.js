@@ -576,7 +576,7 @@ const returnOrderItem = async (req, res,next) => {
 
       const order = await Order.findOne({ _id: orderId, user: userId }).populate('items.product');
 
-      if (!order || order.status !== 'Delivered') {
+      if (!order) {
         return res.status(400).json({ success: false, message: 'Invalid order for return' });
       }
 

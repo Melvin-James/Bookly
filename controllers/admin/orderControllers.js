@@ -110,21 +110,28 @@ const updateOrderStatus = async (req, res, next) => {
       if (item.status === 'Cancelled') continue;
       item.status = status;
     }
-    const itemStatuses = order.items.map(item => item.status);
 
-    if (itemStatuses.every(s => s === 'Delivered')) {
-      order.status = 'Delivered';
-    } else if (itemStatuses.every(s => s === 'Cancelled')) {
-      order.status = 'Cancelled';
-    } else if (itemStatuses.includes('Delivered')) {
-      order.status = 'Delivered';
-    } else if (itemStatuses.includes('Out for Delivery')) {
-      order.status = 'Out for Delivery';
-    } else if (itemStatuses.includes('Shipped')) {
-      order.status = 'Shipped';
-    } else {
-      order.status = status;
+    const statusCounts = {};
+    for (let item of order.items) {
+      statusCounts[item.status] = (statusCounts[item.status] || 0) + 1;
     }
+
+    const priority = ['Delivered', 'Out for Delivery', 'Shipped', 'Placed', 'Returned', 'Cancelled'];
+
+    let highestStatus = null;
+    let maxCount = 0;
+
+    for (let [s, count] of Object.entries(statusCounts)) {
+      if (
+        count > maxCount || 
+        (count === maxCount && priority.indexOf(s) < priority.indexOf(highestStatus))
+      ) {
+        highestStatus = s;
+        maxCount = count;
+      }
+    }
+
+    order.status = highestStatus;
 
     await order.save();
     return res.status(200).json({ message: 'Order status updated.' });
@@ -134,6 +141,7 @@ const updateOrderStatus = async (req, res, next) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 const approveReturnRequest = async (req, res, next) => {
   try {
