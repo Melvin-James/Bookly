@@ -49,54 +49,6 @@
 
   <!-- Main Content -->
   <div class="px-4 sm:px-6 lg:px-8 pb-8">
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <i class="ri-shopping-cart-line text-blue-600 text-xl"></i>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500">Total Orders</p>
-            <p class="text-2xl font-bold text-gray-900" id="totalOrders">-</p>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-            <i class="ri-time-line text-yellow-600 text-xl"></i>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500">Pending Orders</p>
-            <p class="text-2xl font-bold text-gray-900" id="pendingOrders">-</p>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-            <i class="ri-check-line text-green-600 text-xl"></i>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500">Delivered</p>
-            <p class="text-2xl font-bold text-gray-900" id="deliveredOrders">-</p>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-            <i class="ri-money-dollar-circle-line text-purple-600 text-xl"></i>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500">Total Revenue</p>
-            <p class="text-2xl font-bold text-gray-900" id="totalRevenue">₹0</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Orders Table -->
     <% if (orders.length > 0) { %>
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

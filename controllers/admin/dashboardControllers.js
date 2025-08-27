@@ -3,7 +3,7 @@ const User = require('../../models/userSchema');
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 
-const getDashboardStas = async (req, res, next) => {
+const getDashboardStats = async (req, res, next) => {
   try {
     const period = req.query.period || 'month';
 
@@ -15,8 +15,7 @@ const getDashboardStas = async (req, res, next) => {
       currentStart.setHours(0, 0, 0, 0);
       previousStart.setDate(currentStart.getDate() - 1);
       previousStart.setHours(0, 0, 0, 0);
-    }
-    else if (period === 'week') {
+    } else if (period === 'week') {
       currentStart.setDate(currentStart.getDate() - 7);
       previousStart.setDate(previousStart.getDate() - 14);
     } else if (period === 'month') {
@@ -34,32 +33,43 @@ const getDashboardStas = async (req, res, next) => {
       createdAt: { $gte: previousStart }
     });
 
-    const isValidOrder = (order) => {
-      const { paymentMethod, status } = order;
-      if (['Cancelled', 'Returned', 'Failed'].includes(status)) return false;
-      if (paymentMethod === 'Online' && ['Placed', 'Delivered'].includes(status)) return true;
-      if (paymentMethod === 'COD' && status === 'Delivered') return true;
+    const isValidItem = (order, item) => {
+      if (['Cancelled', 'Returned', 'Failed'].includes(item.status)) return false;
+      if (order.paymentMethod === 'Online' && ['Placed', 'Delivered'].includes(item.status)) return true;
+      if (order.paymentMethod === 'COD' && item.status === 'Delivered') return true;
       return false;
     };
 
-    const currentOrders = orders.filter(o => isValidOrder(o) && o.createdAt >= currentStart);
-    const previousOrders = orders.filter(o => isValidOrder(o) && o.createdAt < currentStart);
+    const allItems = [];
+    for (const order of orders) {
+      for (const item of order.items) {
+        if (isValidItem(order, item)) {
+          allItems.push({
+            ...item.toObject(),
+            createdAt: order.createdAt,
+            paymentMethod: order.paymentMethod,
+          });
+        }
+      }
+    }
 
-    const sumRevenue = (ordersList) =>
-      ordersList.reduce((sum, o) => sum + o.totalAmount, 0);
+    const currentItems = allItems.filter(i => i.createdAt >= currentStart);
+    const previousItems = allItems.filter(i => i.createdAt < currentStart);
 
-    const sumProducts = (ordersList) =>
-      ordersList.reduce((sum, o) =>
-        sum + o.items.reduce((s, i) => s + i.quantity, 0), 0);
+    const sumRevenue = (items) =>
+      items.reduce((sum, i) => sum + (i.discountedPrice || i.originalPrice || 0) * i.quantity, 0);
 
-    const totalRevenue = sumRevenue(currentOrders);
-    const prevRevenue = sumRevenue(previousOrders);
+    const sumProducts = (items) =>
+      items.reduce((sum, i) => sum + i.quantity, 0);
 
-    const totalOrders = currentOrders.length;
-    const prevOrders = previousOrders.length;
+    const totalRevenue = sumRevenue(currentItems);
+    const prevRevenue = sumRevenue(previousItems);
 
-    const productsSold = sumProducts(currentOrders);
-    const prevProductsSold = sumProducts(previousOrders);
+    const totalOrders = new Set(currentItems.map(i => i._id.toString())).size;
+    const prevOrders = new Set(previousItems.map(i => i._id.toString())).size;
+
+    const productsSold = sumProducts(currentItems);
+    const prevProductsSold = sumProducts(previousItems);
 
     const percentChange = (curr, prev) => {
       if (prev === 0) return curr > 0 ? 100 : 0;
@@ -80,78 +90,80 @@ const getDashboardStas = async (req, res, next) => {
   }
 };
 
-const getTopProducts = async (req,res,next)=>{
-    try{
-        const orders = await Order.find().populate('items.product');
+const getTopProducts = async (req, res, next) => {
+  try {
+    const orders = await Order.find().populate('items.product');
 
-        const validOrders = orders.filter(order=>{
-            const {paymentMethod, status} = order;
-            if(['Cancelled','Returned','Failed'].includes(status)) return false;
-            if(paymentMethod === 'Online' && ['Placed','Delivered'].includes(status)) return true;
-            if(paymentMethod === 'COD' && status === 'Delivered') return true;
-            return false;
-        })
-        const productMap = new Map();
+    const productMap = new Map();
 
-        validOrders.forEach(order=>{
-            order.items.forEach(item=>{
-                const id = item.product._id.toString();
-                if(!productMap.has(id)){
-                    productMap.set(id,{
-                        name:item.product.name,
-                        sales:0,
-                        revenue:0
-                    });
-                }
-                const p = productMap.get(id);
-                p.sales += item.quantity;
-                p.revenue += item.quantity * (item.discountedPrice || item.originalPrice);
-            });
-        });
+    for (const order of orders) {
+      for (const item of order.items) {
+        const valid =
+          (order.paymentMethod === 'Online' && ['Placed', 'Delivered'].includes(item.status)) ||
+          (order.paymentMethod === 'COD' && item.status === 'Delivered');
 
-        const sorted = [...productMap.values()].sort((a,b)=>b.sales - a.sales);
-        res.json(sorted.slice(0,10));
-    }catch(err){
-        next(err);
-    }
-}
+        if (!valid) continue;
 
-const getTopCategories = async (req,res,next)=>{
-    try{
-        const orders = await Order.find().populate('items.product');
-
-        const validOrders = orders.filter(order=>{
-            const {paymentMethod, status} = order;
-            if(['Cancelled', 'Returned', 'Failed'].includes(status)) return false;
-            if(paymentMethod === 'Online' && ['Placed','Delivered'].includes(status)) return true;
-            if(paymentMethod === 'COD' && status === 'Delivered') return true;
-            return false;
-        })
-        const catMap = new Map();
-
-        for(const order of validOrders){
-            for(const item of order.items){
-                const prod = item.product;
-                const catId = prod.category.toString();
-                if(!catMap.has(catId)){
-                    const cat = await Category.findById(catId);
-                    catMap.set(catId,{
-                        name:cat.name,
-                        sales: 0,
-                        revenue:0
-                    });
-                }
-                const c = catMap.get(catId);
-                c.sales += item.quantity;
-                c.revenue += item.quantity * (item.discountedPrice || item.originalPrice);
-            }
+        const id = item.product._id.toString();
+        if (!productMap.has(id)) {
+          productMap.set(id, {
+            name: item.product.name,
+            sales: 0,
+            revenue: 0
+          });
         }
-        const sorted = [...catMap.values()].sort((a,b)=>b.sales - a.sales);
-        res.json(sorted.slice(0,10));
-    }catch(err){
-        next(err);
+
+        const p = productMap.get(id);
+        p.sales += item.quantity;
+        p.revenue += item.quantity * (item.discountedPrice || item.originalPrice);
+      }
     }
-}
+
+    const sorted = [...productMap.values()].sort((a, b) => b.sales - a.sales);
+    res.json(sorted.slice(0, 10));
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getTopCategories = async (req, res, next) => {
+  try {
+    const orders = await Order.find().populate('items.product');
+
+    const catMap = new Map();
+
+    for (const order of orders) {
+      for (const item of order.items) {
+        const valid =
+          (order.paymentMethod === 'Online' && ['Placed', 'Delivered'].includes(item.status)) ||
+          (order.paymentMethod === 'COD' && item.status === 'Delivered');
+
+        if (!valid) continue;
+
+        const prod = item.product;
+        const catId = prod.category.toString();
+
+        if (!catMap.has(catId)) {
+          const cat = await Category.findById(catId);
+          catMap.set(catId, {
+            name: cat.name,
+            sales: 0,
+            revenue: 0
+          });
+        }
+
+        const c = catMap.get(catId);
+        c.sales += item.quantity;
+        c.revenue += item.quantity * (item.discountedPrice || item.originalPrice);
+      }
+    }
+
+    const sorted = [...catMap.values()].sort((a, b) => b.sales - a.sales);
+    res.json(sorted.slice(0, 10));
+  } catch (err) {
+    next(err);
+  }
+};
 
 const getSalesChart = async (req, res, next) => {
   try {
@@ -161,14 +173,6 @@ const getSalesChart = async (req, res, next) => {
 
     const orders = await Order.find({ createdAt: { $gte: since } });
 
-    const validOrders = orders.filter(order => {
-      const { paymentMethod, status } = order;
-      if (['Cancelled', 'Returned', 'Failed'].includes(status)) return false;
-      if (paymentMethod === 'Online' && ['Placed', 'Delivered'].includes(status)) return true;
-      if (paymentMethod === 'COD' && status === 'Delivered') return true;
-      return false;
-    });
-
     const chartData = {};
     for (let i = 0; i < period; i++) {
       const date = new Date();
@@ -177,13 +181,21 @@ const getSalesChart = async (req, res, next) => {
       chartData[key] = { revenue: 0, orders: 0 };
     }
 
-    validOrders.forEach(order => {
-      const key = new Date(order.createdAt).toLocaleDateString('en-GB');
-      if (chartData[key]) {
-        chartData[key].revenue += order.totalAmount;
-        chartData[key].orders += 1;
+    for (const order of orders) {
+      for (const item of order.items) {
+        const valid =
+          (order.paymentMethod === 'Online' && ['Placed', 'Delivered'].includes(item.status)) ||
+          (order.paymentMethod === 'COD' && item.status === 'Delivered');
+
+        if (!valid) continue;
+
+        const key = new Date(order.createdAt).toLocaleDateString('en-GB');
+        if (chartData[key]) {
+          chartData[key].revenue += (item.discountedPrice || item.originalPrice) * item.quantity;
+          chartData[key].orders += 1; // count per valid item
+        }
       }
-    });
+    }
 
     const labels = Object.keys(chartData).reverse();
     const revenue = labels.map(l => chartData[l].revenue);
@@ -197,33 +209,28 @@ const getSalesChart = async (req, res, next) => {
 
 const getTopPublishers = async (req, res, next) => {
   try {
-    const orders = await Order.aggregate([
-      { $unwind: "$items" },
+    const orders = await Order.find().populate('items.product');
 
-      {
-        $lookup: {
-          from: "products",
-          localField: "items.product",
-          foreignField: "_id",
-          as: "productInfo"
+    const publisherMap = new Map();
+
+    for (const order of orders) {
+      for (const item of order.items) {
+        const valid =
+          (order.paymentMethod === 'Online' && ['Placed', 'Delivered'].includes(item.status)) ||
+          (order.paymentMethod === 'COD' && item.status === 'Delivered');
+
+        if (!valid) continue;
+
+        const publisher = item.product.publisher?.toString() || "Unknown";
+        if (!publisherMap.has(publisher)) {
+          publisherMap.set(publisher, { publisher, totalSold: 0 });
         }
-      },
-      { $unwind: "$productInfo" },
+        publisherMap.get(publisher).totalSold += item.quantity;
+      }
+    }
 
-      {
-        $group: {
-          _id: "$productInfo.publisher",
-          totalSold: { $sum: "$items.quantity" }
-        }
-      },
-
-
-      { $sort: { totalSold: -1 } },
-
-      { $limit: 10 }
-    ]);
-
-    res.json({ publishers: orders });
+    const sorted = [...publisherMap.values()].sort((a, b) => b.totalSold - a.totalSold);
+    res.json({ publishers: sorted.slice(0, 10) });
   } catch (err) {
     next(err);
   }
@@ -231,7 +238,7 @@ const getTopPublishers = async (req, res, next) => {
 
 
 module.exports={
-    getDashboardStas,
+    getDashboardStats,
     getTopProducts,
     getTopCategories,
     getSalesChart,
