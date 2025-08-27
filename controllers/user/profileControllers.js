@@ -7,94 +7,161 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const PDFDocument = require('pdfkit');
 
-const downloadInvoice = async (req, res,next) => {
+const downloadInvoice = async (req, res, next) => {
   try {
     const userId = req.session.user._id;
     const orderId = req.params.id;
 
     const order = await Order.findOne({ _id: orderId, user: userId }).populate('items.product');
+    const user = await User.findById(userId);
 
     if (!order) {
       return res.status(404).render('error', { message: 'Order not found' });
     }
 
-    const doc = new PDFDocument({ margin: 50 });
-
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=invoice-${order._id}.pdf`);
-
+    res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderId}.pdf`);
     doc.pipe(res);
 
-    // Header
-    doc.fontSize(20).fillColor('#007D8B').text('Bookly - Invoice', { align: 'center' });
-    doc.moveDown(1);
+    const primaryColor = '#007D8B';
+    const secondaryColor = '#333333';
+    let y = 40;
+    doc.font('Helvetica');
 
-    // Order Info
-    doc.fontSize(12).fillColor('#333')
-      .text(`Order ID: ${order.orderId}`)
-      .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
-      .text(`Payment Method: ${order.paymentMethod}`)
-      .text(`Order Status: ${order.status}`)
-      .moveDown();
+    const drawLine = (y) => {
+      doc.moveTo(50, y).lineTo(550, y).stroke();
+    };
 
-    // Shipping Address
-    doc.fontSize(14).fillColor('#007D8B').text('Shipping Address');
-    doc.moveDown(0.5);
-    const { name, city, state, pincode, phone, altPhone } = order.address;
-    doc.fontSize(12).fillColor('#333')
-      .text(name)
-      .text(`${city}, ${state} - ${pincode}`)
-      .text(`Phone: ${phone}${altPhone ? `, Alt: ${altPhone}` : ''}`)
-      .moveDown();
+    doc.fontSize(20).fillColor(primaryColor).text('Bookly Invoice', 50, y, { align: 'left' });
+    y += 30;
+    doc.fontSize(10).fillColor(secondaryColor)
+      .text('Bookly E-Commerce Pvt. Ltd.', 50, y)
+      .text('Vikas Nagar, Maradu, Cochin City, IN 680301', 50, y + 15)
+      .text('Email: supportbookly@gmail.com | Phone: +91-8547098608', 50, y + 30);
 
-    // Items Table Header
-    doc.fontSize(14).fillColor('#007D8B').text('Items Ordered');
-    doc.moveDown(0.5);
+    doc.fontSize(12).fillColor(secondaryColor)
+      .text(`Invoice Date: ${new Date(order.createdAt).toLocaleDateString()}`, 400, y + 15, { align: 'right' });
 
-    const tableTop = doc.y;
-    const itemSpacing = 20;
+    y += 60;
+    drawLine(y);
+    y += 20;
 
-    doc.fontSize(12).fillColor('#333');
-    doc.text('Product', 50, tableTop);
-    doc.moveDown(0.5);
-    doc.text('Qty', 250, tableTop);
-    doc.text('Price (₹)', 300, tableTop);
-    doc.text('Discounted (₹)', 380, tableTop);
-    doc.text('Total (₹)', 480, tableTop);
+    doc.fontSize(12).fillColor(primaryColor).text('Billed To', 50, y);
+    const { name, city, state, pincode, phone, altPhone, landmark, addressType } = order.address;
+    doc.fontSize(10).fillColor(secondaryColor)
+      .text(name, 50, y + 20)
+      .text(`${addressType || 'Home'} Address`, 50, y + 35)
+      .text(`${city}, ${state} - ${pincode}`, 50, y + 50)
+      .text(landmark ? `Landmark: ${landmark}` : '', 50, y + 65)
+      .text(`Phone: ${phone}${altPhone ? `, Alt: ${altPhone}` : ''}`, 50, y + 80);
 
-    let y = tableTop + 15;
+    doc.fontSize(12).fillColor(primaryColor).text('Order Information', 300, y);
+    doc.fontSize(10).fillColor(secondaryColor)
+      .text(`Order ID: ${order.orderId}`, 300, y + 20)
+      .text(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`, 300, y + 35)
+      .text(`Payment Method: ${order.paymentMethod}`, 300, y + 50)
+      .text(`Order Status: ${order.status}`, 300, y + 65);
+
+    y += 100;
+    drawLine(y);
+    y += 20;
+
+    doc.fontSize(12).fillColor(primaryColor).text('Order Details', 50, y);
+    y += 20;
+
+    const colWidths = [30, 100, 70, 60, 60, 60, 60, 60];
+    const headers = ['Sl', 'Product', 'Status', 'Qty', 'Orginal', 'discounted', 'Coupon', 'Total'];
+
+    doc.font('Helvetica-Bold').fontSize(10).fillColor(secondaryColor);
+    headers.forEach((header, i) => {
+      const x = 50 + colWidths.slice(0, i).reduce((sum, w) => sum + w, 0);
+      doc.text(header, x, y, { width: colWidths[i], align: i === 1 ? 'left' : 'center' });
+    });
+    y += 15;
+    drawLine(y);
+    y += 10;
+
+    const totalBeforeCoupon = order.items.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
+    const couponDiscountPerItem = totalBeforeCoupon > 0 ? order.couponDiscount / totalBeforeCoupon : 0;
     let subtotal = 0;
 
-    order.items.forEach(item => {
-      const { product, quantity, originalPrice, discountedPrice } = item;
-      const itemTotal = discountedPrice * quantity;
+    order.items.forEach((item, index) => {
+      const { product, quantity, status, originalPrice, discountedPrice } = item;
+      const itemTotalBeforeCoupon = discountedPrice * quantity;
+      const itemCouponShare = itemTotalBeforeCoupon * couponDiscountPerItem;
+      const itemTotal = itemTotalBeforeCoupon - itemCouponShare;
       subtotal += itemTotal;
 
-      doc.text(product.name, 50, y, { width: 180 });
-      doc.text(quantity.toString(), 250, y);
-      doc.text(originalPrice.toFixed(2), 300, y);
-      doc.text(discountedPrice.toFixed(2), 380, y);
-      doc.text(itemTotal.toFixed(2), 480, y);
-      y += itemSpacing;
+      const rowData = [
+        (index + 1).toString(),
+        product.name,
+        status,
+        quantity.toString(),
+        originalPrice.toFixed(2),
+        discountedPrice.toFixed(2),
+        itemCouponShare.toFixed(2),
+        itemTotal.toFixed(2)
+      ];
+
+      doc.font('Helvetica').fontSize(10).fillColor(secondaryColor);
+      rowData.forEach((data, i) => {
+        const x = 50 + colWidths.slice(0, i).reduce((sum, w) => sum + w, 0);
+        doc.text(data, x, y, { width: colWidths[i], align: i === 1 ? 'left' : 'center' });
+      });
+
+      y += 20;
     });
 
-    doc.moveDown(2);
+    drawLine(y);
+    y += 20;
 
-    const discountAmount = order.discountAmount || 0;
-    const totalBeforeDiscount = order.totalAmount + discountAmount;
+    let returnInfo = '';
+    let refundedAmount = 0;
+    const returnItems = order.items.filter(item => item.status === 'Returned' || item.status === 'Cancelled');
 
-    // Summary
-    doc.fontSize(14).fillColor('#007D8B').text('Order Summary');
-    doc.moveDown(0.5);
-    doc.fontSize(12).fillColor('#333')
-      .text(`Subtotal (Before Discounts): ₹${totalBeforeDiscount.toFixed(2)}`)
-      .text(`Total Discounts (offer + Coupon): -₹${discountAmount.toFixed(2)}`)
-      .text(`Total Paid: ₹${order.totalAmount.toFixed(2)}`);
+    if (returnItems.length > 0 || order.status === 'Returned' || order.status === 'Cancelled') {
+      if (order.status === 'Returned' || order.status === 'Cancelled') {
+        returnInfo = `Reason for Order ${order.status}: ${order.items[0]?.returnReason || 'Not specified'}`;
+        const refundTransaction = user.walletTransactions.find(t => t.orderId === order.orderId && t.type === 'credit');
+        refundedAmount = refundTransaction?.amount || 0;
+      } else {
+        returnInfo = returnItems.map(item => `Product: ${item.product.name}, Reason: ${item.returnReason || 'Not specified'}`).join('\n');
+        refundedAmount = user.walletTransactions
+          .filter(t => t.orderId === order.orderId && t.type === 'credit')
+          .reduce((sum, t) => sum + t.amount, 0);
+      }
+
+      doc.fontSize(12).fillColor(primaryColor).text('Return/Cancellation Details', 50, y);
+      y += 20;
+      doc.fontSize(10).fillColor(secondaryColor).text(returnInfo, 50, y, { width: 500 });
+      y += 40;
+      doc.text(`Refunded to Wallet: ₹${refundedAmount.toFixed(2)}`, 50, y);
+      y += 30;
+    }
+
+    const totalBeforeDiscount = order.totalAmount + order.couponDiscount + order.productDiscount;
+    doc.font('Helvetica-Bold').fontSize(12).fillColor(primaryColor).text('Payment Summary', 50, y);
+    y += 20;
+
+    doc.font('Helvetica').fontSize(10).fillColor(secondaryColor)
+      .text(`Subtotal: ${totalBeforeDiscount.toFixed(2)}`, 400, y, { align: 'right' });
+    y += 15;
+    doc.text(`Offer Discounts: ${order.productDiscount.toFixed(2)}`, 400, y, { align: 'right' });
+    y += 15;
+    doc.text(`Coupon Discount : ${order.couponDiscount.toFixed(2)}`, 400, y, { align: 'right' });
+    y += 15;
+    doc.text(`Total Amount Paid: ${order.totalAmount.toFixed(2)}`, 400, y, { align: 'right' });
+    y += 40;
+
+    doc.fontSize(10).fillColor(secondaryColor)
+      .text('Thank you for shopping with Bookly!', 50, 750, { align: 'center' })
+      .text('For support, contact: support@bookly.com | +91-123-456-7890', 50, 765, { align: 'center' })
+      .text('Terms & Conditions apply. All prices are inclusive of taxes.', 50, 780, { align: 'center' });
 
     doc.end();
-
   } catch (err) {
-    next(err)
+    next(err);
   }
 };
 
