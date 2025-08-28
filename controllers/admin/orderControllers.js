@@ -142,7 +142,6 @@ const updateOrderStatus = async (req, res, next) => {
   }
 };
 
-
 const approveReturnRequest = async (req, res, next) => {
   try {
     const { orderId, productId } = req.params;
