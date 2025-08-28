@@ -221,7 +221,7 @@ const getTopPublishers = async (req, res, next) => {
 
         if (!valid) continue;
 
-        const publisher = item.product.publisher?.toString() || "Unknown";
+        const publisher = item.product.publisher || "Unknown";
         if (!publisherMap.has(publisher)) {
           publisherMap.set(publisher, { publisher, totalSold: 0 });
         }

@@ -157,7 +157,6 @@
       
       <div class="p-6">
         <div id="topProducts" class="space-y-3">
-          <!-- Loading skeleton -->
           <div class="animate-pulse space-y-3">
             <% for(let i = 0; i < 5; i++) { %>
               <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -176,7 +175,6 @@
       </div>
     </div>
 
-    <!-- Best Selling Categories -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -192,7 +190,6 @@
       
       <div class="p-6">
         <div id="topCategories" class="space-y-3">
-          <!-- Loading skeleton -->
           <div class="animate-pulse space-y-3">
             <% for(let i = 0; i < 5; i++) { %>
               <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -211,7 +208,6 @@
       </div>
     </div>
 
-    <!-- Best Selling Publishers -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -227,7 +223,6 @@
       
       <div class="p-6">
         <div id="topPublishers" class="space-y-3">
-          <!-- Loading skeleton -->
           <div class="animate-pulse space-y-3">
             <% for(let i = 0; i < 5; i++) { %>
               <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -248,7 +243,6 @@
   </div>
 </div>
 
-<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -320,7 +314,6 @@
   }
 }
 
-/* Loading animation improvements */
 @keyframes shimmer {
   0% {
     background-position: -200px 0;
@@ -343,7 +336,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   initializeDashboard();
 
-  // Chart filter buttons
   document.querySelectorAll('.chart-filter-btn').forEach(btn => {
     btn.addEventListener('click', function () {
       document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
@@ -352,12 +344,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Dashboard period selector
   document.getElementById('dashboardPeriod').addEventListener('change', function () {
     loadDashboardData(this.value);
   });
 
-  // Refresh button
   document.getElementById('refreshDashboard').addEventListener('click', function () {
     const btn = this;
     const originalContent = btn.innerHTML;
@@ -369,7 +359,6 @@ document.addEventListener('DOMContentLoaded', function () {
       btn.innerHTML = originalContent;
       btn.disabled = false;
       
-      // Show success feedback
       btn.classList.add('bg-green-500');
       setTimeout(() => {
         btn.classList.remove('bg-green-500');
@@ -389,7 +378,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function initializeSalesChart() {
     const ctx = document.getElementById('salesChart').getContext('2d');
     
-    // Create gradient backgrounds
     const revenueGradient = ctx.createLinearGradient(0, 0, 0, 400);
     revenueGradient.addColorStop(0, 'rgba(0, 125, 139, 0.2)');
     revenueGradient.addColorStop(1, 'rgba(0, 125, 139, 0.02)');
@@ -537,12 +525,10 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updateStatsCards(data) {
-    // Animate number changes
     animateValue('totalRevenue', 0, data.totalRevenue, 1000, '₹');
     animateValue('totalOrders', 0, data.totalOrders, 1000);
     animateValue('productsSold', 0, data.productsSold, 1000);
     
-    // Update change percentages with colors
     updateChangeIndicator('revenueChange', data.revenueChange);
     updateChangeIndicator('ordersChange', data.ordersChange);
     updateChangeIndicator('productsChange', data.productsChange);
@@ -568,7 +554,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const element = document.getElementById(elementId);
     element.textContent = (value > 0 ? '+' : '') + value + '%';
     
-    // Update color based on value
     element.className = value >= 0 ? 'text-sm font-medium text-green-600' : 'text-sm font-medium text-red-600';
   }
 
@@ -628,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  function renderTopPublishers(containerId, data, type) {
+  function renderTopPublishers(containerId, data) {
   const container = document.getElementById(containerId);
   const publishers = data.publishers;
 
@@ -645,7 +630,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   container.innerHTML = '';
-  publishers.forEach((publisher, index) => {
+  publishers.forEach((pub, index) => {
     const item = document.createElement('div');
     item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
 
@@ -655,8 +640,8 @@ document.addEventListener('DOMContentLoaded', function () {
           ${index + 1}
         </div>
         <div class="space-y-1">
-          <p class="font-medium text-gray-900 text-sm">${publisher._id}</p>
-          <p class="text-xs text-gray-500">${publisher.totalSold} books sold</p>
+          <p class="font-medium text-gray-900 text-sm">${pub.publisher}</p>
+          <p class="text-xs text-gray-500">${pub.totalSold} books sold</p>
         </div>
       </div>
     `;
@@ -664,9 +649,6 @@ document.addEventListener('DOMContentLoaded', function () {
     container.appendChild(item);
   });
 }
-
-
-  // Initial chart load
   updateSalesChart('30');
 });
 </script>
