@@ -15,24 +15,34 @@ const getDashboardStats = async (req, res, next) => {
       currentStart.setHours(0, 0, 0, 0);
       previousStart.setDate(currentStart.getDate() - 1);
       previousStart.setHours(0, 0, 0, 0);
+
     } else if (period === "week") {
       currentStart.setDate(currentStart.getDate() - 7);
+      currentStart.setHours(0, 0, 0, 0);
+
       previousStart.setDate(previousStart.getDate() - 14);
+      previousStart.setHours(0, 0, 0, 0);
+
     } else if (period === "month") {
       currentStart.setMonth(currentStart.getMonth() - 1);
+      currentStart.setHours(0, 0, 0, 0);
+
       previousStart.setMonth(previousStart.getMonth() - 2);
+      previousStart.setHours(0, 0, 0, 0);
+
     } else if (period === "year") {
       currentStart.setFullYear(currentStart.getFullYear() - 1);
+      currentStart.setHours(0, 0, 0, 0);
+
       previousStart.setFullYear(previousStart.getFullYear() - 2);
-    } else {
-      currentStart.setDate(currentStart.getDate() - 1);
-      previousStart.setDate(previousStart.getDate() - 2);
+      previousStart.setHours(0, 0, 0, 0);
     }
 
     const orders = await Order.find({
       createdAt: { $gte: previousStart }
     });
 
+    //helper function
     const isValidItem = (order, item) => {
       if (["Cancelled", "Returned", "Failed"].includes(item.status)) return false;
       if (order.paymentMethod === "Online" && ["Placed", "Delivered"].includes(item.status)) return true;
@@ -42,7 +52,6 @@ const getDashboardStats = async (req, res, next) => {
 
     const allItems = [];
     for (const order of orders) {
-      // subtotal per order (for coupon allocation)
       const orderSubtotal = order.items.reduce(
         (sum, it) => sum + (it.discountedPrice || it.originalPrice || 0) * it.quantity,
         0
@@ -52,7 +61,6 @@ const getDashboardStats = async (req, res, next) => {
         if (isValidItem(order, item)) {
           const itemRevenue = (item.discountedPrice || item.originalPrice || 0) * item.quantity;
 
-          // distribute couponDiscount proportionally
           let couponShare = 0;
           if (order.couponDiscount > 0 && orderSubtotal > 0) {
             couponShare = (itemRevenue / orderSubtotal) * order.couponDiscount;
@@ -79,7 +87,6 @@ const getDashboardStats = async (req, res, next) => {
     const totalRevenue = sumRevenue(currentItems);
     const prevRevenue = sumRevenue(previousItems);
 
-    // ✅ count unique orderIds, not items
     const totalOrders = new Set(currentItems.map((i) => i.orderId)).size;
     const prevOrders = new Set(previousItems.map((i) => i.orderId)).size;
 
@@ -111,7 +118,6 @@ const getTopProducts = async (req, res, next) => {
     const productMap = new Map();
 
     for (const order of orders) {
-      // calculate subtotal to allocate couponDiscount
       const orderSubtotal = order.items.reduce(
         (sum, it) => sum + (it.discountedPrice || it.originalPrice || 0) * it.quantity,
         0
@@ -126,7 +132,6 @@ const getTopProducts = async (req, res, next) => {
 
         const itemRevenue = (item.discountedPrice || item.originalPrice || 0) * item.quantity;
 
-        // proportional coupon share
         let couponShare = 0;
         if (order.couponDiscount > 0 && orderSubtotal > 0) {
           couponShare = (itemRevenue / orderSubtotal) * order.couponDiscount;
@@ -162,7 +167,6 @@ const getTopCategories = async (req, res, next) => {
     const catMap = new Map();
 
     for (const order of orders) {
-      // subtotal per order to distribute coupon
       const orderSubtotal = order.items.reduce(
         (sum, it) => sum + (it.discountedPrice || it.originalPrice || 0) * it.quantity,
         0
@@ -176,15 +180,13 @@ const getTopCategories = async (req, res, next) => {
         if (!valid) continue;
 
         const prod = item.product;
-        if (!prod || !prod.category) continue; // safeguard
+        if (!prod || !prod.category) continue;
 
         const catId = prod.category.toString();
 
-        // item revenue
         const itemRevenue =
           (item.discountedPrice || item.originalPrice || 0) * item.quantity;
 
-        // proportional coupon share
         let couponShare = 0;
         if (order.couponDiscount > 0 && orderSubtotal > 0) {
           couponShare = (itemRevenue / orderSubtotal) * order.couponDiscount;
@@ -194,7 +196,7 @@ const getTopCategories = async (req, res, next) => {
 
         if (!catMap.has(catId)) {
           catMap.set(catId, {
-            name: null, // will populate later
+            name: null, 
             sales: 0,
             revenue: 0,
           });
@@ -206,7 +208,6 @@ const getTopCategories = async (req, res, next) => {
       }
     }
 
-    // fetch category names in one go
     const categoryIds = [...catMap.keys()];
     const categories = await Category.find({ _id: { $in: categoryIds } });
 
@@ -231,17 +232,15 @@ const getSalesChart = async (req, res, next) => {
 
     const orders = await Order.find({ createdAt: { $gte: since } });
 
-    // initialize chartData with last N days
     const chartData = {};
     for (let i = 0; i < period; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const key = date.toLocaleDateString("en-GB");
-      chartData[key] = { revenue: 0, orders: new Set() }; // store orderIds in Set
+      chartData[key] = { revenue: 0, orders: new Set() }; 
     }
 
     for (const order of orders) {
-      // subtotal for coupon distribution
       const orderSubtotal = order.items.reduce(
         (sum, it) => sum + (it.discountedPrice || it.originalPrice || 0) * it.quantity,
         0
@@ -267,15 +266,14 @@ const getSalesChart = async (req, res, next) => {
 
         if (chartData[key]) {
           chartData[key].revenue += netRevenue;
-          chartData[key].orders.add(order._id.toString()); // track unique orders
+          chartData[key].orders.add(order._id.toString()); 
         }
       }
     }
 
-    // format response
     const labels = Object.keys(chartData).reverse();
     const revenue = labels.map((l) => chartData[l].revenue);
-    const ordersCount = labels.map((l) => chartData[l].orders.size); // unique orders per day
+    const ordersCount = labels.map((l) => chartData[l].orders.size); 
 
     res.json({ labels, revenue, orders: ordersCount });
   } catch (err) {
@@ -289,7 +287,6 @@ const getTopPublishers = async (req, res, next) => {
     const publisherMap = new Map();
 
     for (const order of orders) {
-      // subtotal for coupon distribution
       const orderSubtotal = order.items.reduce(
         (sum, it) =>
           sum + (it.discountedPrice || it.originalPrice || 0) * it.quantity,
@@ -306,11 +303,9 @@ const getTopPublishers = async (req, res, next) => {
 
         const publisher = item.product.publisher || "Unknown";
 
-        // base revenue
         const itemRevenue =
           (item.discountedPrice || item.originalPrice || 0) * item.quantity;
 
-        // coupon share
         let couponShare = 0;
         if (order.couponDiscount > 0 && orderSubtotal > 0) {
           couponShare = (itemRevenue / orderSubtotal) * order.couponDiscount;
@@ -332,7 +327,6 @@ const getTopPublishers = async (req, res, next) => {
       }
     }
 
-    // sort by quantity sold (default)
     const sorted = [...publisherMap.values()].sort(
       (a, b) => b.totalSold - a.totalSold
     );
