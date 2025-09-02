@@ -31,10 +31,8 @@ const getSalesReport = async (req, res, next) => {
       query.createdAt = { $gte: startDate, $lte: endDate };
     }
 
-    // fetch all orders in date range
     const orders = await Order.find(query).sort({ createdAt: -1 });
 
-    // collect delivered items with coupon share applied
     let deliveredItems = [];
     let totalSalesAmount = 0;
     let totalDiscount = 0;
@@ -47,16 +45,13 @@ const getSalesReport = async (req, res, next) => {
 
       for (let item of order.items) {
         if (item.status === "Delivered") {
-          // base revenue for this item
           const itemRevenue = (item.discountedPrice || 0) * item.quantity;
 
-          // proportional coupon share
           let couponShare = 0;
           if (order.couponDiscount > 0 && orderSubtotal > 0) {
             couponShare = (itemRevenue / orderSubtotal) * order.couponDiscount;
           }
 
-          // final revenue after coupon share
           const netRevenue = itemRevenue - couponShare;
 
           deliveredItems.push({
@@ -70,7 +65,6 @@ const getSalesReport = async (req, res, next) => {
 
           totalSalesAmount += netRevenue;
 
-          // discount for reporting (product + coupon share)
           const productDiscount =
             ((item.originalPrice || 0) - (item.discountedPrice || 0)) * item.quantity;
           totalDiscount += productDiscount + couponShare;
@@ -82,7 +76,7 @@ const getSalesReport = async (req, res, next) => {
 
     res.render("layout", {
       body: "salesReport",
-      orders: deliveredItems, // now sending items instead of whole orders
+      orders: deliveredItems, 
       stats: {
         totalSalesCount,
         totalSalesAmount,
@@ -133,7 +127,6 @@ const getPaginatedSale = async (req, res, next) => {
     let deliveredItems = [];
 
     for (let order of orders) {
-      // subtotal before coupon
       const orderSubtotal = order.items.reduce(
         (sum, it) => sum + (it.discountedPrice || 0) * it.quantity,
         0
@@ -143,13 +136,11 @@ const getPaginatedSale = async (req, res, next) => {
         if (item.status === "Delivered") {
           const itemRevenue = (item.discountedPrice || 0) * item.quantity;
 
-          // proportional coupon share
           let couponShare = 0;
           if (order.couponDiscount > 0 && orderSubtotal > 0) {
             couponShare = (itemRevenue / orderSubtotal) * order.couponDiscount;
           }
 
-          // net revenue after coupon
           const netRevenue = itemRevenue - couponShare;
 
           deliveredItems.push({
@@ -188,7 +179,6 @@ const downloadSalesReportPDF = async (req, res, next) => {
 
     const orders = await Order.find(query).populate("user");
 
-    // flatten delivered items with coupon share
     let deliveredItems = [];
     for (let order of orders) {
       const orderSubtotal = order.items.reduce(
