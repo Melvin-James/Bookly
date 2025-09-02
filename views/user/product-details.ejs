@@ -114,16 +114,13 @@
           </div>
         </div>
 
-        <!-- Product Information Section -->
         <div class="space-y-6">
           
-          <!-- Product Title & Publisher -->
           <div>
             <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2 leading-tight"><%= product.name %></h1>
             <p class="text-lg text-gray-600">by <span class="font-semibold text-[#007D8B]"><%= product.publisher %></span></p>
           </div>
 
-          <!-- Rating & Reviews -->
           <div class="flex items-center space-x-4">
             <div class="flex items-center space-x-1">
               <% for (let i = 0; i < 5; i++) { %>
@@ -135,7 +132,6 @@
             <span class="text-sm text-gray-500">4.0 (124 reviews)</span>
           </div>
 
-          <!-- Pricing Section -->
           <div class="bg-gray-50 p-4 rounded-lg">
             <div class="flex items-baseline space-x-3 mb-2">
               <span class="text-3xl lg:text-4xl font-bold text-[#007D8B]">₹<%= product.discountedPrice %></span>
@@ -153,7 +149,6 @@
             <% } %>
           </div>
 
-          <!-- Stock Status -->
           <div class="flex items-center space-x-2">
             <% if (product.status === 'Available' && product.quantity > 0) { %>
               <div class="flex items-center space-x-2">
@@ -173,11 +168,9 @@
               </div>
             <% } %>
           </div>
-          <!-- Action Buttons -->
           <div class="space-y-3">
             <% if (product.status === 'Available' && product.quantity > 0) { %>
               <% if (userData) { %>
-                <!-- ✅ Logged-in user: Show real Add to Cart button -->
                 <button 
                   class="add-to-cart-btn w-full bg-[#007D8B] hover:bg-[#006B7A] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
                   data-product-id="<%= product._id %>"
@@ -190,7 +183,6 @@
                   </div>
                 </button>
               <% } else { %>
-                <!-- ❌ Guest user: Show SweetAlert on click -->
                 <button 
                   class="w-full bg-[#007D8B] hover:bg-[#006B7A] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
                   onclick="guestPrompt({
@@ -209,7 +201,6 @@
                 </button>
               <% } %>
             <% } else { %>
-              <!-- ❌ Product not available -->
               <button 
                 disabled
                 class="w-full bg-gray-300 text-gray-500 font-semibold py-3 px-6 rounded-lg cursor-not-allowed"
@@ -225,7 +216,6 @@
           </div>
 
 
-          <!-- Product Details -->
           <div class="border-t pt-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Product Details</h3>
             <div class="grid grid-cols-1 gap-3">
@@ -244,7 +234,6 @@
             </div>
           </div>
 
-          <!-- Delivery Info -->
           <div class="bg-blue-50 p-4 rounded-lg">
             <h4 class="font-semibold text-gray-900 mb-2">Delivery Information</h4>
             <div class="space-y-2 text-sm">
@@ -271,14 +260,12 @@
         </div>
       </div>
 
-      <!-- Product Description -->
       <div class="border-t px-6 lg:px-8 py-6">
         <h3 class="text-xl font-semibold text-gray-900 mb-4">About this book</h3>
         <p class="text-gray-600 leading-relaxed"><%= product.description %></p>
       </div>
     </div>
 
-    <!-- Related Products -->
     <div class="mt-12">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-900">You might also like</h2>
@@ -294,7 +281,6 @@
         <% relatedProducts.forEach(function(book) { %>
           <div class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
             
-            <!-- Book Image -->
             <div class="relative aspect-[3/4] overflow-hidden">
               <img 
                 src="<%= book.productImage[0] %>" 
@@ -302,16 +288,13 @@
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               
-              <!-- Hover Overlay -->
               <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <div class="space-y-2">
-                  <!-- Always show View Details -->
                   <a href="/user/product-details/<%= book._id %>" class="block bg-white text-gray-900 px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-100 transition-colors text-center">
                     View Details
                   </a>
 
                   <% if (userData) { %>
-                    <!-- Logged-in: Add to Cart -->
                     <button 
                       class="add-to-cart-btn block w-full bg-[#007D8B] text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-[#006B7A] transition-colors" 
                       data-product-id="<%= book._id %>"
@@ -319,7 +302,6 @@
                       Add to Cart
                     </button>
                   <% } else { %>
-                    <!-- Guest: Trigger SweetAlert -->
                     <button 
                       onclick="guestPrompt({
                         title: 'Login Required',
@@ -337,14 +319,12 @@
 
             </div>
 
-            <!-- Book Info -->
             <div class="p-3">
               <h3 class="font-medium text-gray-900 mb-1 text-sm line-clamp-2 group-hover:text-[#007D8B] transition-colors">
                 <%= book.name %>
               </h3>
               <p class="text-xs text-gray-500 mb-2"><%= book.publisher %></p>
               
-              <!-- Price -->
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-1">
                   <span class="text-sm font-bold text-[#007D8B]">₹<%= book.discountedPrice %></span>
@@ -371,7 +351,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   
-  // Enhanced Image Gallery and Zoom Functionality
   const mainImage = document.getElementById('mainImage');
   const imageContainer = document.getElementById('image-container');
   const zoomLens = document.getElementById('zoom-lens');

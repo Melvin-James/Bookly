@@ -1,5 +1,4 @@
 <div class="min-h-screen bg-gray-50">
-  <!-- Page Header -->
   <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
     <div class="px-4 sm:px-6 lg:px-8 py-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -13,7 +12,6 @@
           <p class="mt-1 text-sm text-gray-500">Track and manage customer orders</p>
         </div>
         
-        <!-- Search Form -->
         <div class="flex-shrink-0">
           <div class="flex flex-col sm:flex-row gap-2">
             <div class="relative">
@@ -47,9 +45,7 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="px-4 sm:px-6 lg:px-8 pb-8">
-    <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex items-center">
@@ -97,7 +93,6 @@
       </div>
     </div>
 
-    <!-- Orders Table -->
     <% if (orders.length > 0) { %>
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -213,7 +208,6 @@
         </div>
       </div>
     <% } else { %>
-      <!-- Empty State -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 text-center py-12">
         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <i class="ri-shopping-cart-line text-gray-400 text-2xl"></i>
@@ -223,7 +217,6 @@
       </div>
     <% } %>
 
-    <!-- Pagination -->
     <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="text-sm text-gray-500">
         Showing results for orders
@@ -318,7 +311,6 @@
     paginationControls.innerHTML = '';
     
     if (data.totalPages > 1) {
-      // Previous button
       if (data.currentPage > 1) {
         const prevBtn = document.createElement('button');
         prevBtn.innerHTML = '<i class="ri-arrow-left-s-line"></i>';
@@ -327,7 +319,6 @@
         paginationControls.appendChild(prevBtn);
       }
       
-      // Page numbers
       for (let i = 1; i <= data.totalPages; i++) {
         if (i === 1 || i === data.totalPages || (i >= data.currentPage - 1 && i <= data.currentPage + 1)) {
           const btn = document.createElement('button');
@@ -347,7 +338,6 @@
         }
       }
       
-      // Next button
       if (data.currentPage < data.totalPages) {
         const nextBtn = document.createElement('button');
         nextBtn.innerHTML = '<i class="ri-arrow-right-s-line"></i>';
@@ -368,16 +358,47 @@
   }
 
   function updateStats(orders) {
-    const rows = document.querySelectorAll('#orderBody tr');
-    const pendingOrders = orders.filter(order => ['Placed'].includes(order.status)).length;
-    const deliveredOrders = orders.filter(order => order.status === 'Delivered').length;
-    const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+      const rows = document.querySelectorAll('#orderBody tr');
 
-    document.getElementById('totalOrders').textContent = rows.length;
-    document.getElementById('pendingOrders').textContent = pendingOrders;
-    document.getElementById('deliveredOrders').textContent = deliveredOrders;
-    document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toFixed(2)}`;
-  }
+      const pendingOrders = orders.filter(order => order.status === 'Placed').length;
+      const deliveredOrders = orders.filter(order => order.status === 'Delivered').length;
+
+      let totalRevenue = 0;
+
+      for (const order of orders) {
+        const orderSubtotal = order.items.reduce(
+          (sum, it) => sum + (it.discountedPrice || it.originalPrice || 0) * it.quantity,
+          0
+        );
+
+        for (const item of order.items) {
+          let valid = false;
+          if (order.paymentMethod === "COD" && item.status === "Delivered") {
+            valid = true;
+          } else if (order.paymentMethod === "Online" && ["Placed", "Delivered"].includes(item.status)) {
+            valid = true;
+          }
+
+          if (!valid) continue;
+
+          const itemRevenue = (item.discountedPrice || item.originalPrice || 0) * item.quantity;
+
+          let couponShare = 0;
+          if (order.couponDiscount > 0 && orderSubtotal > 0) {
+            couponShare = (itemRevenue / orderSubtotal) * order.couponDiscount;
+          }
+
+          totalRevenue += (itemRevenue - couponShare);
+        }
+      }
+
+      document.getElementById('totalOrders').textContent = rows.length;
+      document.getElementById('pendingOrders').textContent = pendingOrders;
+      document.getElementById('deliveredOrders').textContent = deliveredOrders;
+      document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toFixed(2)}`;
+    }
+
+
 
   window.onload = () => performPagination(1);
 </script>

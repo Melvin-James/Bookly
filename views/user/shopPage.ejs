@@ -267,7 +267,7 @@
                     
                     <% if (product.price !== product.discountedPrice) { %>
                       <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full">
-                        <%= Math.round(((product.price - product.discountedPrice) / product.price) * 100) %>% OFF
+                        <%= product.appliedOffer %>% OFF
                       </span>
                     <% } %>
                   </div>
