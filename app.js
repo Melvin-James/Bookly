@@ -11,6 +11,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const path = require('path');
 const flash = require('connect-flash');
 const errorHandler = require('./middlewares/ErrorHandler'); 
+const checkBlocked = require('./middlewares/checkBlocked');
 
 db();
 
@@ -49,7 +50,7 @@ app.set('views', [
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/user', userRoutes);
+app.use('/user',checkBlocked, userRoutes);
 app.use('/admin', adminRoutes);
 
 app.use(errorHandler);

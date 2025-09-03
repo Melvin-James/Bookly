@@ -13,6 +13,7 @@ module.exports = function(passport) {
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+
         let user = await User.findOne({ googleId: profile.id });
 
         if (!user && profile.emails?.length) {
@@ -20,6 +21,9 @@ module.exports = function(passport) {
         }
 
         if (user) {
+          if (user.isBlocked) {
+            return done(null, false, { message: 'Your account has been blocked. Please contact support.' });
+          }
           return done(null, user);
         } else {
           const newUser = new User({
