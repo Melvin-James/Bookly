@@ -88,6 +88,8 @@ router.get('/order-failure', userAuth, checkOutControllers.getOrderFailurePage);
 router.get('/wishlist',userAuth,wishlistControllers.getWishlistPage);
 router.post('/wishlist/:productId',userAuth,wishlistControllers.toggleWishlist);
 router.post('/wishlist/move-to-cart/:productId', wishlistControllers.moveToCart);
+router.get('/itemsInWishlistCount',wishlistControllers.getItemsInWishlistCount);
+
 
 router.post('/apply-coupon',userAuth,couponControllers.applyCoupon);
 router.post('/remove-coupon',userAuth,couponControllers.removeCoupon);

@@ -69,8 +69,28 @@ const moveToCart = async (req, res,next) => {
     }
   };
 
+  const getItemsInWishlistCount = async(req,res,next)=>{
+    try{
+      if (!req.session || !req.session.user) {
+        return res.status(200).json({ success: true, value: 0 });
+      }
+      const userId = req.session.user._id;
+      if (!userId) {
+        return res.status(404).json({ success: false, value: 0 });
+      }
+      const userWishlist = await User.findById(userId).select('wishlist -_id');
+      const value = userWishlist?.wishlist?.length || 0;
+
+      return res.status(200).json({ success: true, value });
+
+    }catch(error){
+      next(error);
+    }
+  }
+
 module.exports ={
     getWishlistPage,
     toggleWishlist,
     moveToCart,
+    getItemsInWishlistCount
 }

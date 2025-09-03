@@ -187,7 +187,6 @@ const getItemsInCartCount = async (req, res, next) => {
   }
 };
 
-
 module.exports ={
     getCartPage,
     addToCart,
