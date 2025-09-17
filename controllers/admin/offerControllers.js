@@ -1,6 +1,7 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
-
+const STATUS = require('../../config/statusCodes');
+const {OFFER}=require('../../config/messages');
 
 const getOfferPage = async (req, res, next) => {
   try {

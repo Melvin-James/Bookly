@@ -1,4 +1,6 @@
 const Product = require('../../models/productSchema');
+const {INVENTORY}=require('../../config/messages');
+const STATUS = require('../../config/statusCodes');
 
 const getInventoryPage = async (req, res,next) => {
   try {
@@ -77,9 +79,9 @@ const updateStock = async(req,res,next)=>{
         const { quantity, status } = req.body;
 
         if (isNaN(quantity) || quantity < 0) {
-          return res.status(400).json({
+          return res.status(STATUS.BAD_REQUEST).json({
             success: false,
-            message: 'Quantity cannot be negative'
+            message: INVENTORY.NEGATIVE_QUANTITY
           });
         }
 
@@ -100,7 +102,7 @@ const updateProductStatus = async (req, res,next) => {
   
       const validStatuses = ['Available', 'Out of Stock', 'Discontinued'];
       if (!validStatuses.includes(status)) {
-        return res.status(400).json({ success: false, message: 'Invalid status' });
+        return res.status(STATUS.BAD_REQUEST).json({ success: false, message: INVENTORY.INVALID_STATUS });
       }
   
       await Product.findByIdAndUpdate(productId, { status });

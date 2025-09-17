@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const rateLimit = require("express-rate-limit")
 const { createStructParentTreeNextKey } = require('pdfkit');
+const STATUS = require('../../config/statusCodes');
+const {ADMIN} = require('../../config/messages');
 
 const pageerror = async(req,res)=>{
     res.render('pageerror');
@@ -42,28 +44,28 @@ const login = async (req, res, next) => {
     const errors = {}
 
     if (!email || typeof email !== "string") {
-      errors.email = "Email is required"
+      errors.email = ADMIN.EMAIL_REQUIRED
     }
 
     if (!password || typeof password !== "string") {
-      errors.password = "Password is required"
+      errors.password = ADMIN.PASSWORD_REQUIRED
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (email && !emailRegex.test(email.trim())) {
-      errors.email = "Please enter a valid email address"
+      errors.email = ADMIN.EMAIL_INVALID
     }
 
     if (password && password.length < 6) {
-      errors.password = "Password must be at least 6 characters long"
+      errors.password = ADMIN.PASSWORD_MIN
     }
 
     if (email && email.trim().length > 254) {
-      errors.email = "Email address is too long"
+      errors.email = ADMIN.EMAIL_TOO_LONG
     }
 
     if (password && password.length > 128) {
-      errors.password = "Password is too long"
+      errors.password = ADMIN.PASSWORD_MAX
     }
 
     const suspiciousPatterns = [/[<>"'%;()&+]/, /union.*select/i, /drop.*table/i, /insert.*into/i, /delete.*from/i]
@@ -73,7 +75,7 @@ const login = async (req, res, next) => {
     }
 
     if (Object.keys(errors).length > 0) {
-      return res.status(400).json({
+      return res.status(STATUS.NOT_FOUND).json({
         success: false,
         errors,
       })
@@ -87,10 +89,10 @@ const login = async (req, res, next) => {
     }).select("+password")
 
     if (!admin) {
-      return res.status(401).json({
+      return res.status(STATUS.UNAUTHORIZED).json({
         success: false,
         errors: {
-          email: "Invalid email or password",
+          email: ADMIN.INVALID_EMAIL_PASSWORD,
         },
       })
     }
@@ -100,10 +102,10 @@ const login = async (req, res, next) => {
     if (!isPasswordValid) {
       console.warn(`Failed login attempt for admin: ${normalizedEmail} from IP: ${req.ip}`)
 
-      return res.status(401).json({
+      return res.status(STATUS.UNAUTHORIZED).json({
         success: false,
         errors: {
-          email: "Invalid email or password",
+          email: ADMIN.INVALID_EMAIL_PASSWORD,
         },
       })
     }
@@ -128,7 +130,7 @@ const login = async (req, res, next) => {
   } catch (err) {
     console.error("Admin login error:", err)
 
-    return res.status(500).json({
+    return res.status(STATUS.SERVER_ERROR).json({
       success: false,
       errors: {
         general: "An error occurred during login. Please try again.",

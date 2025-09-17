@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const PDFDocument = require('pdfkit');
+const Msg =require('../../config/messages');
+const STATUS = require('../../config/statusCodes');
 
 const downloadInvoice = async (req, res, next) => {
   try {
@@ -16,7 +18,7 @@ const downloadInvoice = async (req, res, next) => {
     const user = await User.findById(userId);
 
     if (!order) {
-      return res.status(404).render('error', { message: 'Order not found' });
+      return res.status(STATUS.NOT_FOUND).render('error', { message: Msg.ORDERS.NOT_FOUND });
     }
 
     const doc = new PDFDocument({ margin: 50, size: 'A4' });
@@ -489,7 +491,7 @@ const getOrderDetails = async(req,res,next)=>{
         .populate('items.product');
 
         if(!order){
-            return res.status(404).render('error',{message:'Order not found'});
+            return res.status(STATUS.NOT_FOUND).render('error',{message:Msg.ORDERS.NOT_FOUND});
         }
 
         const canDownloadInvoice = !['Cancelled','Failed'].includes(order.status);
@@ -513,7 +515,7 @@ const cancelOrder = async (req, res,next) => {
     const order = await Order.findOne({ _id: orderId, user: userId }).populate('items.product');
 
     if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+      return res.status(STATUS.NOT_FOUND).json({ success: false, message: Msg.ORDERS.NOT_FOUND });
     }
 
     if (order.status !== 'Placed') {
@@ -562,7 +564,7 @@ const cancelOrder = async (req, res,next) => {
 
       await order.save();
     }
-    return res.status(200).json({ success: true, message: 'Order cancelled and amount refunded (if applicable)' });
+    return res.status(STATUS.CREATED).json({ success: true, message: Msg.ORDERS.CANCEL_ORDER_SUCCESS });
   } catch (err) {
     next(err);
   }
@@ -577,16 +579,16 @@ const returnOrderItem = async (req, res,next) => {
       const order = await Order.findOne({ _id: orderId, user: userId }).populate('items.product');
 
       if (!order) {
-        return res.status(400).json({ success: false, message: 'Invalid order for return' });
+        return res.status(STATUS.BAD_REQUEST).json({ success: false, message: Msg.ORDERS.INVALID_FOR_RETURN });
       }
 
       const item = order.items.find(i => i._id.toString() === productId);
       if (!item) {
-        return res.status(404).json({ success: false, message: 'Item not found in this order.' });
+        return res.status(STATUS.NOT_FOUND).json({ success: false, message: Msg.ORDERS.ITEM_NOT_FOUND });
       }
       
       if (item.status === 'Returned') {
-        return res.status(400).json({ success: false, message: 'This item is already Returned.' });
+        return res.status(STATUS.BAD_REQUEST).json({ success: false, message: Msg.ORDERS.ALREADY_RETURNED });
       }
       
       item.status = 'Return Requested';
@@ -600,7 +602,7 @@ const returnOrderItem = async (req, res,next) => {
 
       await order.save();
       
-      res.json({ success: true, message: 'Return request submitted successfully' });
+      res.json({ success: true, message: Msg.ORDERS.RETURN_SUCCESS });
   
     } catch (error) {
       next(error);
@@ -614,16 +616,16 @@ const cancelOrderItem = async (req, res, next) => {
 
     const order = await Order.findOne({ _id: orderId, user: userId }).populate('items.product');
     if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found.' });
+      return res.status(STATUS.NOT_FOUND).json({ success: false, message: Msg.ORDERS.NOT_FOUND });
     }
 
     const item = order.items.find(i => i._id.toString() === productId);
     if (!item) {
-      return res.status(404).json({ success: false, message: 'Item not found in this order.' });
+      return res.status(STATUS.NOT_FOUND).json({ success: false, message: Msg.ORDERS.ITEM_NOT_FOUND });
     }
 
     if (item.status === 'Cancelled') {
-      return res.status(400).json({ success: false, message: 'This item is already cancelled.' });
+      return res.status(STATUS.BAD_REQUEST).json({ success: false, message: Msg.ORDERS.ALREADY_CANCELLED });
     }
 
     item.status = 'Cancelled';
@@ -661,7 +663,7 @@ const cancelOrderItem = async (req, res, next) => {
     
     await order.save();
 
-    return res.json({ success: true, message: 'Product cancelled successfully.' });
+    return res.json({ success: true, message: Msg.ORDERS.CANCEL_SUCCESS });
 
   } catch (error) {
     next(err);

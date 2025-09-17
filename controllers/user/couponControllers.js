@@ -2,6 +2,8 @@ const Coupon = require('../../models/couponSchema');
 const cart = require('../../models/productSchema');
 const Product = require('../../models/productSchema');
 const User = require('../../models/userSchema');
+const {COUPON}=require('../../config/messages');
+const STATUS = require('../../config/statusCodes');
 
 const applyCoupon = async(req,res,next)=>{
     try{
@@ -11,17 +13,17 @@ const applyCoupon = async(req,res,next)=>{
         const coupon = await Coupon.findOne({code:couponCode.toUpperCase(),isActive:true});
 
         if(!coupon){
-            return res.status(400).json({success:false,message:'Invalid coupon code!'});
+            return res.status(STATUS.BAD_REQUEST).json({success:false,message:COUPON.INVALID});
         }
 
         if(coupon.expiresAt < Date.now()){
-            return res.status(400).json({success:false,message:'Coupon expired!'});
+            return res.status(STATUS.BAD_REQUEST).json({success:false,message:COUPON.EXPIRED});
         }
 
         const user = await User.findById(userId).populate('cart');
 
         if(!user || user.cart.length === 0){
-            return res.status(400).json({success:false, message:'Cart is empty!'});
+            return res.status(STATUS.BAD_REQUEST).json({success:false, message:COUPON.CART_EMPTY});
         }
 
         let cartTotal = 0;
@@ -35,7 +37,7 @@ const applyCoupon = async(req,res,next)=>{
           
 
         if(cartTotal < coupon.minCartAmount){
-            return res.status(400).json({success:false,message:`Minimum cart amount should be ₹${coupon.minCartAmount}`});
+            return res.status(STATUS.BAD_REQUEST).json({success:false,message:COUPON.MIN_CART_AMOUNT});
         }
 
         let couponDiscount =0;
@@ -50,9 +52,9 @@ const applyCoupon = async(req,res,next)=>{
         const finalTotal = cartTotal - couponDiscount;
 
         if (user.couponUsage?.get(coupon.code) >= coupon.usageLimit) {
-            return res.status(400).json({
+            return res.status(STATUS.BAD_REQUEST).json({
               success: false,
-              message: 'Coupon usage limit reached!'
+              message: COUPON.USAGE_LIMIT
             });
           }
           
@@ -63,9 +65,9 @@ const applyCoupon = async(req,res,next)=>{
             finalTotal
         };
 
-        return res.status(200).json({
+        return res.status(STATUS.CREATED).json({
             success:true,
-            message:`Coupon applied successfully!`,
+            message: COUPON.APPLIED,
             couponDiscount,
             finalTotal
         });
@@ -77,7 +79,7 @@ const applyCoupon = async(req,res,next)=>{
 const removeCoupon = (req,res,next)=>{
     try{
         delete req.session.coupon;
-        res.status(200).json({success:true,message:'Coupon removed successfully.'});
+        res.status(STATUS.CREATED).json({success:true,message:COUPON.REMOVED});
     }catch(err){
         next(err);
     }

@@ -6,6 +6,9 @@ const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
 const crypto = require("crypto")
 const generateReferralCode = require('../../utils/generateReferralCode');
+const STATUS=require('../../config/statusCodes');
+const Msg = require('../../config/messages');
+
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -32,51 +35,51 @@ const signupStep1 = async (req, res, next) => {
   const errors = {}
 
   if (!name || name.trim() === "") {
-    errors.name = "Name is required"
+    errors.name = Msg.SIGNUP.NAME_REQUIRED
   } else if (name.length < 2) {
-    errors.name = "Name must be at least 2 characters long"
+    errors.name = Msg.SIGNUP.NAME_MIN
   }
 
   if (!email || email.trim() === "") {
-    errors.email = "Email is required"
+    errors.email = Msg.SIGNUP.EMAIL_REQUIRED
   } else {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      errors.email = "Please provide a valid email address"
+      errors.email = Msg.SIGNUP.EMAIL_INVALID
     }
   }
 
   if (!phone || phone.trim() === "") {
-    errors.phone = "Phone number is required"
+    errors.phone = Msg.SIGNUP.PHONE_REQUIRED
   } else {
     const phoneRegex = /^[0-9]{10}$/
     if (!phoneRegex.test(phone.replace(/\D/g, ""))) {
-      errors.phone = "Please provide a valid 10-digit phone number"
+      errors.phone = Msg.SIGNUP.PHONE_INVALID
     }
   }
 
   if (!password) {
-    errors.password = "Password is required"
+    errors.password = Msg.SIGNUP.PASSWORD_REQUIRED
   } else if (password.length < 8) {
-    errors.password = "Password must be at least 8 characters long"
+    errors.password = Msg.SIGNUP.PASSWORD_MIN
   }
 
   if (!confirmPassword) {
     errors.confirmPassword = "Please confirm your password"
   } else if (password !== confirmPassword) {
-    errors.confirmPassword = "Passwords do not match"
+    errors.confirmPassword = Msg.SIGNUP.PASSWORD_MISMATCH
   }
 
   if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ errors })
+    return res.status(STATUS.BAD_REQUEST).json({ errors })
   }
 
   try {
     const existing = await User.findOne({ $or: [{ email }, { phone }] })
     if (existing) {
-      return res.status(409).json({
+      return res.status(STATUS.CONFLICT).json({
         errors: {
-          general: existing.email === email ? "Email already exists" : "Phone number already exists",
+          general: existing.email === email ? Msg.SIGNUP.EMAIL_EXISTS : Msg.SIGNUP.PHONE_EXISTS,
         },
       })
     }
@@ -124,19 +127,19 @@ const verifyOtp = async (req, res, next) => {
   const { tempUser } = req.session
 
   if (!otp) {
-    return res.status(400).json({ error: "OTP is required." })
+    return res.status(STATUS.BAD_REQUEST).json({ error: Msg.SIGNUP.OTP_REQUIRED })
   }
 
   if (!tempUser) {
-    return res.status(400).json({ error: "Session expired. Please start over." })
+    return res.status(STATUS.BAD_REQUEST).json({ error: Msg.SIGNUP.SESSION_EXPIRED })
   }
 
   if (tempUser.otp !== otp) {
-    return res.status(400).json({ error: "Invalid OTP. Please try again." })
+    return res.status(STATUS.BAD_REQUEST).json({ error: Msg.SIGNUP.OTP_INVALID })
   }
 
   if (Date.now() > tempUser.otpExpires) {
-    return res.status(400).json({ error: "OTP has expired. Please request a new one." })
+    return res.status(STATUS.BAD_REQUEST).json({ error: Msg.SIGNUP.OTP_EXPIRED })
   }
 
   try {
@@ -171,8 +174,8 @@ const resendOtp = async (req, res, next) => {
   try {
     const tempUser = req.session.tempUser
     if (!tempUser) {
-      return res.status(400).json({
-        error: "Session expired. Please start over.",
+      return res.status(STATUS.BAD_REQUEST).json({
+        error: Msg.SIGNUP.SESSION_EXPIRED,
       })
     }
 
@@ -279,17 +282,17 @@ const login = async (req, res, next) => {
     const errors = {}
 
     if (!email) {
-      errors.email = { msg: "Email is required" }
+      errors.email = { msg: Msg.LOGIN.EMAIL_REQUIRED }
     }
 
     if (!password) {
-      errors.password = { msg: "Password is required" }
+      errors.password = { msg: Msg.LOGIN.PASSWORD_REQUIRED }
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     
     if (email && !emailRegex.test(email)) {
-      errors.email = { msg: "Invalid email format" }
+      errors.email = { msg: Msg.LOGIN.INVALID_CREDENTIALS }
     }
 
     if (Object.keys(errors).length > 0) {
@@ -299,7 +302,7 @@ const login = async (req, res, next) => {
     const user = await User.findOne({ email })
     if (!user || user.isAdmin) {
       return res.render("login", {
-        errors: { login: { msg: "Invalid email or password" } },
+        errors: { login: { msg: Msg.LOGIN.INVALID_CREDENTIALS } },
         formData: { email},
       })
     }
@@ -307,7 +310,7 @@ const login = async (req, res, next) => {
     if (user.isBlocked) {
       return res.render("login", {
         errors: {
-          login: { msg: "Your account has been blocked by the admin." },
+          login: { msg: Msg.LOGIN.BLOCKED },
         },
         formData: { email },
       })
@@ -316,7 +319,7 @@ const login = async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
       return res.render("login", {
-        errors: { login: { msg: "Invalid email or password" } },
+        errors: { login: { msg: Msg.LOGIN.BLOCKED } },
         formData: { email },
       })
     }
@@ -344,7 +347,7 @@ const forgotPassword = async (req, res, next) => {
     const errors = {}
 
     if (!email) {
-      errors.email = "Email is required"
+      errors.email = Msg.LOGIN.EMAIL_REQUIRED
     }
 
     const user = await User.findOne({ email })
@@ -390,7 +393,7 @@ const loadResetPassword = async (req, res) => {
   console.log("From loadResetPassword controller:", token)
   if (!req.session.resetToken || req.session.resetToken !== token || Date.now() > req.session.resetTokenExpiration) {
     return res.render("reset-password", {
-      errors: { token: "Invalid or expired token" },
+      errors: { token: Msg.PASSWORD.RESET_EXPIRED },
       email: "",
     })
   }
@@ -409,11 +412,11 @@ const resetPassword = async (req, res, next) => {
     const email = req.session.resetEmail
 
     if (!newPassword || newPassword.length < 6) {
-      errors.newPassword = "Password must be at least 6 characters"
+      errors.newPassword = Msg.PASSWORD.RESET_MIN
     }
 
     if (newPassword !== confirmPassword) {
-      errors.confirmPassword = "Passwords do not match"
+      errors.confirmPassword = Msg.PASSWORD.RESET_MISMATCH
     }
 
     if (Object.keys(errors).length > 0) {
@@ -445,7 +448,7 @@ const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err)
-      return res.status(500).json({ error: "Failed to logout" })
+      return res.status(STATUS.SERVER_ERROR).json({ error: "Failed to logout" })
     }
     res.redirect("/user/login")
   })

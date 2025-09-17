@@ -42,7 +42,6 @@ const getDashboardStats = async (req, res, next) => {
       createdAt: { $gte: previousStart }
     });
 
-    //helper function
     const isValidItem = (order, item) => {
       if (["Cancelled", "Returned", "Failed"].includes(item.status)) return false;
       if (order.paymentMethod === "Online" && ["Placed", "Delivered"].includes(item.status)) return true;

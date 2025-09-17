@@ -1,4 +1,6 @@
 const User = require('../../models/userSchema');
+const STATUS = require('../../config/statusCodes');
+const{CUSTOMER}=require('../../config/messages');
 
 const customerInfo = async (req, res,next) => {
     try{
@@ -13,7 +15,7 @@ const customerInfo = async (req, res,next) => {
 const toggleBlockStatusCustomer = async (req, res,next) => {
     try {
       const user = await User.findById(req.params.id);
-      if (!user) return res.status(404).json({ success: false });
+      if (!user) return res.status(STATUS.NOT_FOUND).json({ success: false });
   
       user.isBlocked = !user.isBlocked;
       await user.save();

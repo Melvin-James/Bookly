@@ -1,4 +1,6 @@
 const Coupon = require('../../models/couponSchema');
+const STATUS = require('../../config/statusCodes');
+const {COUPON}=require('../../config/messages');
 
 const loadEditCoupon = async (req,res,next)=>{
     try{
@@ -26,24 +28,24 @@ const updateCoupon = async (req, res, next) => {
     } else {
       const trimmedCode = code.trim()
       if (trimmedCode.length < 3) {
-        errors.code = "Coupon code must be at least 3 characters long"
+        errors.code = COUPON.INVALID_CODE
       } else if (trimmedCode.length > 20) {
         errors.code = "Coupon code cannot exceed 20 characters"
       } else if (!/^[A-Z0-9]+$/.test(trimmedCode)) {
-        errors.code = "Coupon code can only contain uppercase letters and numbers"
+        errors.code = COUPON.INVALID_CODE
       } else {
         const existingCoupon = await Coupon.findOne({
           code: trimmedCode.toUpperCase(),
           _id: { $ne: id },
         })
         if (existingCoupon) {
-          errors.code = "This coupon code already exists"
+          errors.code = COUPON.CODE_EXISTS
         }
       }
     }
 
     if (!discountType || !["Flat", "Percentage"].includes(discountType)) {
-      errors.discountType = "Please select a valid discount type (Flat or Percentage)"
+      errors.discountType = COUPON.INVALID_TYPE
     }
 
     if (!discountAmount) {
@@ -51,16 +53,16 @@ const updateCoupon = async (req, res, next) => {
     } else {
       const amount = Number.parseFloat(discountAmount)
       if (isNaN(amount) || amount <= 0) {
-        errors.discountAmount = "Discount amount must be greater than 0"
+        errors.discountAmount = COUPON.INVALID_AMOUNT
       } else if (discountType === "Percentage") {
         if (amount > 100) {
-          errors.discountAmount = "Percentage discount cannot exceed 100%"
+          errors.discountAmount = COUPON.INVALID_PERCENTAGE
         } else if (amount < 1) {
           errors.discountAmount = "Percentage discount must be at least 1%"
         }
       } else if (discountType === "Flat") {
         if (amount > 50000) {
-          errors.discountAmount = "Flat discount cannot exceed ₹50,000"
+          errors.discountAmount = COUPON.INVALID_FLAT
         } else if (amount < 1) {
           errors.discountAmount = "Flat discount must be at least ₹1"
         }
@@ -122,7 +124,7 @@ const updateCoupon = async (req, res, next) => {
     }
 
     if (Object.keys(errors).length > 0) {
-      return res.status(400).json({ success: false, errors })
+      return res.status(STATUS.NOT_FOUND).json({ success: false, errors })
     }
 
     const updatedCoupon = await Coupon.findByIdAndUpdate(
@@ -141,14 +143,14 @@ const updateCoupon = async (req, res, next) => {
     )
 
     if (!updatedCoupon) {
-      return res.status(404).json({ success: false, message: "Coupon not found" })
+      return res.status(STATUS.NOT_FOUND).json({ success: false, message: COUPON.NOT_FOUND })
     }
 
-    res.json({ success: true, message: "Coupon updated successfully", coupon: updatedCoupon })
+    res.json({ success: true, message: COUPON.UPDATED, coupon: updatedCoupon })
   } catch (err) {
     console.error("Error updating coupon:", err)
     if (err.name === "CastError") {
-      return res.status(400).json({ success: false, message: "Invalid coupon ID format" })
+      return res.status(STATUS.BAD_REQUEST).json({ success: false, message: COUPON.INVALID_ID })
     }
     next(err)
   }
@@ -236,12 +238,12 @@ const createCoupon = async (req, res, next) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       if (expiry <= today) {
-        errors.expiresAt = 'Expiry date must be in the future';
+        errors.expiresAt = COUPON.INVALID_EXPIRY
       }
     }
 
     if (Object.keys(errors).length > 0) {
-      return res.status(400).json({ success: false, errors });
+      return res.status(STATUS.BAD_REQUEST).json({ success: false, errors });
     }
 
     const coupon = new Coupon({
@@ -255,7 +257,7 @@ const createCoupon = async (req, res, next) => {
     });
 
     await coupon.save();
-    return res.status(200).json({ success: true });
+    return res.status(STATUS.CREATED).json({ success: true });
 
   } catch (err) {
     next(err);
@@ -268,7 +270,7 @@ const deleteCoupon = async(req,res,next)=>{
         const deleted = await Coupon.findByIdAndDelete(couponId);
 
         if(!deleted){
-            return res.status(404).json({success:false,message:'Coupon not found'});
+            return res.status(STATUS.NOT_FOUND).json({success:false,message:COUPON.NOT_FOUND});
         }
         res.json({success:true});
     }

@@ -31,9 +31,11 @@
           id="name"
           name="name"
           value="<%= category.name %>"
-          required
           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
         />
+        <% if (errors && errors.name) { %>
+          <p class="text-sm mt-1" style="color:#007D8B;"><%= errors.name %></p>
+        <% } %>
       </div>
 
       <!-- Description -->
@@ -45,6 +47,9 @@
           rows="4"
           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007D8B] focus:outline-none"
         ><%= category.description || '' %></textarea>
+        <% if (errors && errors.description) { %>
+          <p class="text-sm mt-1" style="color:#007D8B;"><%= errors.description %></p>
+        <% } %>
       </div>
 
       <!-- Submit Button -->

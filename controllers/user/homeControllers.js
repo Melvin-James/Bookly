@@ -1,6 +1,8 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Customers = require('../../models/userSchema');
+const {PRODUCT} = require('../../config/messages');
+const STATUS = require('../../config/statusCodes');
 
 const getShopProducts = async function (req, res, next) {
   try {
@@ -168,7 +170,7 @@ const getProductDetails = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate('category');
     if (!product) {
-      return res.status(404).render('404');
+      return res.status(STATUS.NOT_FOUND).render('404');
     }
 
     const basePrice = Number(product.price);
@@ -219,7 +221,7 @@ const getProductDetails = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching product details:", error);
-    res.status(500).render('error', { message: 'Server error' });
+    res.status(STATUS.SERVER_ERROR).render('error', { message: PRODUCT.SERVER_ERROR });
   }
 };
 

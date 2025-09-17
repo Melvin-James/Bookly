@@ -5,6 +5,8 @@ const Product = require('../../models/productSchema');
 const razorpay = require('../../utils/razorpay');
 const Coupon = require('../../models/couponSchema');
 const crypto = require('crypto');
+const {CHECKOUT, PRODUCT}=require('../../config/messages');
+const STATUS = require('../../config/statusCodes');
 
 const getCheckoutPage = async (req, res,next) => {
   try {
@@ -69,7 +71,7 @@ const placeOrder = async (req, res,next) => {
     const selectedAddress = addressDoc?.address.find(addr => addr._id.toString() === addressId);
 
     if (!selectedAddress) {
-      return res.status(400).render('error', { message: 'Invalid address selected!' });
+      return res.status(STATUS.BAD_REQUEST).render('error', { message: CHECKOUT.INVALID_ADDRESS });
     }
 
     const user = await User.findById(userId).populate('cart.product');
@@ -230,7 +232,7 @@ const createRazorpayOrder = async (req, res, next) => {
 
     const user = await User.findById(userId).populate('cart.product');
     if (!user || user.cart.length === 0) {
-      return res.json({ success: false, message: 'Cart is empty!' });
+      return res.json({ success: false, message: CHECKOUT.CART_EMPTY });
     }
 
     for (let cartItem of user.cart) {
@@ -238,7 +240,7 @@ const createRazorpayOrder = async (req, res, next) => {
       if (!product || product.quantity < cartItem.quantity) {
         return res.json({
           success: false,
-          message: `Insufficient stock for ${product?.name || 'a product'}`
+          message: PRODUCT.OUT_OF_STOCK
         });
       }
     }
@@ -256,7 +258,6 @@ const createRazorpayOrder = async (req, res, next) => {
     next(err);
   }
 };
-
 
 const getOrderSuccessPage = async (req, res,next) => {
   try {
@@ -281,7 +282,6 @@ const getOrderFailurePage = async (req, res, next) => {
     next(error);
   }
 };
-
 
 const getaddAddress = async(req,res,next)=>{
   try{

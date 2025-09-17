@@ -1,4 +1,6 @@
 const User = require("../../models/userSchema");
+const STATUS = require('../../config/statusCodes');
+const {WALLET} = require('../../config/messages')
 
 const getWalletPage = async (req, res, next) => {
     try {
@@ -41,9 +43,9 @@ const getWalletTransactions = async (req, res, next) => {
         const user = await User.findById(userId);
         
         if (!user) {
-            return res.status(404).json({
+            return res.status(STATUS.BAD_REQUEST).json({
                 success: false,
-                message: 'User not found'
+                message: WALLET.USER_NOT_FOUND
             });
         }
 
@@ -69,9 +71,9 @@ const getWalletTransactions = async (req, res, next) => {
         });
     } catch (err) {
         console.error('Error fetching wallet transactions:', err);
-        res.status(500).json({
+        res.status(STATUS.SERVER_ERROR).json({
             success: false,
-            message: 'Server error while fetching transactions'
+            message: WALLET.SERVER_ERROR
         });
     }
 }

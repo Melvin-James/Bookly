@@ -61,31 +61,54 @@ const getPaginatedCategory = async (req, res,next) => {
   }
 };
 
-const getEditCategory = async(req,res,next)=>{
-  try{
+const getEditCategory = async (req, res, next) => {
+  try {
     const category = await Category.findById(req.params.id);
-    if(!category){
-      return res.status(404).send('Category not found');
+    if (!category) {
+      return res.status(404).send("Category not found");
     }
-    res.render('category-edit',{category});
-  }catch(err){
+    res.render("category-edit", { category, errors: {} });
+  } catch (err) {
     next(err);
   }
-}
+};
 
-const updateCategory = async(req,res,next)=>{
-  const {name,description}=req.body;
+const updateCategory = async (req, res, next) => {
+  const { name, description } = req.body;
 
-  try{
+  try {
     const category = await Category.findById(req.params.id);
-    if(!category){
-      return res.status(404).send('Category not found');
+    if (!category) {
+      return res.status(404).send("Category not found");
     }
-    category.name=name;
-    category.description=description;
+
+    let errors = {};
+
+    // Validations
+    if (!name || name.trim() === "") {
+      errors.name = "Category name is required.";
+    } else if (name.length > 20) {
+      errors.name = "Category name must not exceed 20 characters.";
+    }
+
+    if (!description || description.trim() === "") {
+      errors.description = "Description is required.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).render("category-edit", {
+        category: { ...category.toObject(), name, description },
+        errors,
+      });
+    }
+
+    // Save if valid
+    category.name = name;
+    category.description = description;
     await category.save();
-    res.redirect('/admin/category');
-  }catch(err){
+
+    res.redirect("/admin/category");
+  } catch (err) {
     next(err);
   }
 };
@@ -93,6 +116,7 @@ const updateCategory = async(req,res,next)=>{
 const getAddCategory = async (req,res,next)=>{
   res.render('category-add',{
     category:{},
+    errors: {},
     isEdit:false,
   });
 }
@@ -100,6 +124,25 @@ const getAddCategory = async (req,res,next)=>{
 const addCategory = async (req,res,next)=>{
   try{
     const{name,description}=req.body;
+    let errors={};
+
+    if(!name || name.trim() === ""){
+      errors.name = 'Category name is required';
+    }else if(name.length > 20){
+      errors.name = 'Category name must not exceed 20 characters.';
+    }
+
+    if (!description || description.trim() === "") {
+      errors.description = "Description is required.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).render("category-add", {
+        category: { name, description },
+        errors,
+        isEdit: false,
+      });
+    }
 
     const newCategory = new Category({
       name,
