@@ -182,18 +182,24 @@
     }
     
     function validatePhone() {
-      if (!phoneInput.value.trim()) {
+      const value = phoneInput.value.trim();
+      const phonePattern = /^[1-9][0-9]{9}$/; 
+
+      if (!value) {
         showError(phoneError, 'Phone number is required');
         return false;
-      } else if (!phonePattern.test(phoneInput.value.trim())) {
+      } else if (!phonePattern.test(value)) {
         showError(phoneError, 'Please enter a valid 10-digit phone number');
+        return false;
+      } else if (value === '0000000000') {
+        showError(phoneError, 'Phone number cannot be all zeroes');
         return false;
       } else {
         hideError(phoneError);
         return true;
       }
     }
-    
+        
     function validateImage() {
       if (imageInput.files.length > 0) {
         const file = imageInput.files[0];

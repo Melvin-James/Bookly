@@ -121,19 +121,27 @@ const getAddCategory = async (req,res,next)=>{
   });
 }
 
-const addCategory = async (req,res,next)=>{
-  try{
-    const{name,description}=req.body;
-    let errors={};
+const addCategory = async (req, res, next) => {
+  try {
+    const { name, description } = req.body;
+    let errors = {};
 
-    if(!name || name.trim() === ""){
-      errors.name = 'Category name is required';
-    }else if(name.length > 20){
-      errors.name = 'Category name must not exceed 20 characters.';
+    if (!name || name.trim() === "") {
+      errors.name = "Category name is required";
+    } else if (name.length > 20) {
+      errors.name = "Category name must not exceed 20 characters.";
     }
 
     if (!description || description.trim() === "") {
       errors.description = "Description is required.";
+    }
+
+    const existingCategory = await Category.findOne({
+      name: { $regex: new RegExp(`^${name}$`, "i") } 
+    });
+
+    if (existingCategory) {
+      errors.name = "Category name already exists.";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -147,14 +155,16 @@ const addCategory = async (req,res,next)=>{
     const newCategory = new Category({
       name,
       description,
-      isListed:true,
+      isListed: true,
     });
+
     await newCategory.save();
-    res.redirect('/admin/category');
-  }catch(err){
+    res.redirect("/admin/category");
+  } catch (err) {
     next(err);
   }
 };
+
 
 module.exports = {
   categoryInfo,

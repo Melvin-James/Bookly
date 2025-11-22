@@ -264,25 +264,40 @@
             </div>
 
             <!-- State -->
+            <!-- State Dropdown -->
             <div class="form-group">
               <label for="state" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <i class="fas fa-map text-sm input-icon"></i>
                 State *
               </label>
               <div class="relative">
-                <input 
-                  type="text" 
+                <select 
                   id="state" 
                   name="state" 
-                  value="<%= address?.state || '' %>" 
-                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all" 
-                  placeholder="Enter your state"
-                />
+                  class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#007D8B] bg-gray-50/50 hover:bg-white text-lg transition-all appearance-none"
+                >
+                  <option value="">Select a state</option>
+                  <% 
+                    const indianStates = [
+                      "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana",
+                      "Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur",
+                      "Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
+                      "Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands",
+                      "Chandigarh","Dadra and Nagar Haveli and Daman and Diu","Delhi","Jammu and Kashmir","Ladakh",
+                      "Lakshadweep","Puducherry"
+                    ];
+                    indianStates.forEach(state => { 
+                  %>
+                    <option value="<%= state %>" <%= address?.state === state ? 'selected' : '' %>><%= state %></option>
+                  <% }); %>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                  <i class="fas fa-chevron-down input-icon"></i>
+                </div>
               </div>
               <div id="stateError" class="error-message text-sm mt-2 hidden"></div>
             </div>
 
-            <!-- Pincode -->
             <div class="form-group">
               <label for="pincode" class="block font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <i class="fas fa-mail-bulk text-sm input-icon"></i>
@@ -518,25 +533,45 @@
         if (!value) {
           showError(phoneInput, phoneError, 'Phone number is required');
           return false;
-        } else if (!phonePattern.test(value)) {
+        }
+
+        const phonePattern = /^\d{10}$/;
+        if (!phonePattern.test(value)) {
           showError(phoneInput, phoneError, 'Please enter a valid 10-digit phone number');
           return false;
-        } else {
-          hideError(phoneInput, phoneError);
-          return true;
         }
+
+        if (value === '0000000000') {
+          showError(phoneInput, phoneError, 'Phone number cannot be all zeroes');
+          return false;
+        }
+
+        hideError(phoneInput, phoneError);
+        return true;
       }
+
       
       function validateAltPhone() {
         const value = altPhoneInput.value.trim();
-        if (value && !phonePattern.test(value)) {
-          showError(altPhoneInput, altPhoneError, 'Please enter a valid 10-digit phone number');
-          return false;
-        } else {
-          hideError(altPhoneInput, altPhoneError);
-          return true;
+
+        if (value) {
+
+          const phonePattern = /^\d{10}$/;
+          if (!phonePattern.test(value)) {
+            showError(altPhoneInput, altPhoneError, 'Please enter a valid 10-digit phone number');
+            return false;
+          }
+
+          if (value === '0000000000') {
+            showError(altPhoneInput, altPhoneError, 'Phone number cannot be all zeroes');
+            return false;
+          }
         }
+
+        hideError(altPhoneInput, altPhoneError);
+        return true;
       }
+
       
       function showError(input, errorElement, message) {
         errorElement.textContent = message;
