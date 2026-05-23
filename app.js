@@ -6,6 +6,7 @@ const express = require("express");
 const session = require('express-session');
 const db = require('./config/db');
 const app = express();
+app.set('trust proxy', true);
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const path = require('path');
