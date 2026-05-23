@@ -115,7 +115,7 @@ const signupStep1 = async (req, res, next) => {
       text: `Your OTP code is ${otp}. It is valid for 1 minute.`,
     }
 
-    await transporter.sendMail(mailOptions)
+    transporter.sendMail(mailOptions)
     return res.json({ success: true })
   } catch (err) {
     next(err);
