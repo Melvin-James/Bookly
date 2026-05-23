@@ -10,6 +10,7 @@ module.exports = function(passport) {
       callbackURL: process.env.NODE_ENV === 'development'
         ? process.env.GOOGLE_CALLBACK_DEV
         : process.env.GOOGLE_CALLBACK_PROD,
+        proxy:true,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
