@@ -51,6 +51,10 @@ app.set('views', [
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/', (req, res) => {
+    res.redirect('/user');
+});
+
 app.use('/user',checkBlocked, userRoutes);
 app.use('/admin', adminRoutes);
 
