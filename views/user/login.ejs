@@ -93,7 +93,8 @@
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.8rem;
+            position: relative;
         }
 
         .form-label {
@@ -140,6 +141,13 @@
             font-size: 0.875rem;
             margin-top: 0.5rem;
             font-weight: 500;
+        }
+
+        .form-group .error-message {
+            position: absolute;
+            bottom: -1.3rem;
+            left: 0;
+            margin-top: 0;
         }
 
         .error-message i {
@@ -206,9 +214,6 @@
         }
 
         /* Input focus animations */
-        .form-group {
-            position: relative;
-        }
 
         .form-input:focus + .form-label,
         .form-input:not(:placeholder-shown) + .form-label {
@@ -322,12 +327,6 @@
             </div>
 
             <div class="card-content">
-                <% if (errors?.login) {%>
-                    <div class="error-message login-error">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span><% errors.login.msg %></span>
-                    </div>
-                    <% } %>
                 <form id="userLoginForm" method="POST" action="/user/login">
                     <!-- Email Field -->
                     <div class="form-group">
@@ -336,7 +335,7 @@
                             type="email" 
                             id="email" 
                             name="email" 
-                            class="form-input <%= errors?.email ? 'error' : '' %>"
+                            class="form-input <%= errors?.email || errors?.login ? 'error' : '' %>"
                             placeholder="Enter your email"
                             value="<%= formData?.email || '' %>"
                         
@@ -345,6 +344,11 @@
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span><%= errors.email.msg %></span>
+                            </div>
+                        <% } else if (errors?.login) { %>
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span><%= errors.login.msg %></span>
                             </div>
                         <% } %>
                     </div>
@@ -391,5 +395,116 @@
             <p>&copy; 2025 Bookly. All rights reserved.</p>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            // Toast notification function
+            function showToast(message, type = 'error') {
+                Swal.fire({
+                    icon: type,
+                    title: message,
+                    toast: true,
+                    position: 'top-end',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    timerProgressBar: true
+                });
+            }
+
+            // Error display helpers
+            function showFieldError(fieldId, message) {
+                const field = $(`#${fieldId}`);
+                field.addClass('error');
+                
+                // Remove existing error message
+                field.siblings('.error-message').remove();
+                
+                // Append the error text element
+                field.after(`
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `);
+            }
+
+            function clearErrors() {
+                $('.form-input').removeClass('error');
+                $('.error-message').remove();
+                $('.login-error').remove();
+            }
+
+            // Clear errors on input change
+            $('.form-input').on('input', function() {
+                $(this).removeClass('error');
+                $(this).siblings('.error-message').remove();
+                $('.login-error').remove();
+            });
+
+            // Submit handler
+            $('#userLoginForm').submit(function (e) {
+                e.preventDefault();
+                clearErrors();
+
+                const email = $('#email').val().trim();
+                const password = $('#password').val();
+                let hasErrors = false;
+
+                // Client-side quick check
+                if (!email) {
+                    showFieldError('email', 'Email is required');
+                    hasErrors = true;
+                } else {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        showFieldError('email', 'Please provide a valid email address');
+                        hasErrors = true;
+                    }
+                }
+
+                if (!password) {
+                    showFieldError('password', 'Password is required');
+                    hasErrors = true;
+                }
+
+                if (hasErrors) return;
+
+                // Disable submit button during login request
+                const submitBtn = $('.login-button');
+                submitBtn.prop('disabled', true).text('Signing In...');
+
+                $.ajax({
+                    url: '/user/login',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ email, password }),
+                    success: function (res) {
+                        showToast('Login successful! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = res.redirectTo || '/user/home';
+                        }, 1000);
+                    },
+                    error: function (xhr) {
+                        submitBtn.prop('disabled', false).text('Sign In');
+                        const response = xhr.responseJSON;
+                        if (response && response.errors) {
+                            // Render field-specific or general login error
+                            if (response.errors.login) {
+                                showFieldError('email', response.errors.login.msg);
+                            }
+                            Object.keys(response.errors).forEach(fieldId => {
+                                if (fieldId !== 'login') {
+                                    showFieldError(fieldId, response.errors[fieldId].msg);
+                                }
+                            });
+                        } else {
+                            showToast('Invalid credentials or server error. Please try again.', 'error');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

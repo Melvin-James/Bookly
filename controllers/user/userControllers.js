@@ -21,11 +21,11 @@ const transporter = nodemailer.createTransport({
 
 const loadSignup = (req, res, next) => {
   try {
-    res.render("signup",{
-    pageTitle: "Sign Up",
-    path: "/signup",
-    googleClientId: process.env.GOOGLE_CLIENT_ID
-  });
+    res.render("signup", {
+      pageTitle: "Sign Up",
+      path: "/signup",
+      googleClientId: process.env.GOOGLE_CLIENT_ID
+    });
   } catch (err) {
     next(err);
   }
@@ -106,7 +106,7 @@ const signupStep1 = async (req, res, next) => {
       password: hashedPassword,
       otp,
       otpExpires: Date.now() + 60 * 3000,
-      referredBy, 
+      referredBy,
       referralCodeUsed: referralCode || null,
     }
     const mailOptions = {
@@ -152,8 +152,8 @@ const verifyOtp = async (req, res, next) => {
       phone: tempUser.phone,
       password: tempUser.password,
       referredBy,
-      referralCode: generateReferralCode(tempUser.name), 
-      wallet: referredBy ? 50 : 0 
+      referralCode: generateReferralCode(tempUser.name),
+      wallet: referredBy ? 50 : 0
     })
 
     if (referredBy) {
@@ -182,7 +182,7 @@ const resendOtp = async (req, res, next) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
     const otpExpires = Date.now() + 3 * 60 * 1000
-    console.log('resend otp for signup:',otp);
+    console.log('resend otp for signup:', otp);
     req.session.tempUser.otp = otp
     req.session.tempUser.otpExpires = otpExpires
 
@@ -256,8 +256,8 @@ const homePage = async (req, res, next) => {
 
     res.render("homePage", {
       products,
-      userData: user,  
-      isLoggedIn       
+      userData: user,
+      isLoggedIn
     });
 
   } catch (err) {
@@ -291,37 +291,38 @@ const login = async (req, res, next) => {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    
+
     if (email && !emailRegex.test(email)) {
       errors.email = { msg: Msg.LOGIN.INVALID_CREDENTIALS }
     }
 
     if (Object.keys(errors).length > 0) {
-      return res.render("login", { errors, formData: { email } })
+      return res.status(STATUS.BAD_REQUEST).json({ errors })
     }
 
     const user = await User.findOne({ email })
     if (!user || user.isAdmin) {
-      return res.render("login", {
-        errors: { login: { msg: Msg.LOGIN.INVALID_CREDENTIALS } },
-        formData: { email},
+      return res.status(STATUS.BAD_REQUEST).json({
+        errors: { login: { msg: Msg.LOGIN.INVALID_CREDENTIALS } }
       })
     }
 
     if (user.isBlocked) {
-      return res.render("login", {
-        errors: {
-          login: { msg: Msg.LOGIN.BLOCKED },
-        },
-        formData: { email },
+      return res.status(STATUS.BAD_REQUEST).json({
+        errors: { login: { msg: Msg.LOGIN.BLOCKED } }
+      })
+    }
+
+    if (!user.password) {
+      return res.status(STATUS.BAD_REQUEST).json({
+        errors: { login: { msg: Msg.LOGIN.INVALID_CREDENTIALS } }
       })
     }
 
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
-      return res.render("login", {
-        errors: { login: { msg: Msg.LOGIN.BLOCKED } },
-        formData: { email },
+      return res.status(STATUS.BAD_REQUEST).json({
+        errors: { login: { msg: Msg.LOGIN.INVALID_CREDENTIALS } }
       })
     }
 
@@ -332,7 +333,7 @@ const login = async (req, res, next) => {
       phone: user.phone,
     }
 
-    return res.redirect("/user/home")
+    return res.json({ success: true, redirectTo: "/user/home" })
   } catch (err) {
     next(err);
   }
@@ -352,7 +353,7 @@ const forgotPassword = async (req, res, next) => {
     }
 
     const user = await User.findOne({ email })
-    if (!user || user.isAdmin===true) {
+    if (!user || user.isAdmin === true) {
       errors.email = "User is not registered"
     }
 
@@ -369,7 +370,7 @@ const forgotPassword = async (req, res, next) => {
 
     req.session.resetToken = resetToken
     req.session.resetEmail = email
-    req.session.resetTokenExpiration = Date.now() + 3600000 
+    req.session.resetTokenExpiration = Date.now() + 3600000
 
     const resetLink = `${process.env.RESET_LINK}?token=${resetToken}`
     const mailOptions = {

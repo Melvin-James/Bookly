@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Bookly</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Google Sign-In API -->
-    
+
     <style>
         .spinner {
             border: 3px solid #f3f3f3;
@@ -21,8 +23,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         :root {
@@ -36,52 +43,67 @@
             --radius: 8px;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
-        
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Poppins', sans-serif;
         }
-        
+
         body {
-            background-color: var(--light);
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1rem;
         }
-        
+
         .signup-card {
             width: 100%;
             max-width: 900px;
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             overflow: hidden;
             position: relative;
             display: flex;
             flex-direction: column;
+            animation: slideUp 0.6s ease-out;
         }
-        
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .form-header {
-            padding: 1.5rem;
+            padding: 2rem 2rem 1rem;
             text-align: center;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
+            background: linear-gradient(135deg, rgba(0, 125, 139, 0.05) 0%, rgba(0, 125, 139, 0.02) 100%);
         }
-        
+
         .form-header h1 {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1e293b;
             margin-bottom: 0.5rem;
         }
-        
+
         .form-header p {
-            font-size: 0.875rem;
-            opacity: 0.9;
+            font-size: 0.9rem;
+            color: #64748b;
         }
-        
+
         .progress-steps {
             display: flex;
             justify-content: center;
@@ -90,7 +112,7 @@
             max-width: 300px;
             margin: 0 auto;
         }
-        
+
         .step {
             width: 30px;
             height: 30px;
@@ -104,16 +126,17 @@
             font-size: 0.875rem;
             transition: all 0.3s ease;
         }
-        
-        .step.active, .step.completed {
+
+        .step.active,
+        .step.completed {
             background-color: var(--primary);
             color: white;
         }
-        
+
         .step.completed::after {
             content: '✓';
         }
-        
+
         .step-line {
             flex: 1;
             height: 2px;
@@ -121,7 +144,7 @@
             margin: auto 0;
             position: relative;
         }
-        
+
         .step-line.active::after {
             content: '';
             position: absolute;
@@ -132,123 +155,181 @@
             background-color: var(--primary);
             animation: fillLine 0.5s ease-out;
         }
-        
+
         @keyframes fillLine {
-            from { width: 0; }
-            to { width: 100%; }
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
         }
-        
+
         .form-container {
             padding: 1.5rem;
             flex: 1;
         }
-        
+
         .form-section {
             display: none;
             animation: fadeIn 0.3s ease-out;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         .form-section.active {
             display: block;
         }
-        
+
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             position: relative;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
             font-size: 0.875rem;
-            color: var(--dark);
-            font-weight: 500;
+            color: #374151;
+            font-weight: 600;
         }
-        
+
         .form-control {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--gray);
-            border-radius: var(--radius);
-            font-size: 0.875rem;
+            height: 48px;
+            padding: 0 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
             transition: all 0.3s ease;
+            background: white;
+            color: #1e293b;
         }
-        
+
         .form-control:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 125, 139, 0.2);
+            border-color: #007D8B;
+            box-shadow: 0 0 0 4px rgba(0, 125, 139, 0.1);
+            transform: translateY(-1px);
         }
-        
+
+        .form-control.error {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .error-message {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group .error-message {
+            position: absolute;
+            bottom: -1.3rem;
+            left: 0;
+            margin-top: 0;
+        }
+
+        .error-message i {
+            font-size: 0.75rem;
+        }
+
         .btn {
             width: 100%;
-            padding: 0.75rem;
-            border: none;
-            border-radius: var(--radius);
-            background-color: var(--primary);
+            height: 48px;
+            background: linear-gradient(135deg, #007D8B 0%, #005F66 100%);
             color: white;
-            font-weight: 500;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 125, 139, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
+
         .btn:hover {
-            background-color: var(--primary-dark);
+            background: linear-gradient(135deg, #005F66 0%, #004A52 100%);
+            box-shadow: 0 6px 20px rgba(0, 125, 139, 0.4);
+            transform: translateY(-2px);
         }
-        
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
         .btn-secondary {
-            background-color: white;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            margin-top: 0.5rem;
+            background: white;
+            color: #007D8B;
+            border: 2px solid #007D8B;
+            box-shadow: none;
         }
         
+        .btn-secondary:hover {
+            background: rgba(0, 125, 139, 0.05);
+            box-shadow: none;
+            transform: translateY(-2px);
+        }
+
         .form-navigation {
             display: flex;
             gap: 0.75rem;
             margin-top: 1rem;
         }
-        
+
         .form-navigation .btn {
             flex: 1;
         }
-        
+
         .form-footer {
             text-align: center;
             margin-top: 1.5rem;
             font-size: 0.875rem;
             color: #6c757d;
         }
-        
+
         .form-footer a {
             color: var(--primary);
             text-decoration: none;
             font-weight: 500;
         }
-        
+
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.75rem;
         }
-        
+
         .grid-3 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 0.75rem;
         }
-        
+
         /* Wider layout styles */
         .section-content {
             max-width: 800px;
             margin: 0 auto;
         }
-        
+
         .section-title {
             font-size: 1.25rem;
             font-weight: 600;
@@ -256,7 +337,7 @@
             color: var(--primary);
             text-align: center;
         }
-        
+
         .divider {
             display: flex;
             align-items: center;
@@ -264,90 +345,97 @@
             color: #6c757d;
             font-size: 0.875rem;
         }
-        
+
         .divider::before,
         .divider::after {
             content: '';
             flex: 1;
             border-top: 1px solid var(--gray);
         }
-        
+
         .divider span {
             padding: 0 1rem;
         }
-        
+
         .social-login {
             margin-bottom: 1.5rem;
         }
-        
+
         .google-btn {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--gray);
-            border-radius: var(--radius);
+            height: 48px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
             background-color: white;
-            color: var(--dark);
-            font-weight: 500;
+            color: #1e293b;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
         }
-        
+
         .google-btn:hover {
             background-color: #f8f9fa;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
         }
-        
+
         .google-btn img {
             width: 18px;
             height: 18px;
         }
-        
+
         @media (max-width: 768px) {
             .grid-3 {
                 grid-template-columns: 1fr;
             }
-            
+
             .signup-card {
                 max-width: 600px;
             }
         }
-        
+
         @media (max-width: 480px) {
-            .grid-2, .grid-3 {
+
+            .grid-2,
+            .grid-3 {
                 grid-template-columns: 1fr;
             }
-            
+
             .signup-card {
                 max-width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="signup-card">
         <div class="form-header">
             <h1>Bookly Signup</h1>
             <p>Create your account in just two simple steps</p>
         </div>
-        
+
         <div class="progress-steps">
             <div class="step active" data-step="1">1</div>
             <div class="step-line"></div>
             <div class="step" data-step="2">2</div>
         </div>
-        
-        <div class="form-container">        
+
+        <div class="form-container">
             <div class="social-login">
                 <a href="/user/google" class="google-btn">
-                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google Icon">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+                        alt="Google Icon">
                     Sign up with Google
                 </a>
             </div>
 
-            
+
             <form id="signupForm" enctype="multipart/form-data">
                 <!-- Personal Details Section -->
                 <div class="form-section active" data-section="1">
@@ -355,35 +443,41 @@
                         <div class="grid-3">
                             <div class="form-group">
                                 <label for="name">Full Name</label>
-                                <input type="text" id="name" name="name" class="form-control" placeholder="Your full name">
+                                <input type="text" id="name" name="name" class="form-control"
+                                    placeholder="Your full name">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="email">Email</label>
-                                <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com">
+                                <input type="email" id="email" name="email" class="form-control"
+                                    placeholder="your@email.com">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="phone">Phone</label>
-                                <input type="tel" id="phone" name="phone" class="form-control" placeholder="10-digit number">
+                                <input type="tel" id="phone" name="phone" class="form-control"
+                                    placeholder="10-digit number">
                             </div>
                         </div>
-                        
+
                         <div class="grid-2">
                             <div class="form-group">
                                 <label for="password">Password</label>
-                                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••">
+                                <input type="password" id="password" name="password" class="form-control"
+                                    placeholder="••••••••">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="confirmPassword">Confirm Password</label>
-                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="••••••••">
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                                    placeholder="••••••••">
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="referralCode">Referral Code (optional)</label>
-                            <input type="text" id="referralCode" name="referralCode" class="form-control" placeholder="e.g. BOOK1234">
+                            <input type="text" id="referralCode" name="referralCode" class="form-control"
+                                placeholder="e.g. BOOK1234">
                         </div>
 
                         <button type="button" class="btn" id="nextBtn1">Continue to Verification</button>
@@ -392,9 +486,9 @@
                         </div>
 
                     </div>
-                    
+
                 </div>
-                
+
                 <!-- Verification Section -->
                 <div class="form-section" data-section="2">
                     <div class="section-title">Verify Your Account</div>
@@ -402,16 +496,19 @@
                         <p style="text-align: center; margin-bottom: 1.5rem; color: #6c757d;">
                             We've sent a 6-digit verification code to your email address.
                         </p>
-                        
+
                         <div class="form-group">
                             <label for="otp">Verification Code</label>
-                            <input type="text" id="otp" name="otp" class="form-control" placeholder="Enter 6-digit OTP" maxlength="6">
+                            <input type="text" id="otp" name="otp" class="form-control" placeholder="Enter 6-digit OTP"
+                                maxlength="6">
                         </div>
-                        
+
                         <div class="form-group text-center">
-                            <p style="font-size: 0.875rem; text-align: center;">Didn't receive code? <a href="#" id="resendOtp" style="color: var(--primary); text-decoration: none;">Resend OTP</a></p>
+                            <p style="font-size: 0.875rem; text-align: center;">Didn't receive code? <a href="#"
+                                    id="resendOtp" style="color: var(--primary); text-decoration: none;">Resend OTP</a>
+                            </p>
                         </div>
-                        
+
                         <div class="form-navigation">
                             <button type="button" class="btn btn-secondary" id="prevBtn2">Back</button>
                             <button type="submit" class="btn" id="submitBtn">Complete Signup</button>
@@ -419,7 +516,7 @@
                     </div>
                 </div>
             </form>
-            
+
             <div class="form-footer">
                 Already have an account? <a href="/user/login">Log In</a>
             </div>
@@ -441,12 +538,40 @@
                 });
             }
 
+            // Error display helpers
+            function showFieldError(fieldId, message) {
+                const field = $(`#${fieldId}`);
+                field.addClass('error');
+                
+                // Remove existing error message
+                field.siblings('.error-message').remove();
+                
+                // Append the error text element
+                field.after(`
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `);
+            }
+
+            function clearErrors() {
+                $('.form-control').removeClass('error');
+                $('.error-message').remove();
+            }
+
+            // Clear errors on input change
+            $('.form-control').on('input', function() {
+                $(this).removeClass('error');
+                $(this).siblings('.error-message').remove();
+            });
+
             // Step navigation
             function goToStep(index) {
                 $('.form-section').removeClass('active');
                 $(`.form-section[data-section="${index + 1}"]`).addClass('active');
                 $('.step').removeClass('active completed');
-                
+
                 for (let i = 0; i <= index; i++) {
                     if (i === index) {
                         $(`.step[data-step="${i + 1}"]`).addClass('active');
@@ -454,14 +579,15 @@
                         $(`.step[data-step="${i + 1}"]`).addClass('completed');
                     }
                 }
-                
+
                 if (index > 0) {
                     $('.step-line').addClass('active');
                 }
             }
 
             // Continue to verification
-           $('#nextBtn1').click(function () {
+            $('#nextBtn1').click(function () {
+                clearErrors();
                 const formData = {
                     name: $('#name').val(),
                     email: $('#email').val(),
@@ -487,8 +613,14 @@
                     error: function (xhr) {
                         const response = xhr.responseJSON;
                         if (response && response.errors) {
-                            const errorMessage = response.errors.general || Object.values(response.errors)[0];
-                            showToast(errorMessage, 'error');
+                            if (response.errors.general) {
+                                showToast(response.errors.general, 'error');
+                            }
+                            Object.keys(response.errors).forEach(fieldId => {
+                                if (fieldId !== 'general') {
+                                    showFieldError(fieldId, response.errors[fieldId]);
+                                }
+                            });
                         } else {
                             showToast('An error occurred. Please try again.', 'error');
                         }
@@ -506,7 +638,8 @@
             $('#signupForm').submit(function (e) {
                 e.preventDefault();
                 const otp = $('#otp').val();
-                
+                clearErrors();
+
                 $.ajax({
                     url: '/user/verify-otp',
                     method: 'POST',
@@ -523,9 +656,9 @@
                     error: function (xhr) {
                         const response = xhr.responseJSON;
                         if (response && response.error) {
-                            showToast(response.error, 'error');
+                            showFieldError('otp', response.error);
                         } else {
-                            showToast('Invalid OTP. Please try again.', 'error');
+                            showFieldError('otp', 'Invalid OTP. Please try again.');
                         }
                         $('#otp').val('').focus();
                     }
@@ -538,7 +671,7 @@
             // Resend OTP
             $('#resendOtp').click(function (e) {
                 e.preventDefault();
-                
+
                 $.ajax({
                     url: '/user/resendOtp',
                     method: 'POST',
@@ -558,7 +691,7 @@
             });
 
             // OTP input formatting - only allow numbers
-            $('#otp').on('input', function() {
+            $('#otp').on('input', function () {
                 let value = $(this).val().replace(/\D/g, '');
                 if (value.length > 6) {
                     value = value.substring(0, 6);
@@ -566,9 +699,10 @@
                 $(this).val(value);
             });
         });
-        
+
         // Google Sign-In callback
-        
+
     </script>
 </body>
+
 </html>
