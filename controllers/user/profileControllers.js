@@ -1,13 +1,13 @@
-const User = require('../../models/userSchema');
-const Address = require('../../models/addressSchema');
-const Order = require('../../models/orderSchema');
-const Product = require('../../models/productSchema');
-const mongoose = require('mongoose');
-const nodemailer = require('nodemailer');
-const bcrypt = require('bcrypt');
-const PDFDocument = require('pdfkit');
-const Msg =require('../../config/messages');
-const STATUS = require('../../config/statusCodes');
+import User from '../../models/userSchema.js';
+import Address from '../../models/addressSchema.js';
+import Order from '../../models/orderSchema.js';
+import Product from '../../models/productSchema.js';
+import mongoose from 'mongoose';
+import nodemailer from 'nodemailer';
+import bcrypt from 'bcrypt';
+import PDFDocument from 'pdfkit';
+import Msg from '../../config/messages.js';
+import STATUS from '../../config/statusCodes.js';
 
 const downloadInvoice = async (req, res, next) => {
   try {
@@ -670,7 +670,7 @@ const cancelOrderItem = async (req, res, next) => {
   }
 };
 
-module.exports={
+export default {
     getProfilePage,
     getEditProfile,
     postEditProfile,
@@ -690,4 +690,4 @@ module.exports={
     returnOrderItem,
     downloadInvoice,
     cancelOrderItem,
-}
+};

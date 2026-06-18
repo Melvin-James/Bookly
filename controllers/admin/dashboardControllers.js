@@ -1,7 +1,7 @@
-const Order = require('../../models/orderSchema');
-const User = require('../../models/userSchema');
-const Product = require('../../models/productSchema');
-const Category = require('../../models/categorySchema');
+import Order from '../../models/orderSchema.js';
+import User from '../../models/userSchema.js';
+import Product from '../../models/productSchema.js';
+import Category from '../../models/categorySchema.js';
 
 const getDashboardStats = async (req, res, next) => {
   try {
@@ -336,10 +336,10 @@ const getTopPublishers = async (req, res, next) => {
   }
 };
 
-module.exports={
+export default {
     getDashboardStats,
     getTopProducts,
     getTopCategories,
     getSalesChart,
-    getTopPublishers
-}
+    getTopPublishers,
+};

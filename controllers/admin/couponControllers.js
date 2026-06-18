@@ -1,6 +1,6 @@
-const Coupon = require('../../models/couponSchema');
-const STATUS = require('../../config/statusCodes');
-const {COUPON}=require('../../config/messages');
+import Coupon from '../../models/couponSchema.js';
+import STATUS from '../../config/statusCodes.js';
+import {COUPON} from '../../config/messages.js';
 
 const loadEditCoupon = async (req,res,next)=>{
     try{
@@ -279,10 +279,10 @@ const deleteCoupon = async(req,res,next)=>{
     }
 };
 
-module.exports ={
+export default {
     getCouponPage,
     createCoupon,
     deleteCoupon,
     loadEditCoupon,
     updateCoupon,
-}
+};

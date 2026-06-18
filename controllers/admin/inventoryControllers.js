@@ -1,6 +1,6 @@
-const Product = require('../../models/productSchema');
-const {INVENTORY}=require('../../config/messages');
-const STATUS = require('../../config/statusCodes');
+import Product from '../../models/productSchema.js';
+import {INVENTORY} from '../../config/messages.js';
+import STATUS from '../../config/statusCodes.js';
 
 const getInventoryPage = async (req, res,next) => {
   try {
@@ -112,10 +112,10 @@ const updateProductStatus = async (req, res,next) => {
     }
 };
 
-module.exports = {
+export default {
     getInventoryPage,
     searchStock,
     getPaginatedStock,
     updateStock,
     updateProductStatus,
-}
+};

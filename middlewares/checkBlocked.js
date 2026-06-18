@@ -1,4 +1,4 @@
-const User = require("../models/userSchema");
+import User from "../models/userSchema.js";
 
 async function checkBlocked(req, res, next) {
   try {
@@ -19,4 +19,4 @@ async function checkBlocked(req, res, next) {
   }
 }
 
-module.exports = checkBlocked;
+export default checkBlocked;

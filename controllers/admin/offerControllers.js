@@ -1,7 +1,6 @@
-const Product = require('../../models/productSchema');
-const Category = require('../../models/categorySchema');
-const STATUS = require('../../config/statusCodes');
-const {OFFER}=require('../../config/messages');
+import Product from '../../models/productSchema.js';
+import Category from '../../models/categorySchema.js';
+import STATUS from '../../config/statusCodes.js';
 
 const getOfferPage = async (req, res, next) => {
   try {
@@ -93,7 +92,7 @@ const validateOfferInput = (offer) => {
   return offerValue;
 };
 
-const applyProductOffer = async (req, res) => {
+const applyProductOffer = async (req, res, next) => {
   try {
     const { productId, offer } = req.body;
     
@@ -187,7 +186,7 @@ const removeCategoryOffer = async (req, res,next) => {
   }
 };
 
-module.exports = {
+export default {
   getOfferPage,
   applyProductOffer,
   applyCategoryOffer,

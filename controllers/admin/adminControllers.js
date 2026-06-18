@@ -1,10 +1,9 @@
-const User = require('../../models/userSchema');
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const rateLimit = require("express-rate-limit")
-const { createStructParentTreeNextKey } = require('pdfkit');
-const STATUS = require('../../config/statusCodes');
-const {ADMIN} = require('../../config/messages');
+import User from '../../models/userSchema.js';
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import rateLimit from "express-rate-limit";
+import STATUS from '../../config/statusCodes.js';
+import {ADMIN} from '../../config/messages.js';
 
 const pageerror = async(req,res)=>{
     res.render('pageerror');
@@ -164,10 +163,10 @@ const logout = async(req,res,next)=>{
     }
 }
 
-module.exports = {
+export default {
     loadLogin,
     login,
     loadDashboard,
     pageerror,
     logout,
-}
+};

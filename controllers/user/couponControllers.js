@@ -1,9 +1,9 @@
-const Coupon = require('../../models/couponSchema');
-const cart = require('../../models/productSchema');
-const Product = require('../../models/productSchema');
-const User = require('../../models/userSchema');
-const {COUPON}=require('../../config/messages');
-const STATUS = require('../../config/statusCodes');
+import Coupon from '../../models/couponSchema.js';
+import cart from '../../models/productSchema.js';
+import Product from '../../models/productSchema.js';
+import User from '../../models/userSchema.js';
+import {COUPON} from '../../config/messages.js';
+import STATUS from '../../config/statusCodes.js';
 
 const applyCoupon = async(req,res,next)=>{
     try{
@@ -85,7 +85,7 @@ const removeCoupon = (req,res,next)=>{
     }
 };
 
-module.exports = {
+export default {
     applyCoupon,
     removeCoupon,
-}
+};

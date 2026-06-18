@@ -1,4 +1,4 @@
-const User = require('../models/userSchema');
+import User from '../models/userSchema.js';
 
 const userAuth = async (req, res, next) => {
     if (req.user || req.session.user) {
@@ -14,7 +14,7 @@ const adminAuth = (req, res, next) => {
     return res.redirect('/admin/login');
 };
 
-module.exports = {
+export {
     userAuth,
     adminAuth
 };

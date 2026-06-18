@@ -1,7 +1,7 @@
-const User = require('../../models/userSchema');
-const Product = require('../../models/productSchema');
-const STATUS = require('../../config/statusCodes');
-const {WISHLIST} = require('../../config/messages');
+import User from '../../models/userSchema.js';
+import Product from '../../models/productSchema.js';
+import STATUS from '../../config/statusCodes.js';
+import {WISHLIST} from '../../config/messages.js';
 
 const getWishlistPage = async(req,res,next)=>{
     try{
@@ -90,9 +90,9 @@ const getItemsInWishlistCount = async(req,res,next)=>{
   }
 }
 
-module.exports ={
+export default {
     getWishlistPage,
     toggleWishlist,
     moveToCart,
-    getItemsInWishlistCount
-}
+    getItemsInWishlistCount,
+};

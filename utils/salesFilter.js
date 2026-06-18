@@ -28,4 +28,4 @@ return query;
 
 }
 
-module.exports=getFilterQuery;
+export default getFilterQuery;

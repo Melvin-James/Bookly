@@ -1,6 +1,6 @@
-const User = require('../../models/userSchema');
-const Order = require('../../models/orderSchema');
-const Product = require('../../models/productSchema');
+import User from '../../models/userSchema.js';
+import Order from '../../models/orderSchema.js';
+import Product from '../../models/productSchema.js';
 
 const getAdminOrders = async (req, res,next) => {
   try {
@@ -206,7 +206,7 @@ const rejectReturnRequest = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   getAdminOrders,
   getAdminOrderDetails,
   updateOrderStatus,

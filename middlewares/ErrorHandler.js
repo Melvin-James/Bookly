@@ -1,4 +1,4 @@
-module.exports = (err, req, res, next) => {
+export default (err, req, res, next) => {
   console.error('Error:', err.stack);
 
   const status = err.status || 500;

@@ -1,7 +1,7 @@
-const Order = require('../../models/orderSchema');
-const PDFDocument = require('pdfkit');
-const ExcelJS = require('exceljs');
-const getFilterQuery = require('../../utils/salesFilter');
+import Order from '../../models/orderSchema.js';
+import PDFDocument from 'pdfkit';
+import ExcelJS from 'exceljs';
+import getFilterQuery from '../../utils/salesFilter.js';
 
 const getSalesReport = async (req, res, next) => {
   try {
@@ -330,7 +330,7 @@ const downloadSalesReportExcel = async (req, res, next) => {
 };
 
 
-module.exports={
+export default {
     getSalesReport,
     downloadSalesReportPDF,
     downloadSalesReportExcel,

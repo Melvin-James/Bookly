@@ -1,7 +1,9 @@
-const Product = require('../../models/productSchema');
-const Category = require('../../models/categorySchema');
-const fs = require('fs');
-const path = require('path');
+import Product from '../../models/productSchema.js';
+import Category from '../../models/categorySchema.js';
+import fs from 'fs';
+import path from 'path';
+
+const __dirname = import.meta.dirname;
 
 const productInfo = async (req, res,next) => {
     try{
@@ -418,7 +420,7 @@ const updateProduct = async (req, res, next) => {
   }
 };
 
-module.exports={
+export default {
     productInfo,
     toggleBlockStatusProduct,
     searchProducts,
@@ -427,4 +429,4 @@ module.exports={
     addProduct,
     getEditProduct,
     updateProduct,
-}
+};

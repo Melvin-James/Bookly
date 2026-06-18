@@ -1,17 +1,17 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const adminControllers = require('../controllers/admin/adminControllers');
-const customerControllers = require('../controllers/admin/customerControllers');
-const categoryControllers = require('../controllers/admin/categoryControllers');
-const productControllers = require('../controllers/admin/productControllers');
-const orderControllers = require('../controllers/admin/orderControllers');
-const inventoryControllers = require('../controllers/admin/inventoryControllers');
-const couponControllers = require('../controllers/admin/couponControllers');
-const offerControllers = require('../controllers/admin/offerControllers');
-const salesReportControllers = require('../controllers/admin/salesReportControllers');
-const dashboardControllers = require('../controllers/admin/dashboardControllers');
-const {userAuth,adminAuth}=require('../middlewares/auth');
-const uploadTo = require('../middlewares/multer');
+import adminControllers from '../controllers/admin/adminControllers.js';
+import customerControllers from '../controllers/admin/customerControllers.js';
+import categoryControllers from '../controllers/admin/categoryControllers.js';
+import productControllers from '../controllers/admin/productControllers.js';
+import orderControllers from '../controllers/admin/orderControllers.js';
+import inventoryControllers from '../controllers/admin/inventoryControllers.js';
+import couponControllers from '../controllers/admin/couponControllers.js';
+import offerControllers from '../controllers/admin/offerControllers.js';
+import salesReportControllers from '../controllers/admin/salesReportControllers.js';
+import dashboardControllers from '../controllers/admin/dashboardControllers.js';
+import {userAuth,adminAuth} from '../middlewares/auth.js';
+import uploadTo from '../middlewares/multer.js';
 const uploadProductImage = uploadTo('product-images');
 
 router.get('/pageerror',adminControllers.pageerror);
@@ -85,4 +85,4 @@ router.get('/top-publishers', adminAuth, dashboardControllers.getTopPublishers);
 router.get('/sales-chart', adminAuth, dashboardControllers.getSalesChart);
 
 
-module.exports=router;
+export default router;

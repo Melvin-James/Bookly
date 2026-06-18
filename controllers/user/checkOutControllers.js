@@ -1,12 +1,12 @@
-const User = require('../../models/userSchema');
-const Address = require('../../models/addressSchema');
-const Order = require('../../models/orderSchema');
-const Product = require('../../models/productSchema');
-const razorpay = require('../../utils/razorpay');
-const Coupon = require('../../models/couponSchema');
-const crypto = require('crypto');
-const {CHECKOUT, PRODUCT}=require('../../config/messages');
-const STATUS = require('../../config/statusCodes');
+import User from '../../models/userSchema.js';
+import Address from '../../models/addressSchema.js';
+import Order from '../../models/orderSchema.js';
+import Product from '../../models/productSchema.js';
+import razorpay from '../../utils/razorpay.js';
+import Coupon from '../../models/couponSchema.js';
+import crypto from 'crypto';
+import {CHECKOUT, PRODUCT} from '../../config/messages.js';
+import STATUS from '../../config/statusCodes.js';
 
 const getCheckoutPage = async (req, res,next) => {
   try {
@@ -333,7 +333,7 @@ const postaddAddress = async(req,res,next)=>{
 }
 };
 
-module.exports={
+export default {
     getCheckoutPage,
     placeOrder,
     getOrderSuccessPage,
@@ -341,4 +341,4 @@ module.exports={
     getOrderFailurePage,
     getaddAddress,
     postaddAddress,
-}
+};

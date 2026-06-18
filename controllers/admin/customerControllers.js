@@ -1,6 +1,5 @@
-const User = require('../../models/userSchema');
-const STATUS = require('../../config/statusCodes');
-const{CUSTOMER}=require('../../config/messages');
+import User from '../../models/userSchema.js';
+import STATUS from '../../config/statusCodes.js';
 
 const customerInfo = async (req, res,next) => {
     try{
@@ -73,9 +72,9 @@ const getPaginatedUsers = async (req, res,next) => {
   }
 };
 
-module.exports ={
+export default {
     customerInfo,
     toggleBlockStatusCustomer,
     searchCustomers,
     getPaginatedUsers,
-}
+};

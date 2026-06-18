@@ -1,8 +1,8 @@
-const Product = require('../../models/productSchema');
-const Category = require('../../models/categorySchema');
-const Customers = require('../../models/userSchema');
-const {PRODUCT} = require('../../config/messages');
-const STATUS = require('../../config/statusCodes');
+import Product from '../../models/productSchema.js';
+import Category from '../../models/categorySchema.js';
+import Customers from '../../models/userSchema.js';
+import {PRODUCT} from '../../config/messages.js';
+import STATUS from '../../config/statusCodes.js';
 
 const getShopProducts = async function (req, res, next) {
   try {
@@ -235,8 +235,8 @@ const account = async(req,res,next)=>{
   }
 }
 
-module.exports={
+export default {
     getProductDetails,
     getShopProducts,
     account,
-}
+};

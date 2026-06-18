@@ -1,13 +1,14 @@
-require('dotenv').config();
-const path = require("path")
-const User = require("../../models/userSchema")
-const Product = require("../../models/productSchema")
-const nodemailer = require("nodemailer")
-const bcrypt = require("bcrypt")
-const crypto = require("crypto")
-const generateReferralCode = require('../../utils/generateReferralCode');
-const STATUS=require('../../config/statusCodes');
-const Msg = require('../../config/messages');
+import dotenv from 'dotenv';
+dotenv.config();
+import path from "path";
+import User from "../../models/userSchema.js";
+import Product from "../../models/productSchema.js";
+import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import generateReferralCode from '../../utils/generateReferralCode.js';
+import STATUS from '../../config/statusCodes.js';
+import Msg from '../../config/messages.js';
 
 
 const transporter = nodemailer.createTransport({
@@ -454,7 +455,7 @@ const logout = (req, res) => {
   })
 }
 
-module.exports = {
+export default {
   loadSignup,
   signupStep1,
   verifyOtp,
@@ -468,4 +469,4 @@ module.exports = {
   loadResetPassword,
   resetPassword,
   logout,
-}
+};

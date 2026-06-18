@@ -1,8 +1,8 @@
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const mongoose = require('mongoose');
-const User = require('../models/userSchema');
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import mongoose from 'mongoose';
+import User from '../models/userSchema.js';
 
-module.exports = function(passport) {
+export default function(passport) {
   passport.use(
     new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,

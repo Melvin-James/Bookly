@@ -1,17 +1,17 @@
-const express = require('express');
-const passport = require('passport');
+import express from 'express';
+import passport from 'passport';
 const router = express.Router();
 
-const userControllers=require('../controllers/user/userControllers');
-const homeControllers = require('../controllers/user/homeControllers');
-const profileControllers = require('../controllers/user/profileControllers');
-const cartControllers = require('../controllers/user/cartControllers');
-const checkOutControllers = require('../controllers/user/checkOutControllers');
-const wishlistControllers = require('../controllers/user/wishlistControllers');
-const couponControllers = require('../controllers/user/couponControllers');
-const walletControllers = require('../controllers/user/walletControllers');
-const {userAuth,adminAuth}=require('../middlewares/auth');
-const uploadTo=require('../middlewares/multer')
+import userControllers from '../controllers/user/userControllers.js';
+import homeControllers from '../controllers/user/homeControllers.js';
+import profileControllers from '../controllers/user/profileControllers.js';
+import cartControllers from '../controllers/user/cartControllers.js';
+import checkOutControllers from '../controllers/user/checkOutControllers.js';
+import wishlistControllers from '../controllers/user/wishlistControllers.js';
+import couponControllers from '../controllers/user/couponControllers.js';
+import walletControllers from '../controllers/user/walletControllers.js';
+import {userAuth,adminAuth} from '../middlewares/auth.js';
+import uploadTo from '../middlewares/multer.js';
 const uploadProfileImage = uploadTo('profileImages');
 
 router.get('/signup',userControllers.loadSignup);
@@ -98,4 +98,4 @@ router.get('/wallet', userAuth, walletControllers.getWalletPage);
 router.get('/wallet/transactions', userAuth, walletControllers.getWalletTransactions);
 
 
-module.exports = router;
+export default router;

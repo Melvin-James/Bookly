@@ -1,4 +1,4 @@
-const Category = require('../../models/categorySchema');
+import Category from '../../models/categorySchema.js';
 
 const categoryInfo = async (req, res,next) => {
   try {
@@ -166,7 +166,7 @@ const addCategory = async (req, res, next) => {
 };
 
 
-module.exports = {
+export default {
   categoryInfo,
   toggleBlockStatusCategory,
   searchCategory,

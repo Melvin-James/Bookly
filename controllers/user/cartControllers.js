@@ -1,7 +1,7 @@
-const User = require('../../models/userSchema');
-const Product = require('../../models/productSchema');
-const {CART} = require('../../config/messages');
-const STATUS = require('../../config/statusCodes');
+import User from '../../models/userSchema.js';
+import Product from '../../models/productSchema.js';
+import {CART} from '../../config/messages.js';
+import STATUS from '../../config/statusCodes.js';
 
 const getCartPage = async(req, res, next) => {
   try {
@@ -189,10 +189,10 @@ const getItemsInCartCount = async (req, res, next) => {
   }
 };
 
-module.exports ={
+export default {
     getCartPage,
     addToCart,
     updateCartQuantity,
     removeFromCart,
     getItemsInCartCount,
-}
+};
